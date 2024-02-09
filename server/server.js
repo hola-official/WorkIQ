@@ -1,6 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const passport = require("passport");
+const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
@@ -15,6 +18,18 @@ const store = new MongoDBStore({
 	collection: "sessions",
 	expires: 1 * 60 * 60, // 1hr in seconds
 });
+
+
+// Handle options credentials check - before CORS!
+// and fetch cookies credentials requirement
+app.use(credentials);
+
+// Cross Origin Resource Sharing
+
+app.use(express.json({ limit: "50mb" })); //parse json data inside the req body
+app.use(express.urlencoded({ extended: true })); // parse form data inside the req body
+app.use(cors(corsOptions));
+app.use(cookieParser());
 
 // Use express-session middleware
 app.use(
@@ -34,6 +49,10 @@ app.use(
 app.get("/", (req, res) => {
   res.send("Home Page");
 });
+
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 mongoose
 	.connect(process.env.MONGO_URI)
