@@ -31,9 +31,13 @@ app.use(
 	})
 );
 
+app.get("/", (req, res) => {
+  res.send("Home Page");
+});
+
 mongoose
 	.connect(process.env.MONGO_URI)
 	.then(() => {
-		app.listen(PORT, () => console.log(`Server Is 🏃‍♂️ On PORT ${PORT}`));
+		app.listen(PORT, () => console.log(`Server Is 🏃‍♂️ On ` + PORT));
 	})
 	.catch((err) => console.log(err));
