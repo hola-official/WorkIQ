@@ -3,6 +3,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const passport = require("passport");
+const cookieParser = require('cookie-parser')
 const cors = require("cors");
 const credentials = require("./middleware/credentials");
 const corsOptions = require("./config/corsOptions");
@@ -56,7 +57,7 @@ app.use(
 );
 
 // Define a route for the home page
-app.get("/", (req, res) => {
+app.get("/auth", (req, res) => {
     res.send("Home Page");
 });
 
@@ -72,4 +73,3 @@ mongoose
         app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     })
     .catch((err) => console.log(err));
-		
