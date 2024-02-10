@@ -3,18 +3,19 @@ const express = require("express");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const passport = require("passport");
-const cookieParser = require('cookie-parser')
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const bodyParser = require('body-parser');
+const bodyParser = require("body-parser");
 const credentials = require("./middleware/credentials");
 const corsOptions = require("./config/corsOptions");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-const userRoutes = require('./routes/userRoutes');
-const taskRoutes = require('./routes/taskRoutes');
-const proposalRoutes = require('./routes/proposalRoutes');
-const portfolioRoutes = require('./routes/portfolioRoutes');
-const authRoutes = require('./routes/authRoutes');
+const userRoutes = require("./routes/userRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const proposalRoutes = require("./routes/proposalRoutes");
+const portfolioRoutes = require("./routes/portfolioRoutes");
+const authRoutes = require("./routes/authRoutes");
+const DeleteTaskJob = require("./db/deleteJobs");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -40,7 +41,7 @@ app.use(bodyParser.json());
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).send("Something broke!");
 });
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -63,25 +64,31 @@ app.use(
 );
 
 // Routes
-app.use('/api/users', userRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/proposals', proposalRoutes);
-app.use('/api/portfolios', portfolioRoutes);
-app.use('/api/auth', authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/proposals", proposalRoutes);
+app.use("/api/portfolios", portfolioRoutes);
+app.use("/api/auth", authRoutes);
 
 // Initialize Passport authentication middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    console.log('Connected to MongoDB');
-    // Start the server
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      // Start the task deletion job
-      DeleteTaskJob.start();
-    });
-  })
-  .catch((error) => console.error('Error connecting to MongoDB:', error.message));
+mongoose
+    .connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => {
+        console.log("Connected to MongoDB");
+        // Start the server
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+            // Start the task deletion job
+            DeleteTaskJob.start();
+        });
+    })
+    .catch((error) =>
+        console.error("Error connecting to MongoDB:", error.message)
+    );
