@@ -14,6 +14,7 @@ const userRoutes = require(".//routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const proposalRoutes = require("./routes/proposalRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
+const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require("./routes/authRoutes");
 const DeleteTaskJob = require("./db/deleteJobs");
 
@@ -69,6 +70,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/proposals", proposalRoutes);
 app.use("/api/portfolios", portfolioRoutes);
 app.use("/api/auth", authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Initialize Passport authentication middleware
 app.use(passport.initialize());
