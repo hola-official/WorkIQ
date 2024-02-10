@@ -32,15 +32,14 @@ app.use(credentials);
 app.use(bodyParser.json());
 
 // Middleware for parsing JSON data in request body
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
 app.use(express.json({ limit: "50mb" }));
-
-// Middleware for parsing URL-encoded data in request body
 app.use(express.urlencoded({ extended: true }));
-
-// Enable Cross-Origin Resource Sharing (CORS) with custom options
 app.use(cors(corsOptions));
-
-// Middleware for parsing cookies
 app.use(cookieParser());
 
 // Set up express-session middleware for session management
