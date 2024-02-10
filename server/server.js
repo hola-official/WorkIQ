@@ -10,6 +10,11 @@ const credentials = require("./middleware/credentials");
 const corsOptions = require("./config/corsOptions");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const userRoutes = require('./routes/userRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const proposalRoutes = require('./routes/proposalRoutes');
+const portfolioRoutes = require('./routes/portfolioRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -57,20 +62,26 @@ app.use(
     })
 );
 
-// Define a route for the home page
-app.get("/", (req, res) => {
-    res.send("Home Page");
-});
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/proposals', proposalRoutes);
+app.use('/api/portfolios', portfolioRoutes);
+app.use('/api/auth', authRoutes);
 
 // Initialize Passport authentication middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Connect to MongoDB database
-mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        // Start the server and listen for incoming connections
-        app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-    })
-    .catch((err) => console.log(err));
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      // Start the task deletion job
+      DeleteTaskJob.start();
+    });
+  })
+  .catch((error) => console.error('Error connecting to MongoDB:', error.message));
