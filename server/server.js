@@ -10,19 +10,19 @@ const credentials = require("./middleware/credentials");
 const corsOptions = require("./config/corsOptions");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-const userRoutes = require(".//routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
-const proposalRoutes = require("./routes/proposalRoutes");
+// const proposalRoutes = require("./routes/proposalRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
-const adminRoutes = require('./routes/adminRoutes');
+// const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require("./routes/authRoutes");
-const DeleteTaskJob = require("./db/deleteJobs");
+// const DeleteTaskJob = require("./db/deleteJobs");
 
 // Load environment variables from .env file
 dotenv.config();
 
 // Set port number, defaulting to 3000 if not specified in environment variables
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3000;
 
 // Create an instance of Express application
 const app = express();
@@ -67,10 +67,10 @@ app.use(
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/proposals", proposalRoutes);
+// app.use("/api/proposals", proposalRoutes);
 app.use("/api/portfolios", portfolioRoutes);
 app.use("/api/auth", authRoutes);
-app.use('/api/admin', adminRoutes);
+// app.use('/api/admin', adminRoutes);
 
 // Initialize Passport authentication middleware
 app.use(passport.initialize());
@@ -78,7 +78,7 @@ app.use(passport.session());
 
 // Connect to MongoDB
 mongoose
-    .connect(process.env.MONGODB_URI, {
+    .connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
@@ -88,7 +88,7 @@ mongoose
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
             // Start the task deletion job
-            DeleteTaskJob.start();
+            // DeleteTaskJob.start();
         });
     })
     .catch((error) =>

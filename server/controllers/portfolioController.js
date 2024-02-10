@@ -1,4 +1,4 @@
-const Portfolio = require('../models/Portfolio');
+const Portfolio = require('../Model/portfolioModel');
 const cloudinary = require('cloudinary').v2;
 
 // Configure Cloudinary
