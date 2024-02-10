@@ -1,15 +1,16 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const mongoose = require("mongoose");
 
-const proposalSchema = new Schema({
-  freelancer: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  task: { type: Schema.Types.ObjectId, ref: 'Task', required: true },
-  section: { type: Schema.Types.ObjectId, ref: 'TaskSection' },
-  amount: { type: Number, required: true },
+const proposalSchema = new mongoose.Schema({
+  task: { type: mongoose.Schema.Types.ObjectId, ref: "Task", required: true },
+  freelancer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  section: { type: mongoose.Schema.Types.ObjectId, ref: "Task.sections" },
+  price: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now },
   isAssigned: { type: Boolean, default: false },
-  // Additional fields as needed.
 });
 
-const Proposal = mongoose.model('Proposal', proposalSchema);
-
-module.exports = Proposal;
+module.exports = mongoose.model("Proposal", proposalSchema);

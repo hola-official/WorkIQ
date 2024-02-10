@@ -14,7 +14,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 dotenv.config();
 
 // Set port number, defaulting to 3000 if not specified in environment variables
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // Create an instance of Express application
 const app = express();
@@ -57,7 +57,7 @@ app.use(
 );
 
 // Define a route for the home page
-app.get("/auth", (req, res) => {
+app.get("/", (req, res) => {
     res.send("Home Page");
 });
 
