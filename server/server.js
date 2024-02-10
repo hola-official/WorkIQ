@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const passport = require("passport");
 const cookieParser = require('cookie-parser')
 const cors = require("cors");
+const bodyParser = require('body-parser');
 const credentials = require("./middleware/credentials");
 const corsOptions = require("./config/corsOptions");
 const session = require("express-session");
@@ -28,6 +29,7 @@ const store = new MongoDBStore({
 
 // Middleware to handle options credentials check and fetch cookies credentials requirement
 app.use(credentials);
+app.use(bodyParser.json());
 
 // Middleware for parsing JSON data in request body
 app.use(express.json({ limit: "50mb" }));
