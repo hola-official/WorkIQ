@@ -4,7 +4,7 @@ const {
 	signUp,
 	login,
 	logout,
-  successRedirect,
+	getCurrentUserInfo,
 	activateUser,
 } = require("../controllers/authController");
 const { googleAuthCallback, authenticateGoogle } = require("../middleware/passportMiddleware");
@@ -17,7 +17,8 @@ router.get(
 	authenticateGoogle
 );
 
-router.get("/googleauth/callback", googleAuthCallback, successRedirect);
+router.get("/google/callback", googleAuthCallback);
+router.get("/google/success", getCurrentUserInfo);
 router.post("/signup", signUp);
 router.post("/activate-account", activateUser);
 router.post("/login", login);

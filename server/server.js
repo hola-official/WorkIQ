@@ -17,6 +17,7 @@ const portfolioRoutes = require("./routes/portfolioRoutes");
 // const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require("./routes/authRoutes");
 const refreshRoute = require('./routes/refresh')
+require("./config/passport-setup");
 
 // Load environment variables from .env file
 dotenv.config();

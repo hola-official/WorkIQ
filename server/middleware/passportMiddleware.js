@@ -4,7 +4,8 @@ const authenticateGoogle = passport.authenticate('google', { scope: ['profile', 
 
 
 const googleAuthCallback = passport.authenticate("google", {
-	failureRedirect: "https://quickbillpay.onrender.com/auth", // Redirect on authentication failure
+	successRedirect: "http://localhost:5173",
+	failureRedirect: "http://localhost:3000/auth" // Redirect on authentication failure
 });
 
 

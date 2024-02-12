@@ -9,34 +9,23 @@ const { sendMail } = require("../utils/sendMail.js");
 const createActivationToken = require("../utils/createActivationToken.js");
 // Google authentication callback
 
-const successRedirect = async (req, res) => {
+const getCurrentUserInfo = async (req, res) => {
 	try {
-		//   // Assuming the user is available in req.user after successful authentication
-		const googleProfile = req.user;
-
-		// Fetch user profile from MongoDB based on the email
-		const user = await User.findOne({ email: googleProfile.email });
-
-		if (!user) {
-			// Handle the case where the user is not found in the database
+		// Check if user information exists in the session
+		if (!req.user) {
 			return res
 				.status(404)
-				.json({ message: "User not found in the database" });
+				.json({ message: "User information not found in the session" });
 		}
 
-		//   Perform any additional actions with the user profile
-		//   ...
+		// Retrieve user information from the session
+		const user = req.user;
 
-		const token = generateCookieToken({
-			email: user.email,
-			id: user._id,
-		});
-		//   Redirect or send a response as needed
-		res.redirect(`https://quickbillpay.onrender.com/auth/google-verify?token=${token}`);
+		// Send user information to the frontend
+		return res.status(200).json({ user });
 	} catch (error) {
-		// Handle errors
-		console.error("Error fetching user profile:", error);
-		res.status(500).json({ message: "Internal Server Error" });
+		console.error("Error retrieving user information:", error);
+		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
 
@@ -202,5 +191,5 @@ module.exports = {
 	login,
 	logout,
 	activateUser,
-	successRedirect,
+	getCurrentUserInfo,
 };
