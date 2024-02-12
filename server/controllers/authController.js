@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken')
 const User = require("../Model/userModel");
 const { generateCookieToken } = require("../utils/generateToken");
 // const crypto = require("crypto");
@@ -81,82 +82,88 @@ const signUp = async (req, res) => {
 	}
 };
 
-// const activateAccount = async (req, res) => {
-// 	try {
-// 		const token = req.params.token;
-// 		console.log(token);
-
-// 		const unconfirmedUser = await UnconfirmedUser.findOne({ token });
-// 		console.log(unconfirmedUser);
-
-// 		if (!unconfirmedUser) {
-// 			return res
-// 				.status(400)
-// 				.json({ error: "Invalid activation link or activation link expired" });
-// 		} else {
-// 			const confirmedUser = await User.create({
-// 				email: unconfirmedUser.email,
-// 				username: unconfirmedUser.username,
-// 				password: unconfirmedUser.password,
-// 				name: unconfirmedUser.name,
-// 			});
-
-// 			await UnconfirmedUser.findByIdAndDelete(unconfirmedUser._id);
-// 			console.log(confirmedUser);
-
-// 			return res
-// 				.status(200)
-// 				.json({ message: "Account activated successfully", confirmedUser });
-// 		}
-// 	} catch (error) {
-// 		console.log(error);
-// 		res.status(500).json({ message: "Something went wrong" });
-// 	}
-// };
-
-const signIn = async (req, res) => {
-	const { email, username, password } = req.body;
-
+const activateUser = async (req, res) => {
 	try {
-		// Checking if the user exists in the database
-		const existingUser = await User.findOne({ email, username });
+		const { activation_token, activation_code } = req.body;
 
-		if (!existingUser)
-			return res.status(404).json({ error: "User doesn't exist" });
+		const newUser = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
 
-		if (!existingUser.password) {
-			return res.status(404).json({
-				error: "This user was registered using google Authentication",
-			});
+		if (newUser.activationCode !== activation_code) {
+			return res.status(400).json({ error: "Invalid activation code" });
 		}
 
-		// Comparing the provided password with the hashed password stored in the database
-		const correctPassword = await bcrypt.compare(
+		const { name, email, username, password } = newUser.user;
+
+		const existUser = await User.findOne({ email });
+
+		if (existUser) {
+			return res.status(400).json({ error: "User already exists" });
+		}
+		const user = await User.create({
+			name,
+			username,
+			email,
 			password,
-			existingUser.password
-		);
-		if (!correctPassword)
-			return res.status(400).json({ error: "Invalid credentials" });
-
-		// Generating a JSON Web Token (JWT) for authentication
-
-		const token = generateCookieToken({
-			email: existingUser.email,
-			username: existingUser.username,
-			id: existingUser._id,
 		});
 
-		existingUser.password = null;
-		existingUser.updatedAt = null;
-		existingUser.createdAt = null;
-
-		res.status(200).json({ loggedInUser: existingUser, token });
+		res.status(201).json({
+			success: true,
+			user
+		});
 	} catch (error) {
-		// Handling any errors that occur during the process
+		// return next(new ErrorHandler(error.message, 400));
 		console.log(error);
-		res.status(500).json({ message: "Something went wrong" });
+		if (error.name === 'TokenExpiredError') {
+			return res.status(401).json({ error: 'Token expired, kindly signup again' });
+		}
+		res.status(500).json({ error: "Something went wrong" });
 	}
 };
+
+
+const login = async (req, res) => {
+	const { user, password } = req.body;
+	if (!user || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
+
+	const foundUser = await User.findOne({ username: user } || { email: user }).exec();
+	if (!foundUser) return res.sendStatus(401); //Unauthorized 
+	// evaluate password 
+	const match = await bcrypt.compare(password, foundUser.password);
+	if (match) {
+		const roles = Object.values(foundUser.roles).filter(Boolean);
+		// create JWTs
+		const accessToken = jwt.sign(
+			{
+				"UserInfo": {
+					"username": foundUser.username,
+					"roles": roles
+				}
+			},
+			process.env.ACCESS_TOKEN_SECRET,
+			{ expiresIn: '10s' }
+		);
+		const refreshToken = jwt.sign(
+			{ "username": foundUser.username },
+			process.env.REFRESH_TOKEN_SECRET,
+			{ expiresIn: '1d' }
+		);
+		// Saving refreshToken with current user
+		foundUser.refreshToken = refreshToken;
+		const result = await foundUser.save();
+		console.log(result);
+		console.log(roles);
+
+		// Creates Secure Cookie with refresh token
+		res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
+
+		// Send authorization roles and access token to user
+		res.json({ roles, result, accessToken });
+
+	} else {
+		res.sendStatus(401);
+	}
+};
+
 
 const signOut = (req, res) => {
 	try {
@@ -170,8 +177,8 @@ const signOut = (req, res) => {
 
 module.exports = {
 	signUp,
-	signIn,
+	login,
 	signOut,
-	// activateAccount,
+	activateUser,
 	successRedirect,
 };

@@ -2,11 +2,10 @@ const express = require("express");
 const passport = require("passport");
 const {
 	signUp,
-	signIn,
+	login,
 	signOut,
   successRedirect,
-
-	activateAccount,
+	activateUser,
 } = require("../controllers/authController");
 const { googleAuthCallback, authenticateGoogle } = require("../middleware/passportMiddleware");
 
@@ -20,8 +19,8 @@ router.get(
 
 router.get("/googleauth/callback", googleAuthCallback, successRedirect);
 router.post("/signup", signUp);
-// router.get("/activate-account/:token", activateAccount);
-router.post("/signin", signIn);
+router.get("/activate-account", activateUser);
+router.post("/login", login);
 router.post("/logout", signOut);
 
 module.exports = router;

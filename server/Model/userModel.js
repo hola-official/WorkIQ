@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -16,13 +17,22 @@ const userSchema = new mongoose.Schema({
   location: { type: String },
   avatar: { type: String },
   bio: { type: String },
-  portfolios: [{ type: mongoose.Schema.Types.ObjectId, ref: "Portfolio" }],
-  tasksCompleted: { type: Number, default: 0 },
-  points: { type: Number, default: 0 },
-  joinDate: { type: Date, default: Date.now },
-  isActive: { type: Boolean, default: true },
-  isAdminApproved: { type: Boolean, default: false },
-  isEmailVerified: { type: Boolean, default: false },
-});
+  portfolios: [{ type: Schema.Types.ObjectId, ref: "Portfolio" }],
+  TaskCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+  createdTask: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+  refreshToken: String,
+  points: [
+    {
+      description: String,
+      amount: Number,
+      date: Date,
+    },
+  ],
+  badges: [{ type: Schema.Types.ObjectId, ref: "Badge" }],
+},
+  {
+    timestamps: true,
+  },
+);
 
 module.exports = mongoose.model("User", userSchema);

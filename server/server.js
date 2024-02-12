@@ -16,7 +16,7 @@ const taskRoutes = require("./routes/taskRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 // const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require("./routes/authRoutes");
-// const DeleteTaskJob = require("./db/deleteJobs");
+const refreshRoute = require('./routes/refresh')
 
 // Load environment variables from .env file
 dotenv.config();
@@ -70,6 +70,7 @@ app.use("/api/tasks", taskRoutes);
 // app.use("/api/proposals", proposalRoutes);
 app.use("/api/portfolios", portfolioRoutes);
 app.use("/api/auth", authRoutes);
+app.use('/refresh', refreshRoute);
 // app.use('/api/admin', adminRoutes);
 
 // Initialize Passport authentication middleware

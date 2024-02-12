@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const taskSchema = new mongoose.Schema({
+const taskSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
@@ -12,14 +13,14 @@ const taskSchema = new mongoose.Schema({
       price: { type: Number },
     },
   ],
-  client: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  client: { type: Schema.Types.ObjectId, ref: "User", required: true },
   status: {
     type: String,
     enum: ["pending", "approved", "completed", "rejected"],
     default: "pending",
   },
   createdAt: { type: Date, default: Date.now },
-  visibleTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  visibleTo: [{ type: Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model("Task", taskSchema);
