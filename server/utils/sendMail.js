@@ -26,13 +26,13 @@ const sendConfirmationMail = ({ email: userEmail, name, token }, res) => {
 	let response = {
 		body: {
 			name: name,
-			intro: "Welcome to QuickBill! We're very excited to have you on board.",
+			intro: "Welcome to WorkIQ! We're very excited to have you on board.",
 			action: {
-				instructions: "To get started with Quickbill, please click here:",
+				instructions: "To get started with WorkIQ, please click here:",
 				button: {
 					color: "#22BC66", // Optional action button color
 					text: "Confirm your account",
-					link: `https://quickbillpay.onrender.com/verify-access/${token}`,
+					link: `http://localhost:3000/verify-access/${token}`,
 				},
 			},
 			outro:
@@ -44,7 +44,7 @@ const sendConfirmationMail = ({ email: userEmail, name, token }, res) => {
 	let message = {
 		from: process.env.EMAIL,
 		to: userEmail,
-		subject: `${name}, Welcome to QuickBill`,
+		subject: `${name}, Welcome to WorkIQ`,
 		html: mail,
 	};
 	transporter

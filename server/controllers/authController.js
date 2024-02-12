@@ -42,7 +42,7 @@ const successRedirect = async (req, res) => {
 		// });
 
 		//   Redirect or send a response as needed
-		  res.redirect(`https://quickbillpay.onrender.com/auth/google-verify?token=${token}`);
+		res.redirect(`https://quickbillpay.onrender.com/auth/google-verify?token=${token}`);
 		// req.session.user = req.user;
 		// res.redirect(`https://quickbillpay.onrender.com/auth/google-verify`);
 	} catch (error) {
@@ -55,7 +55,7 @@ const successRedirect = async (req, res) => {
 const signUp = async (req, res) => {
 	try {
 		// Extracting email, password, and name from the request body
-		const { email, password, name } = req.body;
+		const { email, password, name, username } = req.body;
 
 		// Checking if the user already exists
 		const existingUser = await User.findOne({ email }).select("-password");
@@ -70,6 +70,7 @@ const signUp = async (req, res) => {
 
 		const newUnconfirmedUser = await UnconfirmedUser.create({
 			email,
+			username,
 			password: hashedPassword,
 			name,
 			token,
@@ -99,6 +100,7 @@ const activateAccount = async (req, res) => {
 		} else {
 			const confirmedUser = await User.create({
 				email: unconfirmedUser.email,
+				username: unconfirmedUser.username,
 				password: unconfirmedUser.password,
 				name: unconfirmedUser.name,
 			});
@@ -117,11 +119,11 @@ const activateAccount = async (req, res) => {
 };
 
 const signIn = async (req, res) => {
-	const { email, password } = req.body;
+	const { email, username, password } = req.body;
 
 	try {
 		// Checking if the user exists in the database
-		const existingUser = await User.findOne({ email });
+		const existingUser = await User.findOne({ email, username });
 
 		if (!existingUser)
 			return res.status(404).json({ error: "User doesn't exist" });
@@ -144,6 +146,7 @@ const signIn = async (req, res) => {
 
 		const token = generateCookieToken({
 			email: existingUser.email,
+			username: existingUser.username,
 			id: existingUser._id,
 		});
 
