@@ -29,6 +29,22 @@ const userSchema = new mongoose.Schema({
     },
   ],
   badges: [{ type: Schema.Types.ObjectId, ref: "Badge" }],
+  skills: [{ type: String }],
+  category: { type: String },
+  website: { type: String },
+  socialMedia: {
+    twitter: { type: String },
+    linkedin: { type: String },
+    github: { type: String },
+  },
+  experience: {
+    title: { type: String },
+    company: { type: String },
+    location: { type: String },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    // Add other experience details as needed
+  },
 },
   {
     timestamps: true,
