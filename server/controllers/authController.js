@@ -123,7 +123,7 @@ const activateUser = async (req, res) => {
 
 const login = async (req, res) => {
 	const { user, password } = req.body;
-	// if (!user || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
+	if (!user || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
 
 	const foundUser = await User.findOne({ username: user } || { email: user }).exec();
 	if (!foundUser) return res.sendStatus(401); //Unauthorized 

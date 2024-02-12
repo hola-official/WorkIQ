@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   name: { type: String, required: true },
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -37,18 +37,16 @@ const userSchema = new mongoose.Schema({
     linkedin: { type: String },
     github: { type: String },
   },
-  experience: {
+  experience: [{
     title: { type: String },
     company: { type: String },
     location: { type: String },
     startDate: { type: Date },
     endDate: { type: Date },
-    // Add other experience details as needed
-  },
+  }],
 },
   {
     timestamps: true,
-  },
-);
+  });
 
 module.exports = mongoose.model("User", userSchema);
