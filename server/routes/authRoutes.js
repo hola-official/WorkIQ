@@ -3,7 +3,7 @@ const passport = require("passport");
 const {
 	signUp,
 	login,
-	signOut,
+	logout,
   successRedirect,
 	activateUser,
 } = require("../controllers/authController");
@@ -21,6 +21,6 @@ router.get("/googleauth/callback", googleAuthCallback, successRedirect);
 router.post("/signup", signUp);
 router.get("/activate-account", activateUser);
 router.post("/login", login);
-router.post("/logout", signOut);
+router.post("/logout", logout);
 
 module.exports = router;
