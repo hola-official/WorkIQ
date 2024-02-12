@@ -1,11 +1,11 @@
 const bcrypt = require("bcrypt");
 const User = require("../Model/userModel");
 const { generateCookieToken } = require("../utils/generateToken");
-const UnconfirmedUser = require("../Model/unconfirmedUserModel");
-const crypto = require("crypto");
-const { sendConfirmationMail } = require("../utils/sendMail");
-const passport = require("passport");
+// const crypto = require("crypto");
+// const passport = require("passport");
 
+const { sendMail } = require("../utils/sendMail.js");
+const createActivationToken = require("../utils/createActivationToken.js");
 // Google authentication callback
 
 const successRedirect = async (req, res) => {
@@ -30,21 +30,8 @@ const successRedirect = async (req, res) => {
 			email: user.email,
 			id: user._id,
 		});
-
-		// Creates Secure Cookie with token token
-		// res.cookie("jwt", token, {
-		// 	// domain: ".onrender.com",
-		// 	// path: "/",
-		// 	httpOnly: true,
-		// 	secure: true,
-		// 	sameSite: "None",
-		// 	maxAge: 1 * 60 * 60 * 1000, //1hr
-		// });
-
 		//   Redirect or send a response as needed
 		res.redirect(`https://quickbillpay.onrender.com/auth/google-verify?token=${token}`);
-		// req.session.user = req.user;
-		// res.redirect(`https://quickbillpay.onrender.com/auth/google-verify`);
 	} catch (error) {
 		// Handle errors
 		console.error("Error fetching user profile:", error);
@@ -55,29 +42,38 @@ const successRedirect = async (req, res) => {
 const signUp = async (req, res) => {
 	try {
 		// Extracting email, password, and name from the request body
-		const { email, password, name, username } = req.body;
+		const { email, username, password, name } = req.body;
 
 		// Checking if the user already exists
-		const existingUser = await User.findOne({ email, username }).select("-password");
+		const existingUser = await User.findOne({ email }).select("-password");
 		if (existingUser)
 			return res.status(400).json({ error: "User already exists" });
 
 		const hashedPassword = await bcrypt.hash(password, 12);
+		const user = { name, username, email, password: hashedPassword };
 
-		// Creating a new Unconfirmed user using the provided email, hashed password, and name
-		const token = crypto.randomBytes(32).toString("hex");
-		// const tokenExpiryDate = new Date() + 10 * 60 * 1000; // 10 mins from now
+		const activationToken = createActivationToken(user);
+		const activationCode = activationToken.activationCode;
 
-		const newUnconfirmedUser = await UnconfirmedUser.create({
-			email,
-			username,
-			password: hashedPassword,
-			name,
-			token,
-			// tokenExpiryDate,
-		});
+		const data = { user: { name: user.name }, activationCode };
 
-		sendConfirmationMail(newUnconfirmedUser, res);
+		try {
+			await sendMail({
+				email: user.email,
+				subject: "Activation your Account ",
+				template: "activation-mail.ejs",
+				data,
+			});
+			res.status(201).json({
+				success: true,
+				message: `Please check your email ${user.email} to active your account`,
+				activationToken: activationToken.token,
+			});
+		} catch (error) {
+			// return next(new ErrorHandler(error.message, 400));
+			console.log(error);
+			return res.status(400).json({ error: error.message });
+		}
 	} catch (error) {
 		// Handling any errors that occur during the process
 		console.log(error);
@@ -85,38 +81,38 @@ const signUp = async (req, res) => {
 	}
 };
 
-const activateAccount = async (req, res) => {
-	try {
-		const token = req.params.token;
-		console.log(token);
+// const activateAccount = async (req, res) => {
+// 	try {
+// 		const token = req.params.token;
+// 		console.log(token);
 
-		const unconfirmedUser = await UnconfirmedUser.findOne({ token });
-		console.log(unconfirmedUser);
+// 		const unconfirmedUser = await UnconfirmedUser.findOne({ token });
+// 		console.log(unconfirmedUser);
 
-		if (!unconfirmedUser) {
-			return res
-				.status(400)
-				.json({ error: "Invalid activation link or activation link expired" });
-		} else {
-			const confirmedUser = await User.create({
-				email: unconfirmedUser.email,
-				username: unconfirmedUser.username,
-				password: unconfirmedUser.password,
-				name: unconfirmedUser.name,
-			});
+// 		if (!unconfirmedUser) {
+// 			return res
+// 				.status(400)
+// 				.json({ error: "Invalid activation link or activation link expired" });
+// 		} else {
+// 			const confirmedUser = await User.create({
+// 				email: unconfirmedUser.email,
+// 				username: unconfirmedUser.username,
+// 				password: unconfirmedUser.password,
+// 				name: unconfirmedUser.name,
+// 			});
 
-			await UnconfirmedUser.findByIdAndDelete(unconfirmedUser._id);
-			console.log(confirmedUser);
+// 			await UnconfirmedUser.findByIdAndDelete(unconfirmedUser._id);
+// 			console.log(confirmedUser);
 
-			return res
-				.status(200)
-				.json({ message: "Account activated successfully", confirmedUser });
-		}
-	} catch (error) {
-		console.log(error);
-		res.status(500).json({ message: "Something went wrong" });
-	}
-};
+// 			return res
+// 				.status(200)
+// 				.json({ message: "Account activated successfully", confirmedUser });
+// 		}
+// 	} catch (error) {
+// 		console.log(error);
+// 		res.status(500).json({ message: "Something went wrong" });
+// 	}
+// };
 
 const signIn = async (req, res) => {
 	const { email, username, password } = req.body;
@@ -150,17 +146,6 @@ const signIn = async (req, res) => {
 			id: existingUser._id,
 		});
 
-		// Creates Secure Cookie with token token
-		// res.cookie("jwt", token, {
-		// 	// domain: ".onrender.com",
-		// 	// path: "/",
-		// 	httpOnly: true,
-		// 	secure: true,
-		// 	sameSite: "None",
-		// 	maxAge: 1 * 60 * 60 * 1000, //1hr
-		// });
-
-
 		existingUser.password = null;
 		existingUser.updatedAt = null;
 		existingUser.createdAt = null;
@@ -187,6 +172,6 @@ module.exports = {
 	signUp,
 	signIn,
 	signOut,
-	activateAccount,
+	// activateAccount,
 	successRedirect,
 };

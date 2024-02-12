@@ -19,7 +19,7 @@ const taskSchema = new mongoose.Schema({
     default: "pending",
   },
   createdAt: { type: Date, default: Date.now },
-  visibleTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  visibleTo: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model("Task", taskSchema);
