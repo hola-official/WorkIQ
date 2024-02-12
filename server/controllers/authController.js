@@ -123,46 +123,55 @@ const activateUser = async (req, res) => {
 
 const login = async (req, res) => {
 	const { user, password } = req.body;
-	if (!user || !password) return res.status(400).json({ 'message': 'Username and password are required.' });
+	if (!user || !password) {
+		return res.status(400).json({ message: 'Username and password are required.' });
+	}
 
-	const foundUser = await User.findOne({ username: user } || { email: user }).exec();
-	if (!foundUser) return res.sendStatus(401); //Unauthorized 
-	// evaluate password 
-	const match = await bcrypt.compare(password, foundUser.password);
-	if (match) {
-		const roles = Object.values(foundUser.roles).filter(Boolean);
-		// create JWTs
-		const accessToken = jwt.sign(
-			{
-				"UserInfo": {
-					"username": foundUser.username,
-					"roles": roles
-				}
-			},
-			process.env.ACCESS_TOKEN_SECRET,
-			{ expiresIn: '10s' }
-		);
-		const refreshToken = jwt.sign(
-			{ "username": foundUser.username },
-			process.env.REFRESH_TOKEN_SECRET,
-			{ expiresIn: '1d' }
-		);
-		// Saving refreshToken with current user
-		foundUser.refreshToken = refreshToken;
-		const result = await foundUser.save();
-		console.log(result);
-		console.log(roles);
+	try {
+		// Find the user by username or email
+		const foundUser = await User.findOne({ $or: [{ username: user }, { email: user }] }).exec();
+		if (!foundUser) {
+			return res.status(401).json({ message: 'Invalid username or password.' });
+		}
 
-		// Creates Secure Cookie with refresh token
-		res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
+		// Evaluate password
+		const match = await bcrypt.compare(password, foundUser.password);
+		if (match) {
+			const roles = Object.values(foundUser.roles).filter(Boolean);
+			// Create JWTs
+			const accessToken = jwt.sign(
+				{
+					UserInfo: {
+						username: foundUser.username,
+						roles: roles
+					}
+				},
+				process.env.ACCESS_TOKEN_SECRET,
+				{ expiresIn: '10s' }
+			);
+			const refreshToken = jwt.sign(
+				{ username: foundUser.username },
+				process.env.REFRESH_TOKEN_SECRET,
+				{ expiresIn: '1d' }
+			);
+			// Saving refreshToken with current user
+			foundUser.refreshToken = refreshToken;
+			const result = await foundUser.save();
 
-		// Send authorization roles and access token to user
-		res.json({ roles, result, accessToken });
+			// Creates Secure Cookie with refresh token
+			res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
 
-	} else {
-		res.sendStatus(401);
+			// Send authorization roles and access token to user
+			return res.json({ roles, result, accessToken });
+		} else {
+			return res.status(401).json({ message: 'Invalid username or password.' });
+		}
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: 'Internal server error.' });
 	}
 };
+
 
 
 const logout = async (req, res) => {
@@ -175,8 +184,8 @@ const logout = async (req, res) => {
 	// Is refreshToken in db?
 	const foundUser = await User.findOne({ refreshToken }).exec();
 	if (!foundUser) {
-			res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
-			return res.sendStatus(204);
+		res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
+		return res.sendStatus(204);
 	}
 
 	// Delete refreshToken in db

@@ -65,11 +65,11 @@ app.use(
 );
 
 // Routes
-app.use("/api/users", userRoutes);
-app.use("/api/tasks", taskRoutes);
+app.use("/users", userRoutes);
+app.use("/tasks", taskRoutes);
 // app.use("/api/proposals", proposalRoutes);
-app.use("/api/portfolios", portfolioRoutes);
-app.use("/api/auth", authRoutes);
+app.use("/portfolios", portfolioRoutes);
+app.use("/auth", authRoutes);
 app.use('/refresh', refreshRoute);
 // app.use('/api/admin', adminRoutes);
 
