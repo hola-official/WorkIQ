@@ -162,20 +162,20 @@ const login = async (req, res) => {
 };
 
 const passwordReset = async (req, res) => {
-	
+
 	const { email } = req.body;
-	
+
 	try {
-			const user = await User.findOne({ email });
-		
-			if (!user) {
-				return res.status(400).json({ error: "User not found" });
-			}
-		
-			const activationToken = createActivationToken(user);
-			const activationCode = activationToken.activationCode;
-		
-			const data = { user: { name: user.name }, activationCode };
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(400).json({ error: "User not found" });
+		}
+
+		const activationToken = createActivationToken(user);
+		const activationCode = activationToken.activationCode;
+
+		const data = { user: { name: user.name }, activationCode };
 		await sendMail({
 			email: user.email,
 			subject: "Reset your password",
@@ -204,7 +204,7 @@ const confirmPasswordResetOTP = async (req, res) => {
 		if (decoded.activationCode !== activation_code) {
 			return res.status(400).json({ error: "Invalid activation code" });
 		}
-	
+
 		res.status(201).json({
 			success: true,
 			message: "OTP verified successfully",
@@ -216,31 +216,32 @@ const confirmPasswordResetOTP = async (req, res) => {
 
 }
 
+
 const passwordResetConfirmed = async (req, res) => {
 	const { activation_token, activation_code, password } = req.body;
 
 	try {
 		const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
-	
+
 		if (decoded.activationCode !== activation_code) {
 			return res.status(400).json({ error: "Invalid activation code" });
 		}
-	
+
 		const { email } = decoded.user;
-	
+
 		const hashedPassword = await bcrypt.hash(password, 12);
-	
+
 		const user = await User.findOneAndUpdate(
 			{ email },
 			{ password: hashedPassword },
 			{ new: true }
 		);
-	
+
 		res.status(201).json({
 			success: true,
 			user,
 		});
-		
+
 	} catch (error) {
 		res.status(500).json({ error: "Something went wrong" });
 	}
@@ -278,7 +279,7 @@ module.exports = {
 	logout,
 	activateUser,
 	getCurrentUserInfo,
-	passwordReset,	
+	passwordReset,
 	confirmPasswordResetOTP,
 	passwordResetConfirmed
 };
