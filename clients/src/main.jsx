@@ -10,24 +10,24 @@ import { extendTheme } from "@chakra-ui/theme-utils";
 import { RecoilRoot } from "recoil";
 
 const styles = {
-  global: (props) => ({
-    body: {
-      color: mode("gray.800", "whiteAlpha: 900")(props),
-      bg: mode("gray.100", "#101010")(props),
-    },
-  }),
+	global: (props) => ({
+		body: {
+			color: mode("gray.800", "whiteAlpha: 900")(props),
+			bg: mode("gray.100", "#101010")(props),
+		},
+	}),
 };
 
 const config = {
-  initialColorMode: "light",
-  useSystemColorMode: true,
+	initialColorMode: "light",
+	useSystemColorMode: true,
 };
 
 const colors = {
-  gray: {
-    light: "#616161",
-    dark: "#1e1e1e",
-  },
+	gray: {
+		light: "#616161",
+		dark: "#1e1e1e",
+	},
 };
 
 const theme = extendTheme({ config, styles, colors });
@@ -35,11 +35,13 @@ const theme = extendTheme({ config, styles, colors });
 ReactDOM.createRoot(document.getElementById("root")).render(
 
   <RecoilRoot>
-    <BrowserRouter>
-      <ChakraProvider theme={theme}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <App />
-      </ChakraProvider>
-    </BrowserRouter>
+{/* <React.StrictMode> */}
+		<BrowserRouter>
+			<ChakraProvider theme={theme}>
+				<ColorModeScript initialColorMode={theme.config.initialColorMode} />
+				<App />
+			</ChakraProvider>
+		</BrowserRouter>
+	{/* </React.StrictMode> */}
   </RecoilRoot>
 );

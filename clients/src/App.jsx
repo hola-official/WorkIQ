@@ -1,13 +1,13 @@
 import { React } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import "./index.css";
-import test from './test'
+import Test from './test'
 
 function App() {
 
   return (
     <Routes>
-      <Route path='/' element={<test />} />
+      <Route path='/' element={<Test />} />
       <Route/>
     </Routes>
   )
