@@ -12,9 +12,7 @@ import {
   Image,
   Link,
   Box,
-  IconButton,
-  Divider,
-  AbsoluteCenter,
+  Checkbox,
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/react";
@@ -135,7 +133,7 @@ export default function SplitScreen() {
                 >
                   <FormLabel>Email or username</FormLabel>
                   <Input
-                    type="email"
+                    type={"email" && 'text'}
                     onChange={(e) => setEmail(e.target.value) || setUsername(e.target.value)}
                     value={email || username}
                     placeholder="example@mail.com"
@@ -173,24 +171,30 @@ export default function SplitScreen() {
                     </InputRightElement>
                   </InputGroup>
                 </FormControl>
-
-                {/* <Stack spacing={10} pt={2}> */}
-                <Button
-                  loadingText="Signing in"
-                  w={{ base: "full", md: "400px", lg: "500px" }}
-                  // size={{ base: "lg", md: "md" }}
-                  bg={"blue.500"}
-                  color={"white"}
-                  _hover={{
-                    bg: "blue.400",
-                  }}
-                  type="submit"
-                  isLoading={loading}
-                  mx="auto"
-                >
-                  Sign In
-                </Button>
-                {/* </Stack> */}
+                <Stack spacing={10}>
+                  <Stack
+                    direction={{ base: 'column', sm: 'row' }}
+                    align={'start'}
+                    justify={'space-between'}>
+                    <Checkbox>Remember me</Checkbox>
+                    <Text color={'blue.400'}><Link href="/forget-password">Forgot password?</Link></Text>
+                  </Stack>
+                  <Button
+                    loadingText="Signing in"
+                    w={{ base: "full", md: "400px", lg: "500px" }}
+                    // size={{ base: "lg", md: "md" }}
+                    bg={"blue.500"}
+                    color={"white"}
+                    _hover={{
+                      bg: "blue.400",
+                    }}
+                    type="submit"
+                    isLoading={loading}
+                    mx="auto"
+                  >
+                    Sign In
+                  </Button>
+                </Stack>
                 <Stack pt={6}>
                   <Text align={"center"}>
                     Don&apos;t have an account?{" "}
