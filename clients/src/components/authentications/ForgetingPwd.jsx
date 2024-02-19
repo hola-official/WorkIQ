@@ -11,12 +11,14 @@ import {
 import { useAxiosInstance } from "/api/axios";
 import useShowToast from "../../hooks/useShowToast";
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const ForgetingPwd = () => {
   const [email, setEmail] = useState("");
   const axiosInstance = useAxiosInstance();
   const showToast = useShowToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -29,6 +31,8 @@ const ForgetingPwd = () => {
         console.log(response.error)
       }
       showToast('success', 'Reset password link sent to your email', 'success');
+      // setTimeout(()=>{navigate('/login')},2000);
+      navigate('/confirm-email')
     } catch (error) {
       if (error?.response?.status === 404) {
         showToast(
@@ -56,37 +60,36 @@ const ForgetingPwd = () => {
         boxShadow={'lg'}
         p={6}
         my={12}>
-        <form onSubmit={handleSubmit}>
-          <Heading lineHeight={1.1} fontSize={{ base: '2xl', md: '3xl' }}>
-            Forgot your password?
-          </Heading>
-          <Text
-            fontSize={{ base: 'sm', sm: 'md' }}
-            color={useColorModeValue('gray.800', 'gray.400')}>
-            You&apos;ll get an email with a reset link
-          </Text>
+        <Heading lineHeight={1.1} fontSize={{ base: '2xl', md: '3xl' }}>
+          Forgot your password?
+        </Heading>
+        <Text
+          fontSize={{ base: 'sm', sm: 'md' }}
+          color={useColorModeValue('gray.800', 'gray.400')}>
+          You&apos;ll get an email with a reset link
+        </Text>
 
-          <FormControl id="email">
-            <Input
-              placeholder="your-email@example.com"
-              _placeholder={{ color: 'gray.500' }}
-              type="email"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-            />
-          </FormControl>
-          <Stack spacing={6}>
-            <Button
-              bg={'blue.400'}
-              color={'white'}
-              type='submit'
-              _hover={{
-                bg: 'blue.500',
-              }}>
-              Request Reset
-            </Button>
-          </Stack>
-        </form>
+        <FormControl id="email">
+          <Input
+            placeholder="your-email@example.com"
+            _placeholder={{ color: 'gray.500' }}
+            type="email"
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
+          />
+        </FormControl>
+        <Stack spacing={6}>
+          <Button
+            bg={'blue.400'}
+            color={'white'}
+            type='submit'
+            onClick={handleSubmit}
+            _hover={{
+              bg: 'blue.500',
+            }}>
+            Request Reset
+          </Button>
+        </Stack>
       </Stack>
     </Flex>
   )

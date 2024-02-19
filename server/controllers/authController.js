@@ -162,37 +162,38 @@ const login = async (req, res) => {
 };
 
 const passwordReset = async (req, res) => {
-
 	const { email } = req.body;
 
 	try {
-		const user = await User.findOne({ email });
+			const user = await User.findOne({ email });
 
-		if (!user) {
-			return res.status(400).json({ error: "User not found" });
-		}
+			if (!user) {
+					return res.status(400).json({ error: "User not found" });
+			}
 
-		const activationToken = createActivationToken(user);
-		const activationCode = activationToken.activationCode;
+			const activationToken = createActivationToken(user);
+			const activationCode = activationToken?.activationCode; // Ensure activationToken exists before accessing activationCode
 
-		const data = { user: { name: user.name }, activationCode };
-		await sendMail({
-			email: user.email,
-			subject: "Reset your password",
-			template: "password-reset-mail.ejs",
-			data,
-		});
-		res.status(201).json({
-			success: true,
-			message: `Please check your email ${user.email} to reset your password`,
-			activationToken: activationToken.token,
-		});
+			if (!activationCode) {
+					return res.status(500).json({ error: "Failed to create activation token" });
+			}
+
+			const data = { user: { name: user.name }, activationCode };
+			await sendMail({
+					email: user.email,
+					subject: "Reset your password",
+					template: "password-reset-mail.ejs",
+					data,
+			});
+			res.status(201).json({
+					success: true,
+					message: `Please check your email ${user.email} to reset your password`,
+					activationToken: activationToken.token,
+			});
 	} catch (error) {
-		// return next(new ErrorHandler(error.message, 400));
-		console.log(error);
-		res.status(500).json({ error: "Something went wrong" });
+			console.log(error);
+			res.status(500).json({ error: "Something went wrong" });
 	}
-
 }
 
 const confirmPasswordResetOTP = async (req, res) => {
