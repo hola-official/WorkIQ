@@ -32,7 +32,7 @@ const ForgetingPwd = () => {
       }
       showToast('success', 'Reset password link sent to your email', 'success');
       // setTimeout(()=>{navigate('/login')},2000);
-      navigate('/confirm-email')
+      navigate('/activate-form')
     } catch (error) {
       if (error?.response?.status === 404) {
         showToast(

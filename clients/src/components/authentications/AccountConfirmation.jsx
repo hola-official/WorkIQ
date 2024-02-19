@@ -38,16 +38,14 @@ const AccountConfirmation = () => {
           fontWeight={{ base: 500, md: 800 }}
           mt={{ base: 2, md: 5 }}
         >
-          {" "}
-          Your Account has been{" "}
+          Your Account has been
         </Text>
         <Text
           as={"h1"}
           fontSize={{ base: "lg", sm: "xl", md: "2xl", lg: "3xl" }}
           fontWeight={{ base: 500, md: 800 }}
         >
-          {" "}
-          successfully created{" "}
+          successfully created
         </Text>
       </Flex>
 

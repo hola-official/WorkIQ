@@ -60,7 +60,6 @@ const signUp = async (req, res) => {
 				activationToken: activationToken.token,
 			});
 		} catch (error) {
-			// return next(new ErrorHandler(error.message, 400));
 			console.log(error);
 			return res.status(400).json({ error: error.message });
 		}
@@ -70,6 +69,7 @@ const signUp = async (req, res) => {
 		res.status(500).json({ error: "Something went wrong" });
 	}
 };
+
 
 const activateUser = async (req, res) => {
 	try {
@@ -112,13 +112,15 @@ const activateUser = async (req, res) => {
 
 const login = async (req, res) => {
 	const { user, password } = req.body;
-	if (!user || !password) {
-		return res.status(400).json({ message: 'Username and password are required.' });
-	}
-
+	console.log(user, password)
+	
 	try {
+		if (!user || !password) {
+			return res.status(400).json({ message: 'Username and password are required.' });
+		}
 		// Find the user by username or email
 		const foundUser = await User.findOne({ $or: [{ username: user }, { email: user }] }).exec();
+		console.log(foundUser)
 		if (!foundUser) {
 			return res.status(401).json({ message: 'Invalid username or password.' });
 		}

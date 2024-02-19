@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import useShowToast from "../../hooks/useShowToast";
 import { useAxiosInstance } from "../../../api/axios";
 
-const VerifyEmailForm = () => {
+const AccountVerifyEmailForm = () => {
   const [code, setCode] = useState();
   const axiosInstance = useAxiosInstance();
   const showToast = useShowToast();
@@ -24,23 +24,27 @@ const VerifyEmailForm = () => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post(
-        "/auth/reset-password/confirm",
+        "/auth/activate-account",
         JSON.stringify({ activation_code: code, activation_token })
       );
-      if (!response) {
-        console.log(response.error);
+  
+      if (response.status === 200) {
+        showToast("success", "Account activated successfully", "success");
+        navigate("/auth");
+      } else {
+        showToast("error", "Failed to activate account", "error");
+        console.log(response.data.error); // Log the error message received from the server
       }
-      showToast("success", "Password reset successful", "success");
-      navigate("/auth");
     } catch (error) {
       if (error?.response?.status === 404) {
-        showToast("Error", "You need to be registered", "error");
+        showToast("error", "You need to be registered", "error");
       } else {
-        showToast("Error", "Failed to reset password", "error");
+        showToast("error", "An unexpected error occurred", "error");
       }
       console.log(error.response);
     }
   };
+  
 
 
   return (
@@ -101,4 +105,4 @@ const VerifyEmailForm = () => {
   );
 };
 
-export default VerifyEmailForm;
+export default AccountVerifyEmailForm;
