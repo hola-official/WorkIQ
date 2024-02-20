@@ -3,6 +3,7 @@ import {
 	Flex,
 	Text,
 	FormControl,
+	FormLabel,
 	Heading,
 	Input,
 	Stack,
@@ -55,6 +56,7 @@ export default function SplitScreen() {
 			if (data.message) {
 				showToast("Success", data.message, "success");
 			}
+			// setUser(data);
 
 			navigate("/activate-verify");
 		} catch (error) {
@@ -89,11 +91,7 @@ export default function SplitScreen() {
 					</Heading>
 					<form onSubmit={handleSubmit}>
 						<Stack spacing={4}>
-							<Box
-								// w={{ base: "100%" }}
-								maxW="500px"
-								mx="auto"
-							>
+							<Box maxW="500px" mx="auto">
 								<HStack>
 									<Box>
 										<FormControl isRequired>
@@ -102,14 +100,10 @@ export default function SplitScreen() {
 												onChange={(e) => setUsername(e.target.value)}
 												placeholder="Username"
 												value={username}
-												pattern="^(?!\s+$).{3,}$"
 												color={"black"}
 												border={"1px solid black"}
 												required
 											/>
-											<span className="regex-error">
-												Username must be at least 3 characters long{" "}
-											</span>
 										</FormControl>
 									</Box>
 									<Box>
@@ -121,12 +115,8 @@ export default function SplitScreen() {
 												value={name}
 												color={"black"}
 												border={"1px solid black"}
-												pattern="^(?!\s+$).{5,}$"
 												required
 											/>
-											<span className="regex-error">
-												Full name must be at least 5 characters long
-											</span>
 										</FormControl>
 									</Box>
 								</HStack>
@@ -138,12 +128,8 @@ export default function SplitScreen() {
 										value={email}
 										placeholder="Email address"
 										border={"1px solid black"}
-										pattern="[a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
 										required
 									/>
-									<span className="regex-error">
-										Please enter a valid email address.{" "}
-									</span>
 								</FormControl>
 
 								<FormControl isRequired my={5}>
@@ -153,7 +139,6 @@ export default function SplitScreen() {
 											onChange={(e) => setPassword(e.target.value)}
 											value={password}
 											placeholder="Password"
-											// pattern="[0-9a-zA-Z]{8,}"
 											border={"1px solid black"}
 											required
 										/>
@@ -168,9 +153,6 @@ export default function SplitScreen() {
 											</Button>
 										</InputRightElement>
 									</InputGroup>
-									<span className="regex-error">
-									Password must be at least 8 characters.{" "}
-								</span>
 								</FormControl>
 
 								<FormControl isRequired my={5}>
@@ -180,7 +162,6 @@ export default function SplitScreen() {
 											onChange={(e) => setConfirmPassword(e.target.value)}
 											value={confirmPassword}
 											placeholder="Confirm password"
-											// pattern="[0-9a-zA-Z]{8,}"
 											border={"1px solid black"}
 											required
 										/>

@@ -7,12 +7,13 @@ import VerifyEmailForm from './components/authentications/VerifyEmailForm';
 import GoogleAuth from './components/authentications/GoogleAuth';
 import AccountConfirmation from './components/authentications/AccountConfirmation';
 import AccountVerifyEmailForm from './components/authentications/AccountVerifyEmailForm';
+import SidebarWithHeader from './SidebarWithHeader';
 
 function App() {
-  const [user, setUser] = useState(null)
 
   return (
     <Routes>
+      <Route path="/dashboard" element={<SidebarWithHeader />} />
       <Route path="/auth/google-verify" element={<GoogleAuth />} />
       <Route path="/confirm-email" element={<AccountConfirmation />} />
       <Route path="/auth" element={<AuthPage />} />

@@ -9,7 +9,6 @@ import {
   Heading,
   Input,
   Stack,
-  Image,
   Link,
   Box,
   Checkbox,
