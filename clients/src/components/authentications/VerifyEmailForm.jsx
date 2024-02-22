@@ -13,10 +13,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useShowToast from "../../hooks/useShowToast";
 import { useAxiosInstance } from "../../../api/axios";
+import actToken from "../../atoms/activationTokenAtom";
+import { useRecoilValue } from "recoil";
 
 const VerifyEmailForm = () => {
   const [code, setCode] = useState();
   const axiosInstance = useAxiosInstance();
+  const activationToken = useRecoilValue(actToken)
   const showToast = useShowToast();
   const navigate = useNavigate();
 
@@ -25,16 +28,17 @@ const VerifyEmailForm = () => {
     try {
       const response = await axiosInstance.post(
         "/auth/reset-password/confirm",
-        JSON.stringify({ activation_code: code, activation_token })
+        JSON.stringify({ activation_code: code, activation_token: activationToken })
       );
+      console.log(response)
       if (!response) {
         console.log(response.error);
       }
       showToast("success", "Password reset successful", "success");
       navigate("/auth");
     } catch (error) {
-      if (error?.response?.status === 404) {
-        showToast("Error", "You need to be registered", "error");
+      if (error?.response?.status === 400) {
+        showToast("Error", "Code does not match", "error");
       } else {
         showToast("Error", "Failed to reset password", "error");
       }

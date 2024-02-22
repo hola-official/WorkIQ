@@ -47,9 +47,9 @@ export default function SplitScreen() {
         "/auth/login",
         JSON.stringify({ user, password })
       );
-      console.log(response.data.loggedInUser);
-      const loggedUser = response.data.loggedInUser;
-      const token = response.data.token;
+      console.log(response.data);
+      const loggedUser = response.data;
+      const token = response.data.accessToken;
 
       localStorage.setItem("user-workiq", JSON.stringify(loggedUser));
       localStorage.setItem("token", token);

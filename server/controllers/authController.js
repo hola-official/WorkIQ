@@ -35,9 +35,17 @@ const signUp = async (req, res) => {
 		const { email, username, password, name } = req.body;
 
 		// Checking if the user already exists
-		const existingUser = await User.findOne({ email }).select("-password");
-		if (existingUser)
-			return res.status(400).json({ error: "User already exists" });
+		const existingEmail = await User.findOne({ email }).select("-password");
+		const existingUsername = await User.findOne({ username }).select("-password");
+		if (existingEmail) {
+			return res.status(400).json({ error: "User already exists with this email" });
+		}
+		if (existingUsername) {
+			return res.status(400).json({ error: "User already exists with this username" });
+		}
+		if (existingEmail && existingUsername) {
+			return res.status(400).json({ error: "User already exists" })
+		}
 
 		const hashedPassword = await bcrypt.hash(password, 12);
 		const user = { name, username, email, password: hashedPassword };
@@ -113,7 +121,7 @@ const activateUser = async (req, res) => {
 const login = async (req, res) => {
 	const { user, password } = req.body;
 	console.log(user, password)
-	
+
 	try {
 		if (!user || !password) {
 			return res.status(400).json({ message: 'Username and password are required.' });
@@ -167,34 +175,34 @@ const passwordReset = async (req, res) => {
 	const { email } = req.body;
 
 	try {
-			const user = await User.findOne({ email });
+		const user = await User.findOne({ email });
 
-			if (!user) {
-					return res.status(400).json({ error: "User not found" });
-			}
+		if (!user) {
+			return res.status(400).json({ error: "User not found" });
+		}
 
-			const activationToken = createActivationToken(user);
-			const activationCode = activationToken?.activationCode; // Ensure activationToken exists before accessing activationCode
+		const activationToken = createActivationToken(user);
+		const activationCode = activationToken?.activationCode; // Ensure activationToken exists before accessing activationCode
 
-			if (!activationCode) {
-					return res.status(500).json({ error: "Failed to create activation token" });
-			}
+		if (!activationCode) {
+			return res.status(500).json({ error: "Failed to create activation token" });
+		}
 
-			const data = { user: { name: user.name }, activationCode };
-			await sendMail({
-					email: user.email,
-					subject: "Reset your password",
-					template: "password-reset-mail.ejs",
-					data,
-			});
-			res.status(201).json({
-					success: true,
-					message: `Please check your email ${user.email} to reset your password`,
-					activationToken: activationToken.token,
-			});
+		const data = { user: { name: user.name }, activationCode };
+		await sendMail({
+			email: user.email,
+			subject: "Reset your password",
+			template: "password-reset-mail.ejs",
+			data,
+		});
+		res.status(201).json({
+			success: true,
+			message: `Please check your email ${user.email} to reset your password`,
+			activationToken: activationToken.token,
+		});
 	} catch (error) {
-			console.log(error);
-			res.status(500).json({ error: "Something went wrong" });
+		console.log(error);
+		res.status(500).json({ error: "Something went wrong" });
 	}
 }
 

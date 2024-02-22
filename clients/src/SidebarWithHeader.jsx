@@ -53,7 +53,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
 				{/* <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
 					Logo
 				</Text> */}
-				<Image src="/QBLogo.png" />
+				<Image src="/SidebarLogo.svg" />
 
 				<CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
 			</Flex>

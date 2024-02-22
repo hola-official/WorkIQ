@@ -13,9 +13,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useShowToast from "../../hooks/useShowToast";
 import { useAxiosInstance } from "../../../api/axios";
+import { useRecoilValue } from "recoil";
+import actToken from "../../atoms/activationTokenAtom";
 
 const AccountVerifyEmailForm = () => {
   const [code, setCode] = useState();
+  const activationToken = useRecoilValue(actToken)
   const axiosInstance = useAxiosInstance();
   const showToast = useShowToast();
   const navigate = useNavigate();
@@ -25,10 +28,13 @@ const AccountVerifyEmailForm = () => {
     try {
       const response = await axiosInstance.post(
         "/auth/activate-account",
-        JSON.stringify({ activation_code: code, activation_token })
+        JSON.stringify({ activation_code: code, activation_token: activationToken })
       );
-  
-      if (response.status === 200) {
+      const { user } = response.data;
+      await localStorage.setItem("user-workiq", JSON.stringify(user));
+
+      console.log(response.data);
+      if (response.status === 201) {
         showToast("success", "Account activated successfully", "success");
         navigate("/auth");
       } else {
@@ -37,14 +43,14 @@ const AccountVerifyEmailForm = () => {
       }
     } catch (error) {
       if (error?.response?.status === 404) {
-        showToast("error", "You need to be registered", "error");
+        showToast("error", error.response.data.error, "error");
       } else {
-        showToast("error", "An unexpected error occurred", "error");
+        showToast("error", error.response.data.error, "error");
       }
       console.log(error.response);
     }
   };
-  
+
 
 
   return (

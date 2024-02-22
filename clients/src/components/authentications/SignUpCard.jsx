@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { useAxiosInstance } from "../../../api/axios";
 import userAtom from "../../atoms/userAtom";
 import useShowToast from "../../hooks/useShowToast";
+import activationToken from "../../atoms/activationTokenAtom";
 
 export default function SplitScreen() {
 	const setAuthScreen = useSetRecoilState(authScreenAtom);
@@ -30,6 +31,7 @@ export default function SplitScreen() {
 	const [email, setEmail] = useState("");
 	const [name, setName] = useState("");
 	const [username, setUsername] = useState("");
+	const setActivationToken = useSetRecoilState(activationToken)
 	const setUser = useSetRecoilState(userAtom);
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
@@ -56,7 +58,8 @@ export default function SplitScreen() {
 			if (data.message) {
 				showToast("Success", data.message, "success");
 			}
-			// setUser(data);
+			setUser(data);
+			setActivationToken(data.activationToken)
 
 			navigate("/activate-verify");
 		} catch (error) {
@@ -89,7 +92,7 @@ export default function SplitScreen() {
 							Sign up to enjoy the feature of WorkIQ.
 						</Text>
 					</Heading>
-					<form onSubmit={handleSubmit}>
+					<form onSubmit={handleSubmit} className='text-color blue.400'>
 						<Stack spacing={4}>
 							<Box maxW="500px" mx="auto">
 								<HStack>
