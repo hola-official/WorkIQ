@@ -40,13 +40,13 @@ const SidebarContent = ({ onClose, ...rest }) => {
 	return (
 		<Box
 			transition="3s ease"
-			bg={"#ECF1F6"}
+			bg={"#000"}
 			boxShadow="1px 0px 2px 1px rgba(0,0,0,0.6)"
 			zIndex={99}
 			w={{ base: "full", md: 60 }}
 			pos="fixed"
 			h="full"
-			color={"#374957"} ///////////////////////////////////////////////////For the sidebar
+			color={"#fff"} ///////////////////////////////////////////////////For the sidebar
 			{...rest}
 		>
 			<Flex h="20" alignItems="center" mx="6" justifyContent="space-between">
@@ -62,7 +62,8 @@ const SidebarContent = ({ onClose, ...rest }) => {
 				as={NavLink}
 				to={"/dashboard"}
 				style={({ isActive }) => ({
-					color: isActive ? "rgb(41, 112, 255)" : "",
+					color: isActive ? "#fff" : "",
+					background: isActive ? "#3B82F6" : "",
 				})}
 				icon={MdHome}
 			>
@@ -81,43 +82,46 @@ const SidebarContent = ({ onClose, ...rest }) => {
 							cursor="pointer"
 						>
 							<Icon mr="4" fontSize="16" as={ImArrowDownLeft2} />
-							Get Paid
+							Tasks
 						</Flex>
 						<AccordionIcon />
 					</AccordionButton>
 					<AccordionPanel pb={4}>
 						<NavItem
 							as={NavLink}
-							to={"/invoices/create"}
+							to={"/tasks/create"}
 							style={({ isActive }) => ({
-								color: isActive ? "rgb(41, 112, 255)" : "",
+								color: isActive ? "#fff" : "",
+								background: isActive ? "#3B82F6" : "",
 							})}
-							pl="12"
+							pl="10"
 							py="2"
 						>
-							Create Invoice
+							Create Task
 						</NavItem>
 						<NavItem
 							as={NavLink}
-							to={"/invoices/sent"}
+							to={"/tasks/sent"}
 							style={({ isActive }) => ({
-								color: isActive ? "rgb(41, 112, 255)" : "",
+								color: isActive ? "#fff" : "",
+								background: isActive ? "#3B82F6" : "",
 							})}
-							pl="12"
+							pl="10"
 							py="2"
 						>
-							Sent Invoices
+							All Tasks
 						</NavItem>
 						<NavItem
 							as={NavLink}
 							to={"/clients"}
 							style={({ isActive }) => ({
-								color: isActive ? "rgb(41, 112, 255)" : "",
+								color: isActive ? "#fff" : "",
+								background: isActive ? "#3B82F6" : "",
 							})}
-							pl="12"
+							pl="10"
 							py="2"
 						>
-							Clients
+							Sent proposal
 						</NavItem>
 					</AccordionPanel>
 				</AccordionItem>
@@ -142,16 +146,24 @@ const SidebarContent = ({ onClose, ...rest }) => {
 							as={NavLink}
 							to={"/bills"}
 							style={({ isActive }) => ({
-								color: isActive ? "rgb(41, 112, 255)" : "",
+								color: isActive ? "#fff" : "",
+								background: isActive ? "#3B82F6" : "",
 							})}
-							pl="12"
+							pl="10"
 							py="2"
 						>
 							Bills
 						</NavItem>
-						<NavItem as={NavLink} to={"/payrolls"} 	style={({ isActive }) => ({
-								color: isActive ? "rgb(41, 112, 255)" : "",
-							})} pl="12" py="2">
+						<NavItem
+							as={NavLink}
+							to={"/payrolls"}
+							style={({ isActive }) => ({
+								color: isActive ? "#fff" : "",
+								background: isActive ? "#3B82F6" : "",
+							})}
+							pl="10"
+							py="2"
+						>
 							Payroll
 						</NavItem>
 					</AccordionPanel>
@@ -162,7 +174,8 @@ const SidebarContent = ({ onClose, ...rest }) => {
 				as={NavLink}
 				to={"/invoice-me"}
 				style={({ isActive }) => ({
-					color: isActive ? "rgb(41, 112, 255)" : "",
+					color: isActive ? "#fff" : "",
+					background: isActive ? "#3B82F6" : "",
 				})}
 				icon={AiFillGift}
 			>
@@ -172,7 +185,8 @@ const SidebarContent = ({ onClose, ...rest }) => {
 				as={NavLink}
 				to={"/employees"}
 				style={({ isActive }) => ({
-					color: isActive ? "rgb(41, 112, 255)" : "",
+					color: isActive ? "#fff" : "",
+					background: isActive ? "#3B82F6" : "",
 				})}
 				icon={BsGearFill}
 			>
@@ -193,7 +207,7 @@ const NavItem = ({ icon, children, ...rest }) => {
 				role="group"
 				cursor="pointer"
 				_hover={{
-					bg: "cyan.400",
+					bg: "blue.400",
 					color: "white",
 				}}
 				{...rest}
@@ -202,9 +216,6 @@ const NavItem = ({ icon, children, ...rest }) => {
 					<Icon
 						mr="4"
 						fontSize="16"
-						_groupHover={{
-							color: "white",
-						}}
 						as={icon}
 					/>
 				)}
@@ -296,7 +307,7 @@ const SidebarWithHeader = ({ children }) => {
 	return (
 		<Box
 			minH="100vh"
-			bg={"#F8F8F8"} ///////////////////////////////////////////////////////////For the whole box
+			bg={"#fff"} ///////////////////////////////////////////////////////////For the whole box
 		>
 			<SidebarContent
 				onClose={() => onClose}

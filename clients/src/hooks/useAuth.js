@@ -1,9 +1,9 @@
 import { useRecoilValue } from 'recoil';
 import { jwtDecode } from 'jwt-decode';
-import { authTokenState } from '../atoms/authTokenState'; // Assuming you define atoms in a separate file
+import tokenAtom from '../atoms/tokenAtom'; // Assuming you define atoms in a separate file
 
 const useAuth = () => {
-  const token = useRecoilValue(authTokenState);
+  const token = useRecoilValue(tokenAtom);
   let isClient = false;
   let isAdmin = false;
   let status = 'Freelancer';

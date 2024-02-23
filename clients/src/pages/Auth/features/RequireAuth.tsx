@@ -1,0 +1,18 @@
+import React from 'react';
+import { useLocation, Navigate, Outlet } from 'react-router-dom';
+import useAuth from '../../../hooks/useAuth'; // Import useAuth from Recoil-based hook
+
+const RequireAuth = ({ allowedRoles }) => {
+    const location = useLocation();
+    const { roles } = useAuth(); // Retrieve authentication-related state using Recoil
+
+    const content = (
+        roles.some(role => allowedRoles.includes(role))
+            ? <Outlet />
+            : <Navigate to="/auth" state={{ from: location }} replace />
+    );
+
+    return content;
+};
+
+export default RequireAuth;
