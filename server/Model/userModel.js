@@ -22,6 +22,7 @@ const userSchema = new Schema(
       Freelancer: String,
       Admin: String,
     },
+    googleId: String,
     location: { type: String },
     avatar: { type: String },
     bio: { type: String },
@@ -29,7 +30,7 @@ const userSchema = new Schema(
     portfolios: [{ type: Schema.Types.ObjectId, ref: "Portfolio" }],
     tasksCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCreated: [{ type: Schema.Types.ObjectId, ref: "Task" }],
-    refreshToken: String,
+    refreshToken: [String],
     points: [
       {
         description: String,

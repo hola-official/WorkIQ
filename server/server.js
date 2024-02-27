@@ -36,25 +36,31 @@ app.use(
     })
 );
 
+// Middleware to initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Middleware to parse request body
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// Cross Origin Resource Sharing
+app.use(cors(corsOptions));
+
+// Cookie parser middleware
+app.use(cookieParser());
+
 // Handle options credentials check - before CORS!
 // and fetch cookies credentials requirement
 app.use(credentials);
 
-// Middleware to initialize passport
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(express.json({ limit: "50mb" })); //parse json data inside the req body
-app.use(express.urlencoded({ extended: true })); // parse form data inside the req body
-
-// Cross Origin Resource Sharing
-app.use(cors(corsOptions));
-app.use(cookieParser());
-
+// Routes
 app.use("/auth", authRoutes);
 app.use("/refresh", refreshRoute);
 app.use("/users", userRoutes);
 app.use("/tasks", taskRoutes);
 
+// Connect to MongoDB and start server
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {

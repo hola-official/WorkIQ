@@ -111,6 +111,19 @@ const activateUser = async (req, res) => {
 	}
 };
 
+//To request for password reset, we need to send the user's email to the server.
+// We will then send a password reset email to the user that will allow them to reset their password.
+// The mail will contain a token that will be used to verify the user's identity and to reset their password.
+// The token will be signed using the secret key and will expire after a certain period of time.
+// The user will be able to reset their password by providing the new password along with the token.
+// The server will then verify the token and the user's email and update the user's password in the database.
+// The user will then be able to login with their new password.
+// The password reset link will be sent to the user's email address.
+// The user will then be able to click on the link to reset their password.
+// The user will then be able to enter their new password and click on the "Reset Password" button.
+// The server will then verify the token and the user's email and update the user's password in the database.
+// The user will then be able to login with their new password.
+
 const passwordReset = async (req, res) => {
 	const { email } = req.body;
 
@@ -226,12 +239,6 @@ const login = async (req, res) => {
 				: foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
 
 			if (cookies?.jwt) {
-				/*
-					Scenario added here: 
-					1) User logs in but never uses RT and does not logout 
-					2) RT is stolen
-					3) If 1 & 2 occurs, reuse detection is needed to clear all RTs when user logs in
-				*/
 				const refreshToken = cookies.jwt;
 				const foundToken = await User.findOne({ refreshToken }).exec();
 

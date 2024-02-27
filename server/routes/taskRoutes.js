@@ -3,8 +3,8 @@ const router = express.Router();
 const {
   createTask,
   deleteTask,
-  getAllTasks,
-  getTask,
+  getAllClientTasks,
+  getTaskById,
 } = require("../controllers/taskController");
 const verifyJWT = require("../middleware/verifyJWT");
 const { Admin, Client, Freelancer } = require("../config/roles_list");
@@ -17,9 +17,9 @@ router.post("/create", verifyJWT, verifyRoles(Admin, Client), createTask);
 router.delete("/:id", verifyJWT, verifyRoles(Admin), deleteTask);
 
 // Route to get all tasks
-router.get("/", verifyJWT, verifyRoles(Admin, Client), getAllTasks);
+router.get("/", verifyJWT, verifyRoles(Admin, Client), getAllClientTasks);
 
 // Route to get a task by ID
-router.get("/:id", verifyJWT, verifyRoles(Admin, Client), getTask);
+router.get("/:id", verifyJWT, verifyRoles(Admin, Client), getTaskById);
 
 module.exports = router;
