@@ -1,13 +1,8 @@
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken')
 const User = require("../Model/userModel");
-const { generateCookieToken } = require("../utils/generateToken");
-// const crypto = require("crypto");
-// const passport = require("passport");
-
+const jwt = require("jsonwebtoken");
 const { sendMail } = require("../utils/sendMail.js");
 const createActivationToken = require("../utils/createActivationToken.js");
-// Google authentication callback
 
 const getCurrentUserInfo = async (req, res) => {
 	try {
@@ -35,17 +30,16 @@ const signUp = async (req, res) => {
 		const { email, username, password, name } = req.body;
 
 		// Checking if the user already exists
-		const existingEmail = await User.findOne({ email }).select("-password");
-		const existingUsername = await User.findOne({ username }).select("-password");
-		if (existingEmail) {
+
+		const existingUser = await User.findOne({ email }).select("-password");
+		if (existingUser)
 			return res.status(400).json({ error: "User already exists with this email" });
-		}
-		if (existingUsername) {
-			return res.status(400).json({ error: "User already exists with this username" });
-		}
-		if (existingEmail && existingUsername) {
-			return res.status(400).json({ error: "User already exists" })
-		}
+
+		const existingUsername = await User.findOne({ username }).select(
+			"-password"
+		);
+		if (existingUsername)
+			return res.status(400).json({ error: "Username already taken" });
 
 		const hashedPassword = await bcrypt.hash(password, 12);
 		const user = { name, username, email, password: hashedPassword };
@@ -78,7 +72,6 @@ const signUp = async (req, res) => {
 	}
 };
 
-
 const activateUser = async (req, res) => {
 	try {
 		const { activation_token, activation_code } = req.body;
@@ -105,69 +98,16 @@ const activateUser = async (req, res) => {
 
 		res.status(201).json({
 			success: true,
-			user
+			user,
 		});
 	} catch (error) {
-		// return next(new ErrorHandler(error.message, 400));
 		console.log(error);
-		if (error.name === 'TokenExpiredError') {
-			return res.status(401).json({ error: 'Token expired, kindly signup again' });
+		if (error.name === "TokenExpiredError") {
+			return res
+				.status(401)
+				.json({ error: "Token expired, kindly signup again" });
 		}
 		res.status(500).json({ error: "Something went wrong" });
-	}
-};
-
-
-const login = async (req, res) => {
-	const { user, password } = req.body;
-	console.log(user, password)
-
-	try {
-		if (!user || !password) {
-			return res.status(400).json({ message: 'Username and password are required.' });
-		}
-		// Find the user by username or email
-		const foundUser = await User.findOne({ $or: [{ username: user }, { email: user }] }).exec();
-		console.log(foundUser)
-		if (!foundUser) {
-			return res.status(401).json({ message: 'Invalid username or password.' });
-		}
-
-		// Evaluate password
-		const match = await bcrypt.compare(password, foundUser.password);
-		if (match) {
-			const roles = Object.values(foundUser.roles).filter(Boolean);
-			// Create JWTs
-			const accessToken = jwt.sign(
-				{
-					UserInfo: {
-						username: foundUser.username,
-						roles: roles
-					}
-				},
-				process.env.ACCESS_TOKEN_SECRET,
-				{ expiresIn: '10s' }
-			);
-			const refreshToken = jwt.sign(
-				{ username: foundUser.username },
-				process.env.REFRESH_TOKEN_SECRET,
-				{ expiresIn: '1d' }
-			);
-			// Saving refreshToken with current user
-			foundUser.refreshToken = refreshToken;
-			const result = await foundUser.save();
-
-			// Creates Secure Cookie with refresh token
-			res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 24 * 60 * 60 * 1000 });
-
-			// Send authorization roles and access token to user
-			return res.json({ roles, result, accessToken });
-		} else {
-			return res.status(401).json({ message: 'Invalid username or password.' });
-		}
-	} catch (error) {
-		console.error(error);
-		return res.status(500).json({ message: 'Internal server error.' });
 	}
 };
 
@@ -182,11 +122,7 @@ const passwordReset = async (req, res) => {
 		}
 
 		const activationToken = createActivationToken(user);
-		const activationCode = activationToken?.activationCode; // Ensure activationToken exists before accessing activationCode
-
-		if (!activationCode) {
-			return res.status(500).json({ error: "Failed to create activation token" });
-		}
+		const activationCode = activationToken.activationCode;
 
 		const data = { user: { name: user.name }, activationCode };
 		await sendMail({
@@ -201,17 +137,17 @@ const passwordReset = async (req, res) => {
 			activationToken: activationToken.token,
 		});
 	} catch (error) {
+		// return next(new ErrorHandler(error.message, 400));
 		console.log(error);
 		res.status(500).json({ error: "Something went wrong" });
 	}
-}
+};
 
 const confirmPasswordResetOTP = async (req, res) => {
 	const { activation_token, activation_code } = req.body;
 
-	const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
-
 	try {
+		const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
 		if (decoded.activationCode !== activation_code) {
 			return res.status(400).json({ error: "Invalid activation code" });
 		}
@@ -221,12 +157,9 @@ const confirmPasswordResetOTP = async (req, res) => {
 			message: "OTP verified successfully",
 		});
 	} catch (error) {
-		res.status(500).json({ error: "Something went wrong" });
-
+		res.status(500).json({ error: error.message });
 	}
-
-}
-
+};
 
 const passwordResetConfirmed = async (req, res) => {
 	const { activation_token, activation_code, password } = req.body;
@@ -252,45 +185,154 @@ const passwordResetConfirmed = async (req, res) => {
 			success: true,
 			user,
 		});
-
 	} catch (error) {
 		res.status(500).json({ error: "Something went wrong" });
 	}
+};
 
-}
+const login = async (req, res) => {
+	const cookies = req.cookies;
+	const { user, password } = req.body;
+	// console.log(req.body);
 
+	try {
+		if (!user || !password)
+			return res
+				.status(400)
+				.json({ message: "Username and password are required." });
 
+		const foundUser = await User.findOne({
+			$or: [{ username: user }, { email: user }],
+		})
+			.select("+password")
+			.exec();
+
+		if (!foundUser)
+			return res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
+
+		// evaluate password
+		const match = await bcrypt.compare(password, foundUser.password);
+		if (match) {
+			const roles = Object.values(foundUser.roles).filter(Boolean);
+
+			const newRefreshToken = jwt.sign(
+				{ username: foundUser.username },
+				process.env.REFRESH_TOKEN_SECRET,
+				{ expiresIn: "1d" }
+			);
+
+			let newRefreshTokenArray = !cookies?.jwt
+				? foundUser.refreshToken
+				: foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
+
+			if (cookies?.jwt) {
+				/*
+					Scenario added here: 
+					1) User logs in but never uses RT and does not logout 
+					2) RT is stolen
+					3) If 1 & 2 occurs, reuse detection is needed to clear all RTs when user logs in
+				*/
+				const refreshToken = cookies.jwt;
+				const foundToken = await User.findOne({ refreshToken }).exec();
+
+				//Detected refresh token reuse!
+				if (!foundToken) {
+					// console.log("Used cookie already");
+					// clear out ALL previous refresh tokens
+					newRefreshTokenArray = [];
+				}
+
+				res.clearCookie("jwt", {
+					httpOnly: true,
+					sameSite: "None",
+					secure: true,
+				});
+			}
+
+			// Saving refreshToken with current user
+			foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
+			// console.log(foundUser)
+			const result = await foundUser.save();
+			// console.log(result)
+			result.password = ''
+			result.refreshToken = ''
+			// console.log(result)
+			const accessToken = jwt.sign(
+				{
+					UserInfo: {
+						_id: foundUser._id,
+						username: foundUser.username,
+						roles: roles,
+					},
+				},
+				process.env.ACCESS_TOKEN_SECRET,
+				{ expiresIn: "15m" }
+			);
+
+			// const userInfo = {...result, password: ''}
+
+			// Creates Secure Cookie with refresh token
+			res.cookie("jwt", newRefreshToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: "None",
+				maxAge: 24 * 60 * 60 * 1000,
+			});
+
+			// console.log(accessToken)
+			// console.log(accessToken)
+
+			// Send authorization roles and access token to user
+			res.json({ accessToken, loggedUser: result });
+		} else {
+			res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
+		}
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
 
 const logout = async (req, res) => {
 	// On client, also delete the accessToken
 
 	const cookies = req.cookies;
-	if (!cookies?.jwt) return res.sendStatus(204); //No content
-	const refreshToken = cookies.jwt;
 
-	// Is refreshToken in db?
-	const foundUser = await User.findOne({ refreshToken }).exec();
-	if (!foundUser) {
-		res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
-		return res.sendStatus(204);
+	try {
+		if (!cookies?.jwt) return res.sendStatus(204); //No content
+		const refreshToken = cookies.jwt;
+
+		// Is refreshToken in db?
+		const foundUser = await User.findOne({ refreshToken }).exec();
+		if (!foundUser) {
+			res.clearCookie("jwt", {
+				httpOnly: true,
+				sameSite: "None",
+				secure: true,
+			});
+			return res.sendStatus(204);
+		}
+
+		// Delete refreshToken in db
+		foundUser.refreshToken = foundUser.refreshToken.filter(
+			(rt) => rt !== refreshToken
+		);
+		const result = await foundUser.save();
+		console.log(result);
+
+		res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
+		res.sendStatus(204);
+	} catch (error) {
+		res.status(500).json({ message: error.message });
 	}
-
-	// Delete refreshToken in db
-	foundUser.refreshToken = '';
-	const result = await foundUser.save();
-	console.log(result);
-
-	res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true });
-	res.sendStatus(204);
-}
+};
 
 module.exports = {
 	signUp,
+	activateUser,
 	login,
 	logout,
-	activateUser,
 	getCurrentUserInfo,
 	passwordReset,
 	confirmPasswordResetOTP,
-	passwordResetConfirmed
+	passwordResetConfirmed,
 };

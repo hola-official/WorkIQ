@@ -8,14 +8,16 @@ const taskSchema = new Schema({
   durationDays: { type: Number, required: true },
   category: { type: String },
   skills: [{ type: String }],
+  doc: { type: String },
   sections: [
     {
       title: { type: String },
       description: { type: String },
+      timeframe: { type: Number, required: true },
       price: { type: Number },
     },
   ],
-  createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User" },
   status: {
     type: String,
     enum: ["pending", "approved", "completed", "rejected"],
