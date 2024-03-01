@@ -15,11 +15,11 @@ const userSchema = new Schema(
       // required: true
     },
     roles: {
-      Client: {
+      Freelancer: {
         type: String,
-        default: "Client",
+        default: "Freelancer",
       },
-      Freelancer: String,
+      Client: String,
       Admin: String,
     },
     googleId: String,

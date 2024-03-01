@@ -36,6 +36,11 @@ app.use(
     })
 );
 
+
+// Handle options credentials check - before CORS!
+// and fetch cookies credentials requirement
+app.use(credentials);
+
 // Middleware to initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
@@ -50,9 +55,6 @@ app.use(cors(corsOptions));
 // Cookie parser middleware
 app.use(cookieParser());
 
-// Handle options credentials check - before CORS!
-// and fetch cookies credentials requirement
-app.use(credentials);
 
 // Routes
 app.use("/auth", authRoutes);

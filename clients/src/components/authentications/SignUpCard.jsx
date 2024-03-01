@@ -54,6 +54,7 @@ export default function SplitScreen() {
 			);
 			// const loggedUser = response.data.loggedInUser;
 			const data = response.data;
+			console.log(response)
 
 			if (data.message) {
 				showToast("Success", data.message, "success");
@@ -64,7 +65,16 @@ export default function SplitScreen() {
 			navigate("/activate-verify");
 		} catch (error) {
 			console.log(error);
-			showToast("Error", error.response.data.error, "error");
+			
+			if (!error.status) {
+				console.log("No Server Response");
+			} else if (error.status === 400) {
+				showToast("Error", error.data.error, "error");
+			} else if (error.status === 401) {
+				console.log("Unauthorized");
+			} else {
+				console.log(err.data?.message);
+			}
 		} finally {
 			setLoading(false);
 		}

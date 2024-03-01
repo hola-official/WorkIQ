@@ -11,6 +11,7 @@ import { ROLES } from '../config/roles_list';
 import RequireAuth from './pages/Auth/features/RequireAuth';
 import DashboardPage from './pages/Dashboard/DashboardPage';
 import CreateTask from './pages/Tasks/CreateTaskPage';
+import ProfilePage from './pages/Profile/ProfilePage';
 
 function App() {
 
@@ -20,15 +21,22 @@ function App() {
       <Route path="/confirm-email" element={<AccountConfirmation />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/activate-verify" element={<AccountVerifyEmailForm />} />
+      <Route path="/forget-password" element={<ForgetingPwd />} />
+      <Route path="/activate-form" element={<VerifyEmailForm />} />
       <Route
         element={<RequireAuth allowedRoles={[...Object.values(ROLES)]} />}
       >
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/tasks/create" element={<CreateTask />} />
 
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+
+        <Route
+        element={<RequireAuth allowedRoles={[...Object.values(ROLES.Admin, ROLES.Client)]} />}>
+        <Route path='clients'>
+          <Route path="task/create" element={<CreateTask />} />
+        </Route>
+        </Route>
       </Route>
-      <Route path="/forget-password" element={<ForgetingPwd />} />
-      <Route path="/activate-form" element={<VerifyEmailForm />} />
     </Routes>
   )
 }

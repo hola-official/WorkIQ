@@ -27,7 +27,7 @@ const getCurrentUserInfo = async (req, res) => {
 const signUp = async (req, res) => {
 	try {
 		// Extracting email, password, and name from the request body
-		const { email, username, password, name } = req.body;
+		const { email, username, password, name, location } = req.body;
 
 		// Checking if the user already exists
 
@@ -42,7 +42,7 @@ const signUp = async (req, res) => {
 			return res.status(400).json({ error: "Username already taken" });
 
 		const hashedPassword = await bcrypt.hash(password, 12);
-		const user = { name, username, email, password: hashedPassword };
+		const user = { name, username, email, location, password: hashedPassword };
 
 		const activationToken = createActivationToken(user);
 		const activationCode = activationToken.activationCode;
