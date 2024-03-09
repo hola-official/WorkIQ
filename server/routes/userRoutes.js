@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userControllers');
+const verifyJWT = require('../middleware/verifyJWT');
 
-router.post('/register', userController.registerUser);
-router.put('/:userId', userController.updateUser);
-router.delete('/:userId', userController.deleteUser);
-router.get('/:userId', userController.getUser);
+router.put('/update/:userId', verifyJWT, userController.updateUser);
+router.delete('/:userId', verifyJWT, userController.deleteUser);
+router.get('/:query', verifyJWT, userController.getUserProfile);
 
 module.exports = router;

@@ -12,12 +12,19 @@ const authRoutes = require("./routes/authRoutes");
 const refreshRoute = require("./routes/refresh");
 const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const cloudinary = require("cloudinary").v2;
 require("./config/passport-setup");
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Set up MongoDB store
 const store = new MongoDBStore({
@@ -44,17 +51,12 @@ app.use(credentials);
 // Middleware to initialize passport
 app.use(passport.initialize());
 app.use(passport.session());
-
-// Middleware to parse request body
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" })); //parse json data inside the req body
+app.use(express.urlencoded({ extended: true })); // parse form data inside the req body
 
 // Cross Origin Resource Sharing
 app.use(cors(corsOptions));
-
-// Cookie parser middleware
 app.use(cookieParser());
-
 
 // Routes
 app.use("/auth", authRoutes);

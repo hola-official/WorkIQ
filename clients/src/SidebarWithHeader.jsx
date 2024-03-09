@@ -5,6 +5,7 @@ import {
 	AccordionPanel,
 	AccordionIcon,
 	Image,
+	Spinner,
 } from "@chakra-ui/react";
 import {
 	IconButton,
@@ -35,8 +36,10 @@ import { ImArrowDownLeft2, ImArrowUpRight2 } from "react-icons/im";
 import { MdHome } from "react-icons/md";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
+import useGetUserProfile from "./hooks/useGetProfile";
 
 const SidebarContent = ({ onClose, ...rest }) => {
+
 	return (
 		<Box
 			transition="3s ease"
@@ -229,6 +232,13 @@ const MobileNav = ({ onOpen, ...rest }) => {
 	const logout = useLogout();
 	const user = useRecoilValue(userAtom);
 	const navigate = useNavigate();
+	if (!user && loading) {
+    return (
+      <Flex justifyContent={"center"}>
+        <Spinner size={"xl"} />
+      </Flex>
+    );
+  }
 
 	return (
 		<Flex
@@ -270,7 +280,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
 							_focus={{ boxShadow: "none" }}
 						>
 							<HStack>
-								<Avatar size={"sm"} src={user?.avatar} />
+								<Avatar size={"sm"} src={user.avatar} />
 								<VStack
 									display={{ base: "none", md: "flex" }}
 									alignItems="flex-start"
@@ -278,7 +288,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
 									ml="2"
 								>
 									<Text fontSize="sm" color="gray.600">
-										{user?.name}
+										{user.name}
 									</Text>
 								</VStack>
 								<Box display={{ base: "none", md: "flex" }}>
@@ -290,7 +300,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
 							bg={useColorModeValue("white", "gray.900")}
 							borderColor={useColorModeValue("gray.200", "gray.700")}
 						>
-							<MenuItem onClick={() => navigate("/profile")}>Profile</MenuItem>
+							<MenuItem onClick={() => navigate(`/profile/${user.username}`)}>Profile</MenuItem>
 							<MenuDivider />
 							<MenuItem onClick={logout}>Sign out</MenuItem>
 						</MenuList>

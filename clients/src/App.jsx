@@ -28,7 +28,7 @@ function App() {
       >
 
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="profile" element={<ProfilePage />} />
+        <Route path="profile/:query" element={<ProfilePage />} />
 
         <Route
         element={<RequireAuth allowedRoles={[...Object.values(ROLES.Admin, ROLES.Client)]} />}>

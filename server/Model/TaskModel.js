@@ -4,9 +4,16 @@ const Schema = mongoose.Schema;
 const taskSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
-  price: { type: Number, required: true },
+  price: {
+    type: Number,
+    default: 0,
+    // required: true,
+  },
   durationDays: { type: Number, required: true },
-  category: { type: String },
+  categoryId: {
+    type: Schema.Types.ObjectId,
+    ref: "Category",
+  },
   skills: [{ type: String }],
   doc: { type: String },
   sections: [
