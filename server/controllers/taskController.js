@@ -33,7 +33,7 @@ const createTask = async (req, res) => {
 
 
     if (doc) {
-      const uploadedResponse = await cloudinary.uploader.upload(img);
+      const uploadedResponse = await cloudinary.uploader.upload(doc);
       doc = uploadedResponse.secure_url;
     }
 

@@ -6,8 +6,8 @@ const cloudinary = require("cloudinary").v2;
 // Controller for updating user details
 const updateUser = async (req, res) => {
   const userId = req.userId;
-  const { name, email, username, password, location, website, skills, category, socialMedia } = req.body;
-  let { profilePic, bio } = req.body;
+  const { name, email, username, password, location, website, skills, bio, category, socialMedia } = req.body;
+  let { profilePic } = req.body;
   try {
     let user = await userModel.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -38,12 +38,13 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ error: "No changes detected" });
     }
     console.log(bio)
+
     const maxLength = 350;
     if (bio.length > maxLength) {
-      return res.status(401).json({ message: `Bio must be less than ${maxLength} characters` });
+      return res.status(401).json({ error: `Bio must be less than ${maxLength} characters` });
     }
-    // Update avatar
 
+    // Update avatar
     if (profilePic) {
       if (user.profilePic) {
         await cloudinary.uploader.destroy(
@@ -52,7 +53,6 @@ const updateUser = async (req, res) => {
       }
       const uploadedResponse = await cloudinary.uploader.upload(profilePic);
       profilePic = uploadedResponse.secure_url;
-      console.log(profilePic);
     }
 
     // Update other user fields
@@ -80,6 +80,7 @@ const updateUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 // Controller for deleting a user
@@ -117,7 +118,7 @@ const getUserProfile = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    console.error("Error getting user:", error);
+    console.error("Error getting user: ", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 };

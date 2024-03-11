@@ -30,11 +30,12 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="profile/:query" element={<ProfilePage />} />
 
-        <Route
-        element={<RequireAuth allowedRoles={[...Object.values(ROLES.Admin, ROLES.Client)]} />}>
+      </Route>
+
+      <Route
+        element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Client]} />}>
         <Route path='clients'>
           <Route path="task/create" element={<CreateTask />} />
-        </Route>
         </Route>
       </Route>
     </Routes>

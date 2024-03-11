@@ -26,7 +26,7 @@ const userSchema = new Schema(
     location: { type: String },
     avatar: { type: String },
     bio: { type: String },
-    balance: { type: Number, default: 0 },
+    balance: { type: Number, default: 500 },
     portfolios: [{ type: Schema.Types.ObjectId, ref: "Portfolio" }],
     tasksCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCreated: [{ type: Schema.Types.ObjectId, ref: "Task" }],

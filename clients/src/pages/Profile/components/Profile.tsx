@@ -31,6 +31,8 @@ import {
   Stack,
   Center,
   Spinner,
+  Hide,
+  Show,
 } from "@chakra-ui/react";
 import { EditIcon } from "@chakra-ui/icons";
 import { MdLocationOn } from "react-icons/md";
@@ -42,9 +44,10 @@ import { useRecoilState } from "recoil";
 import usePreviewImg from "./../../../hooks/usePreviewImg";
 import useGetUserProfile from "../../../hooks/useGetProfile";
 import { useAxiosInstance } from "../../../../api/axios";
+import useErrorHandler from "../../../hooks/useErrorHandler";
+import { useParams } from "react-router-dom";
 
 const Profile = () => {
-  const [languageInputValue, setLanguageInputValue] = useState("");
   const [skillInputValue, setSkillInputValue] = useState("");
   const [user, setUser] = useRecoilState(userAtom);
   const [inputs, setInputs] = useState({
@@ -64,14 +67,13 @@ const Profile = () => {
   const { loading, users } = useGetUserProfile();
   const fileRef = useRef(null);
   const { handleImageChange, imgUrl } = usePreviewImg();
+  const { userId } = useParams();
   const [updating, setUpdating] = useState(false);
   const [socialMedia, setSocialMedia] = useState({});
   const [skills, setSkills] = useState([]);
   const [skillError, setSkillError] = useState("");
   const [bioError, setBioError] = useState("");
-  const [bio, setBio] = useState(
-    "As a UX designer, I specialize in crafting seamless user experiences that align with your brand and resonate with your audience. My services encompass comprehensive user research, wireframing, prototyping, and interface design. I focus on understanding user behaviors, pain points, and preferences to create intuitive and engaging digital products. Whether it's improving existing interfaces or creating new ones from scratch, I ensure designs that are user-centric, visually appealing, and optimized for usability across devices and platforms"
-  );
+  const errorHandler = useErrorHandler()
   const {
     isOpen: isBioOpen,
     onOpen: onBioOpen,
@@ -109,26 +111,6 @@ const Profile = () => {
     setBio(event.target.value);
   };
 
-  const handleEditClick = () => {
-    onBioOpen();
-  };
-
-  const handleCancelClick = () => {
-    setBio(
-      "As a UX designer, I specialize in crafting seamless user experiences that align with your brand and resonate with your audience. My services encompass comprehensive user research, wireframing, prototyping, and interface design. I focus on understanding user behaviors, pain points, and preferences to create intuitive and engaging digital products. Whether it's improving existing interfaces or creating new ones from scratch, I ensure designs that are user-centric, visually appealing, and optimized for usability across devices and platforms"
-    );
-    onBioClose();
-  };
-
-  const handleSaveClick = () => {
-    if (bio.length > 200) {
-      setBioError("");
-    } else {
-      setBioError("Bio should not exeed 200 characters");
-    }
-    // Save bio changes here (e.g., update database)
-    onBioClose();
-  };
   console.log(user);
   const handleSocialMediaInput = (property, value) => {
     setSocialMedia((prevSocialMedia) => {
@@ -146,9 +128,8 @@ const Profile = () => {
     setUpdating(true);
 
     try {
-      // const res = await axiosInstance.put(`/users/update/${user.loggedUser._id}`, inputs);
       const res = await axiosInstance.put(
-        `/users/update/${user._id}`,
+        `/users/update/${user.loggedUser._id}`,
         JSON.stringify({
           ...inputs,
           profilePic: imgUrl,
@@ -162,10 +143,6 @@ const Profile = () => {
         return;
       }
       // if (error?.response?.status === 404) {
-      if (data?.message?.status === 404) {
-        showToast("Error", "No changes detected", "error");
-        return;
-      }
 
       showToast("Success", "Profile updated successfully", "success");
 
@@ -174,7 +151,16 @@ const Profile = () => {
       console.log(data);
       localStorage.setItem("user-workiq", JSON.stringify(data));
     } catch (error) {
-      showToast("Error", error.message, "error");
+      // showToast("Error", error.message, "error");
+      if (error.response.message) {
+        showToast("Error", error.response.message, "error");
+      } else {
+        errorHandler(error);
+      }
+
+      // if (error.response.status === 400) {
+      //   showToast("Error", error.response.data.error, "error");
+      // } 
       console.log(error);
     } finally {
       setUpdating(false);
@@ -213,18 +199,18 @@ const Profile = () => {
               <Wrap>
                 <WrapItem>
                   <Avatar
-                    src={users.avatar}
+                    src={users?.avatar}
                     size={{ base: "xl", lg: "2xl" }}
-                    name={users.name}
+                    name={users?.name}
                   />
                 </WrapItem>
               </Wrap>
               <Text as={"h2"} fontSize={"md"}>
-                {users.username}
+                {users?.username}
               </Text>
               <Box>
                 <Text as={"h1"} fontWeight={600} fontSize={"lg"}>
-                  {users.name}
+                  {users?.name}
                 </Text>
                 <Text
                   as={"h1"}
@@ -253,26 +239,25 @@ const Profile = () => {
                     </Text>
                   </Box>
                   <Text fontSize={{ base: "md", md: "lg" }}>
-                    {new Date(users.createdAt).toLocaleString("default", {
+                    {new Date(users?.createdAt).toLocaleString("default", {
                       month: "long",
                       year: "numeric",
                     })}
                   </Text>
                 </Flex>
-
-                <Button
-                  color={"white"}
-                  size={{ base: "md", md: "lg" }}
-                  bg={"blue.500"}
-                  _hover={{
-                    bg: "blue.400",
-                  }}
-                  cursor={"pointer"}
-                  rightIcon={<EditIcon />}
-                  onClick={onModalOpen}
-                >
-                  Edit my data
-                </Button>
+                <Box display={!user?.username != users.username ?'none' : 'block'} >
+                  <Button
+                    color="white"
+                    size={{ base: "md", md: "lg" }}
+                    bg="blue.500"
+                    _hover={{ bg: "blue.400" }}
+                    cursor="pointer"
+                    rightIcon={<EditIcon />}
+                    onClick={onModalOpen}
+                  >
+                    Edit my data
+                  </Button>
+                </Box>
 
                 <Modal isOpen={isModalOpen} onClose={onModalClose}>
                   <ModalOverlay />
@@ -280,175 +265,191 @@ const Profile = () => {
                     <ModalHeader>User Profile Edit</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                      <form onSubmit={handleSubmit}>
-                        <Flex align={"center"} justify={"center"} my={6}>
-                          <Stack
-                            spacing={4}
-                            w={"full"}
-                            maxW={"md"}
-                            // bg={useColorModeValue('white', 'gray.dark')}
-                            rounded={"xl"}
-                            boxShadow={"lg"}
-                            p={6}
+                      {/* <form onSubmit={handleSubmit}> */}
+                      <Flex align={"center"} justify={"center"} my={6}>
+                        <Stack
+                          spacing={4}
+                          w={"full"}
+                          maxW={"md"}
+                          // bg={useColorModeValue('white', 'gray.dark')}
+                          rounded={"xl"}
+                          boxShadow={"lg"}
+                          p={6}
+                        >
+                          <Heading
+                            lineHeight={1.1}
+                            fontSize={{ base: "2xl", sm: "3xl" }}
                           >
-                            <Heading
-                              lineHeight={1.1}
-                              fontSize={{ base: "2xl", sm: "3xl" }}
-                            >
-                              User Profile Edit
-                            </Heading>
-                            <FormControl>
-                              <Stack direction={["column", "row"]} spacing={6}>
-                                <Center>
-                                  <Avatar
-                                    size="xl"
-                                    boxShadow={"md"}
-                                    src={imgUrl || user.avatar}
-                                  />
-                                </Center>
-                                <Center w="full">
-                                  <Button
-                                    onClick={() => fileRef.current.click()}
-                                    w="full"
-                                  >
-                                    Change Avatar
-                                  </Button>
-                                  <Input
-                                    type="file"
-                                    hidden
-                                    ref={fileRef}
-                                    onChange={handleImageChange}
-                                  />
-                                </Center>
-                              </Stack>
-                            </FormControl>
-                            <FormControl>
-                              <FormLabel>Full name</FormLabel>
-                              <Input
-                                placeholder="your fullname"
-                                _placeholder={{ color: "gray.500" }}
-                                type="text"
-                                onChange={(e) =>
-                                  setInputs({ ...inputs, name: e.target.value })
-                                }
-                                value={inputs.name}
-                              />
-                            </FormControl>
-                            <FormControl>
-                              <FormLabel>Username</FormLabel>
-                              <Input
-                                disabled
-                                placeholder="UserName"
-                                _placeholder={{ color: "gray.500" }}
-                                type="text"
-                                onChange={(e) =>
-                                  setInputs({
-                                    ...inputs,
-                                    username: e.target.value,
-                                  })
-                                }
-                                value={inputs.username}
-                              />
-                            </FormControl>
-                            <FormControl>
-                              <FormLabel>Email address</FormLabel>
-                              <Input
-                                placeholder="your-email@example.com"
-                                _placeholder={{ color: "gray.500" }}
-                                type="email"
-                                onChange={(e) =>
-                                  setInputs({
-                                    ...inputs,
-                                    email: e.target.value,
-                                  })
-                                }
-                                value={inputs.email}
-                              />
-                            </FormControl>
-                            <FormControl>
-                              <FormLabel>Bio</FormLabel>
-                              <Input
-                                placeholder="your bio..."
-                                _placeholder={{ color: "gray.500" }}
-                                type="textarea"
-                                onChange={(e) =>
-                                  setInputs({ ...inputs, bio: e.target.value })
-                                }
-                                value={inputs.bio}
-                              />
-                            </FormControl>
-                            <FormControl>
-                              <FormLabel>Password</FormLabel>
-                              <Input
-                                placeholder="password"
-                                _placeholder={{ color: "gray.500" }}
-                                type="password"
-                                onChange={(e) =>
-                                  setInputs({
-                                    ...inputs,
-                                    password: e.target.value,
-                                  })
-                                }
-                                value={inputs.password}
-                              />
-                            </FormControl>
-                            <Flex flexDir={"column"} gap={2} mt={2}>
-                              <Input
-                                value={socialMedia.twitter}
-                                onChange={(e) =>
-                                  handleSocialMediaInput("twitter", e.target.value)
-                                }
-                                placeholder="Twitter link"
-                              />
-                              <Input
-                                value={socialMedia.linkedin}
-                                onChange={(e) =>
-                                  handleSocialMediaInput("linkedin", e.target.value)
-                                }
-                                placeholder="LinkedIn link"
-                              />
-                              <Input
-                                value={socialMedia.github}
-                                onChange={(e) =>
-                                  handleSocialMediaInput("github", e.target.value)
-                                }
-                                placeholder="GitHub link"
-                              />
-                            </Flex>
-                            <Stack
-                              spacing={6}
-                              direction={["column", "row"]}
-                            >
-
-                              <Button
-                                bg={"red.500"}
-                                color={"white"}
-                                w="full"
-                                onClick={onModalClose}
-                                _hover={{
-                                  bg: "red.400",
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button
-                                bg={"blue.500"}
-                                color={"white"}
-                                w="full"
-                                _hover={{
-                                  bg: "blue.400",
-                                }}
-                                type="submit"
-                                isLoading={updating}
-                              >
-                                Submit
-                              </Button>
+                            User Profile Edit
+                          </Heading>
+                          <FormControl>
+                            <Stack direction={["column", "row"]} spacing={6}>
+                              <Center>
+                                <Avatar
+                                  size="xl"
+                                  boxShadow={"md"}
+                                  src={imgUrl || user.avatar}
+                                />
+                              </Center>
+                              <Center w="full">
+                                <Button
+                                  onClick={() => fileRef.current.click()}
+                                  w="full"
+                                >
+                                  Change Avatar
+                                </Button>
+                                <Input
+                                  type="file"
+                                  hidden
+                                  ref={fileRef}
+                                  onChange={handleImageChange}
+                                />
+                              </Center>
                             </Stack>
-                          </Stack>
-                        </Flex>
-                      </form>
-                    </ModalBody>
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Full name</FormLabel>
+                            <Input
+                              placeholder="your fullname"
+                              _placeholder={{ color: "gray.500" }}
+                              type="text"
+                              onChange={(e) =>
+                                setInputs({ ...inputs, name: e.target.value })
+                              }
+                              value={inputs.name}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Username</FormLabel>
+                            <Input
+                              disabled
+                              placeholder="UserName"
+                              _placeholder={{ color: "gray.500" }}
+                              type="text"
+                              onChange={(e) =>
+                                setInputs({
+                                  ...inputs,
+                                  username: e.target.value,
+                                })
+                              }
+                              value={inputs.username}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Email address</FormLabel>
+                            <Input
+                              placeholder="your-email@example.com"
+                              _placeholder={{ color: "gray.500" }}
+                              type="email"
+                              onChange={(e) =>
+                                setInputs({
+                                  ...inputs,
+                                  email: e.target.value,
+                                })
+                              }
+                              value={inputs.email}
+                            />
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Bio</FormLabel>
+                            <Textarea
+                              placeholder="Your bio..."
+                              _placeholder={{ color: "gray.500" }}
+                              size={"lg"}
+                              onChange={(e) =>
+                                setInputs({
+                                  ...inputs,
+                                  bio: e.target.value,
+                                })
+                              }
+                              value={inputs.bio}
+                            // maxLength={350} // Set the maximum character length
+                            />
+                            {/* <Box>
+                                <Text
+                                  as="span"
+                                  fontSize="sm"
+                                  color={inputs.bio.length > 350 ? "red.500" : "gray.500"} // Change color if exceeded max length
+                                >
+                                  {inputs.bio.length}/350 characters
+                                </Text>
+                              </Box> */}
 
+                          </FormControl>
+                          <FormControl>
+                            <FormLabel>Password</FormLabel>
+                            <Input
+                              placeholder="password"
+                              _placeholder={{ color: "gray.500" }}
+                              type="password"
+                              onChange={(e) =>
+                                setInputs({
+                                  ...inputs,
+                                  password: e.target.value,
+                                })
+                              }
+                              value={inputs.password}
+                            />
+                          </FormControl>
+                          <Flex flexDir={"column"} gap={2} mt={2}>
+                            <Input
+                              value={socialMedia.twitter}
+                              onChange={(e) =>
+                                handleSocialMediaInput("twitter", e.target.value)
+                              }
+                              placeholder="Twitter link"
+                            />
+                            <Input
+                              value={socialMedia.linkedin}
+                              onChange={(e) =>
+                                handleSocialMediaInput("linkedin", e.target.value)
+                              }
+                              placeholder="LinkedIn link"
+                            />
+                            <Input
+                              value={socialMedia.github}
+                              onChange={(e) =>
+                                handleSocialMediaInput("github", e.target.value)
+                              }
+                              placeholder="GitHub link"
+                            />
+                          </Flex>
+                        </Stack>
+                      </Flex>
+                      {/* </form> */}
+                    </ModalBody>
+                    <Stack
+                      px={5}
+                      direction={["column", "row"]}
+                    >
+
+                      <Button
+                        bg={"red.500"}
+                        color={"white"}
+                        w="80%"
+                        size={{ base: "md", md: 'md' }}
+                        onClick={onModalClose}
+                        _hover={{
+                          bg: "red.400",
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        bg={"blue.500"}
+                        color={"white"}
+                        w="full"
+                        size={{ base: "md", md: 'md' }}
+                        _hover={{
+                          bg: "blue.400",
+                        }}
+                        onClick={handleSubmit}
+                        type="submit"
+                        isLoading={updating}
+                      >
+                        Submit
+                      </Button>
+                    </Stack>
                     <ModalFooter gap={2}></ModalFooter>
                   </ModalContent>
                 </Modal>
@@ -488,16 +489,10 @@ const Profile = () => {
                 >
                   Description
                 </Text>
-                {/* <Icon
-                  cursor="pointer"
-                  as={EditIcon}
-                  color="blue.500"
-                  onClick={handleEditClick}
-                /> */}
               </Flex>
 
               <Text textAlign={'start'} as="h2" color="#6B7280" fontSize="md">
-                {user.bio || "No bio provided."}
+                {users.bio || "No bio provided."}
               </Text>
             </Flex>
 

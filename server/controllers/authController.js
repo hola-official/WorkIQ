@@ -206,7 +206,6 @@ const passwordResetConfirmed = async (req, res) => {
 const login = async (req, res) => {
 	const cookies = req.cookies;
 	const { user, password } = req.body;
-	// console.log(req.body);
 
 	try {
 		if (!user || !password)
@@ -228,6 +227,20 @@ const login = async (req, res) => {
 		if (match) {
 			const roles = Object.values(foundUser.roles).filter(Boolean);
 
+			// Generate access token
+			const accessToken = jwt.sign(
+				{
+					UserInfo: {
+						_id: foundUser._id,
+						username: foundUser.username,
+						roles: roles,
+					},
+				},
+				process.env.ACCESS_TOKEN_SECRET,
+				{ expiresIn: "1d" }
+			);
+
+			// Set refresh token
 			const newRefreshToken = jwt.sign(
 				{ username: foundUser.username },
 				process.env.REFRESH_TOKEN_SECRET,
@@ -244,8 +257,6 @@ const login = async (req, res) => {
 
 				//Detected refresh token reuse!
 				if (!foundToken) {
-					// console.log("Used cookie already");
-					// clear out ALL previous refresh tokens
 					newRefreshTokenArray = [];
 				}
 
@@ -256,38 +267,31 @@ const login = async (req, res) => {
 				});
 			}
 
-			// Saving refreshToken with current user
+			// Save new refresh token
 			foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-			// console.log(foundUser)
 			const result = await foundUser.save();
-			// console.log(result)
-			result.password = ''
-			result.refreshToken = ''
-			// console.log(result)
-			const accessToken = jwt.sign(
-				{
-					UserInfo: {
-						_id: foundUser._id,
-						username: foundUser.username,
-						roles: roles,
-					},
-				},
-				process.env.ACCESS_TOKEN_SECRET,
-				{ expiresIn: "1d" }
-			);
+			result.password = '';
+			result.refreshToken = '';
 
-			// const userInfo = {...result, password: ''}
+			// Create and send email
+			try {
+				await sendMail({
+					email: foundUser.email,
+					subject: "Welcome Back! Your Login Was Successful 🚀",
+					template: "login-successful-mail.ejs",
+					data: { user: { username: foundUser.username } },
+				});
+			} catch (error) {
+				console.error("Error sending email:", error.message);
+			}
 
-			// Creates Secure Cookie with refresh token
+			// Set access token cookie
 			res.cookie("jwt", newRefreshToken, {
 				httpOnly: true,
 				secure: true,
 				sameSite: "None",
 				maxAge: 24 * 60 * 60 * 1000,
 			});
-
-			// console.log(accessToken)
-			// console.log(accessToken)
 
 			// Send authorization roles and access token to user
 			res.json({ accessToken, loggedUser: result });
@@ -299,13 +303,12 @@ const login = async (req, res) => {
 	}
 };
 
-const logout = async (req, res) => {
-	// On client, also delete the accessToken
 
+const logout = async (req, res) => {
 	const cookies = req.cookies;
 
 	try {
-		if (!cookies?.jwt) return res.sendStatus(204); //No content
+		if (!cookies?.jwt) return res.sendStatus(204); // No content
 		const refreshToken = cookies.jwt;
 
 		// Is refreshToken in db?
@@ -326,6 +329,35 @@ const logout = async (req, res) => {
 		const result = await foundUser.save();
 		console.log(result);
 
+		// Send logout confirmation email
+		const userData = {
+			name: foundUser.name,
+			email: foundUser.email,
+			location: foundUser.location, // You can customize this based on your user model
+			timestamp: new Date().toLocaleString("default", {
+				month: "long",
+				day: "numeric",
+				year: "numeric",
+				hour: "numeric",
+				minute: "numeric",
+			}),
+			// Add more relevant data if needed
+		};
+
+		// Send email
+		try {
+			await sendMail({
+				email: userData.email,
+				subject: "Logout Successful! Until Next Time 🌟",
+				template: "logout-mail.ejs",
+				data: { user: { username: foundUser.username }, time: { timestamp: userData.timestamp } },
+			});
+		} catch (error) {
+			console.log("Error sending logout email:", error);
+			// Handle error if needed
+		}
+
+		// Clear cookie and send response
 		res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
 		res.sendStatus(204);
 	} catch (error) {
