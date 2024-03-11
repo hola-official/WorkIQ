@@ -1,69 +1,95 @@
-// Import required modules
 const Task = require("../Model/TaskModel");
-const userModel = require("../Model/userModel.js");
 const { sendMail } = require("../utils/sendMail.js");
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
-// Controller method to create a new task
-const createTask = async (req, res) => {
+//Get all courses categories
+const getCategories = async (req, res) => {
   try {
-    const { title, description, price, durationDays, category, skills } = req.body;
-    const { doc } = req.body;
-    const createdBy = req.userId;
-
-    const creatorDetails = await userModel.findById(createdBy);
-    const email = creatorDetails.email;
-
-    if (price > creatorDetails.balance) {
-      return res.status(400).json({ error: "Insufficient balance" });
-    }
-
-    creatorDetails.balance -= price;
-    await creatorDetails.save();
-
-    const maxTitleLength = 50;
-    if (title.length > maxTitleLength) {
-      return res.status(400).json({ message: `Text must be less than ${maxTitleLength} characters` });
-    }
-
-    const maxLength = 250;
-    if (description.length > maxLength) {
-      return res.status(400).json({ message: `Title must be less than ${maxLength} characters` });
-    }
-
-
-    if (doc) {
-      const uploadedResponse = await cloudinary.uploader.upload(doc);
-      doc = uploadedResponse.secure_url;
-    }
-
-    const newTask = await Task.create({
-      title,
-      description,
-      price,
-      durationDays,
-      category,
-      skills,
-      client: createdBy,
-    });
-
-    res.status(201).json({ message: "Task created successfully", task: newTask });
-
-    try {
-      await sendMail({
-        email,
-        subject: "New Task Created",
-        template: "new-task-create.ejs",
-        data: { user: { name: creatorDetails.username }, task: newTask },
-      });
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
+    const categories = await Category.find().sort({ name: 1 });
+    res.status(200).json(categories);
   } catch (error) {
-    console.error("Error creating task:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ message: error.message });
   }
 };
+
+//Create task title
+const createTitle = async (req, res) => {
+  try {
+    const { title } = req.body;
+    if (!title) return res.status(400).json({ msg: "Please enter title" });
+    const maxLength = 70;
+    if (title.length > maxLength) {
+      return res.status(401).json({ error: `Title must be less than ${maxLength} characters` });
+    }
+    const userId = req.userId;
+    const task = new Task({ title, client: userId });
+    await task.save();
+    res.status(201).json({ task });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+    console.log(error)
+  }
+};
+
+// // Controller method to create a new task
+// const createTask = async (req, res) => {
+//   try {
+//     const { title, description, price, durationDays, category, skills } = req.body;
+//     const { doc } = req.body;
+//     const createdBy = req.userId;
+
+//     const creatorDetails = await userModel.findById(createdBy);
+//     const email = creatorDetails.email;
+
+//     if (price > creatorDetails.balance) {
+//       return res.status(400).json({ error: "Insufficient balance" });
+//     }
+
+//     creatorDetails.balance -= price;
+//     await creatorDetails.save();
+
+//     const maxTitleLength = 50;
+//     if (title.length > maxTitleLength) {
+//       return res.status(400).json({ message: `Text must be less than ${maxTitleLength} characters` });
+//     }
+
+//     const maxLength = 250;
+//     if (description.length > maxLength) {
+//       return res.status(400).json({ message: `Title must be less than ${maxLength} characters` });
+//     }
+
+//     if (doc) {
+//       const uploadedResponse = await cloudinary.uploader.upload(doc);
+//       doc = uploadedResponse.secure_url;
+//     }
+
+//     const newTask = await Task.create({
+//       title,
+//       description,
+//       price,
+//       durationDays,
+//       category,
+//       skills,
+//       client: createdBy,
+//     });
+
+//     res.status(201).json({ message: "Task created successfully", task: newTask });
+
+//     try {
+//       await sendMail({
+//         email,
+//         subject: "New Task Created",
+//         template: "new-task-create.ejs",
+//         data: { user: { name: creatorDetails.username }, task: newTask },
+//       });
+//     } catch (error) {
+//       console.error("Error sending email:", error);
+//     }
+//   } catch (error) {
+//     console.error("Error creating task:", error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 // Controller method to delete a task by ID
 const deleteTask = async (req, res) => {
@@ -119,4 +145,11 @@ const getTaskById = async (req, res) => {
 };
 
 // Export the controller methods
-module.exports = { createTask, deleteTask, getAllClientTasks, getTaskById };
+module.exports = {
+  // createTask,
+  getCategories,
+  createTitle,
+  deleteTask,
+  getAllClientTasks,
+  getTaskById,
+};

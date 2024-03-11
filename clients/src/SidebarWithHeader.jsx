@@ -92,7 +92,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
 					<AccordionPanel pb={4}>
 						<NavItem
 							as={NavLink}
-							to={"/clients/task/create"}
+							to={"/clients/my-tasks"}
 							style={({ isActive }) => ({
 								color: isActive ? "#fff" : "",
 								background: isActive ? "#3B82F6" : "",
@@ -100,7 +100,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
 							pl="10"
 							py="2"
 						>
-							Create Task
+							My Tasks
 						</NavItem>
 						<NavItem
 							as={NavLink}
@@ -337,7 +337,7 @@ const SidebarWithHeader = ({ children }) => {
 			</Drawer>
 			{/* mobilenav */}
 			<MobileNav onOpen={onOpen} />
-			<Box ml={{ base: 0, md: 60 }} p="2">
+			<Box ml={{ base: 0, md: 60 }} minH={'100%'} p="2">
 				{children}
 			</Box>
 		</Box>

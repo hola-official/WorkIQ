@@ -5,13 +5,17 @@ const {
   deleteTask,
   getAllClientTasks,
   getTaskById,
+  createTitle,
+  getCategories
 } = require("../controllers/taskController");
 const verifyJWT = require("../middleware/verifyJWT");
 const { Admin, Client, Freelancer } = require("../config/roles_list");
 const verifyRoles = require("../middleware/verifyRoles");
 
 // Route to create a new task
-router.post("/create", verifyJWT, verifyRoles(Admin, Client), createTask);
+router.get("/task-categories", verifyJWT, getCategories);
+router.post("/create-title", verifyJWT, verifyRoles(Admin, Client), createTitle)
+// router.post("/create", verifyJWT, verifyRoles(Admin, Client), createTask);
 
 // Route to delete a task by ID
 router.delete("/:id", verifyJWT, verifyRoles(Admin), deleteTask);

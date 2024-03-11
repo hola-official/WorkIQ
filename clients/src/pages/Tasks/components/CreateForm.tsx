@@ -1,306 +1,144 @@
 import {
   Box,
-  Flex,
-  Input,
   Button,
-  Textarea,
+  Flex,
   FormControl,
   FormLabel,
-  FormErrorMessage,
-  Select,
-  Grid,
-  GridItem,
-  VStack,
+  Input,
+  Stack,
+  Text,
+  List,
   ListItem,
+  ListIcon,
+  OrderedList,
   UnorderedList,
+  Center,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import useShowToast from "../../../hooks/useShowToast";
-import { useAxiosInstance } from "../../../../api/axios";
-import useErrorHandler from "../../../hooks/useErrorHandler";
+import { useEffect, useState } from "react";
+import * as z from "zod";
+import { useAxiosInstance } from '../../../../api/axios';
+import useShowToast from './../../../hooks/useShowToast';
+
+const formSchema = z.object({
+  title: z.string().min(1, {
+    message: "Title is required",
+  }),
+});
 
 const CreateForm = () => {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    durationDays: "",
-    categoryId: "",
-    skills: [],
-    doc: "",
-    sections: [{ title: "", description: "", timeframe: "", price: "" }],
-  });
-  const showToast = useShowToast();
-  const axiosInstance = useAxiosInstance();
-  const errorHandler = useErrorHandler();
+  const [title, setTitle] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValid, setIsValid] = useState(false);
+  const axiosInstance = useAxiosInstance()
+  const showToast = useShowToast()
 
-  const handleChange = (e, index) => {
-    const { name, value } = e.target;
-    const updatedSections = [...formData.sections];
-    updatedSections[index][name] = value;
-    setFormData({
-      ...formData,
-      sections: updatedSections,
-    });
-  };
+  useEffect(() => {
+    // Validation logic
+    if (title.trim().length < 1) {
+      setIsValid(false);
+    } else{
+      setIsValid(true)
+    }
+  }, [title])
 
-  const handleAddSection = () => {
-    setFormData({
-      ...formData,
-      sections: [
-        ...formData.sections,
-        { title: "", description: "", timeframe: "", price: "" },
-      ],
-    });
-  };
-
-  const handleRemoveSection = (index) => {
-    const updatedSections = [...formData.sections];
-    updatedSections.splice(index, 1);
-    setFormData({
-      ...formData,
-      sections: updatedSections,
-    });
-  };
-
-  const handleSkillsChange = (e) => {
-    const { value } = e.target;
-    const newSkills = value.split(/[,\n]+/).map((skill) => skill.trim());
-    setFormData({ ...formData, skills: newSkills });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("title", formData.title);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("price", formData.price);
-      formDataToSend.append("durationDays", formData.durationDays);
-      formDataToSend.append("categoryId", formData.categoryId);
-      formDataToSend.append("skills", formData.skills.join(","));
-      formDataToSend.append("doc", formData.doc);
-      formData.sections.forEach((section, index) => {
-        formDataToSend.append(`sections[${index}][title]`, section.title);
-        formDataToSend.append(
-          `sections[${index}][description]`,
-          section.description
-        );
-        formDataToSend.append(
-          `sections[${index}][timeframe]`,
-          section.timeframe
-        );
-        formDataToSend.append(`sections[${index}][price]`, section.price);
-      });
+    setIsSubmitting(true);
 
-      const res = await axiosInstance.post(`/tasks/create`, formDataToSend);
+    // Submit logic
+    try {
+      // Your submit logic here
+      const res = await axiosInstance.post(
+        `/tasks/create-title`,
+        JSON.stringify({ title })
+      );
       const data = res.data;
 
       if (data.error) {
         showToast("Error", data.error, "error");
         return;
       }
-
-      showToast("Success", "Task created successfully", "success");
-      console.log(data);
+      showToast('Success', 'Task created successfully!', 'success');
+      console.log(data)
+      setIsSubmitting(false);
     } catch (error) {
-      if (error.response.message) {
-        showToast("Error", error.response.message, "error");
-      } else {
-        errorHandler(error);
+      if (error) {
+        showToast('Error', error.response.data.msg || error.response.data.error, 'error')
       }
-      console.log(error);
+      console.error("Error submitting form:", error);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Flex justify="center">
-        <Box p={8} borderWidth={1} borderRadius={8} boxShadow="lg" w="80%">
-          <VStack spacing={4} align="stretch">
-            <FormControl isRequired isInvalid={!!formData.title.error}>
-              <FormLabel>Title</FormLabel>
-              <Input
-                name="title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                placeholder="Title"
-              />
-            </FormControl>
+    <Flex justify="center" align="center" h={"100vh"} pos={"fixed"} px={30}>
+      <Stack spacing={8} direction={{ base: "column", md: "row" }}>
+        <Flex flexDir="column" w={{ base: "100%", md: "50%" }}>
+          <Text
+            fontSize={{ base: "md", md: "2xl", lg: "4xl" }}
+            fontWeight={500}
+          >
+            Let's start with a strong title.
+          </Text>
+          <Text fontSize="md" color="gray.600">
+            This helps your task post stand out to the right candidates. It's the
+            first thing they'll see, so make it count!
+          </Text>
+        </Flex>
 
-            <FormControl
-              mt={4}
-              isRequired
-              isInvalid={!!formData.description.error}
-            >
-              <FormLabel>Description</FormLabel>
-              <Textarea
-                name="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Description"
-              />
-              <FormErrorMessage>{formData.description.error}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl
-              mt={4}
-              isRequired
-              isInvalid={!!formData.price.error}
-            >
-              <FormLabel>Price</FormLabel>
-              <Input
-                name="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                placeholder="Price"
-              />
-              <FormErrorMessage>{formData.price.error}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl
-              mt={4}
-              isRequired
-              isInvalid={!!formData.durationDays.error}
-            >
-              <FormLabel>Duration (Days)</FormLabel>
-              <Input
-                name="durationDays"
-                type="number"
-                value={formData.durationDays}
-                onChange={(e) =>
-                  setFormData({ ...formData, durationDays: e.target.value })
-                }
-                placeholder="Duration (Days)"
-              />
-              <FormErrorMessage>{formData.durationDays.error}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl
-              mt={4}
-              isRequired
-              isInvalid={!!formData.categoryId.error}
-            >
-              <FormLabel>Category</FormLabel>
-              <Select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                placeholder="Select category"
-              >
-                <option value="Web Development">Web Development</option>
-                <option value="Mobile App Development">Mobile App Development</option>
-                <option value="Graphic Design">Graphic Design</option>
-                <option value="Writing">Writing</option>
-                <option value="Translation">Translation</option>
-                <option value="Data Entry">Data Entry</option>
-                <option value="Virtual Assistant">Virtual Assistant</option>
-                <option value="Customer Service">Customer Service</option>
-                <option value="Sales & Marketing">Sales & Marketing</option>
-                <option value="Accounting & Consulting">Accounting & Consulting</option>
-                <option value="Legal">Legal</option>
-                <option value="Engineering & Architecture">Engineering & Architecture</option>
-                <option value="IT & Networking">IT & Networking</option>
-                <option value="Admin Support">Admin Support</option>
-                <option value="Other">Other</option>
-              </Select>
-            </FormControl>
-
-            <FormControl mt={4} isRequired isInvalid={!formData.skills.error}>
-              <FormLabel>Skills</FormLabel>
-              <Input
-                name="skills"
-                value={formData.skills.join(", ")}
-                onChange={handleSkillsChange}
-                placeholder="Enter skills (comma-separated or press enter)"
-              />
-              <FormErrorMessage>{formData.skills.error}</FormErrorMessage>
-            </FormControl>
-
-            <FormControl mt={4}>
-              <FormLabel>Upload Document</FormLabel>
-              <Input
-                name="doc"
-                type="file"
-                onChange={(e) =>
-                  setFormData({ ...formData, doc: e.target.files[0] })
-                }
-              />
-            </FormControl>
-          </VStack>
-
-          <VStack spacing={4} align="stretch">
-            {/* Add sections */}
-            <UnorderedList listStyleType="none">
-              {formData.sections.map((section, index) => (
-                <ListItem key={index} mt={4}>
-                  <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-                    <GridItem colSpan={1}>
-                      <FormLabel>Section Title</FormLabel>
-                      <Input
-                        name="title"
-                        value={section.title}
-                        onChange={(e) => handleChange(e, index)}
-                        placeholder="Section Title"
-                      />
-                    </GridItem>
-                    <GridItem colSpan={1}>
-                      <FormLabel>Section Description</FormLabel>
-                      <Textarea
-                        name="description"
-                        value={section.description}
-                        onChange={(e) => handleChange(e, index)}
-                        placeholder="Section Description"
-                      />
-                    </GridItem>
-                    <GridItem colSpan={1}>
-                      <FormLabel>Section Timeframe (Days)</FormLabel>
-                      <Input
-                        name="timeframe"
-                        value={section.timeframe}
-                        onChange={(e) => handleChange(e, index)}
-                        placeholder="Section Timeframe (Days)"
-                      />
-                    </GridItem>
-                    <GridItem colSpan={1}>
-                      <FormLabel>Section Price</FormLabel>
-                      <Input
-                        name="price"
-                        type="number"
-                        value={section.price}
-                        onChange={(e) => handleChange(e, index)}
-                        placeholder="Section Price"
-                      />
-                    </GridItem>
-                  </Grid>
-                  <Button
-                    mt={4}
-                    colorScheme="red"
-                    onClick={() => handleRemoveSection(index)}
-                  >
-                    Remove Section
-                  </Button>
-                </ListItem>
-              ))}
+        <Flex flexDir="column">
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={4}>
+              <FormControl>
+                <FormLabel>Write a title for your task post</FormLabel>
+                <Input
+                  isDisabled={isSubmitting}
+                  placeholder="e.g. 'Advanced web development'"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </FormControl>
+              <Stack direction={{ base: "column", md: "row" }} spacing={4}>
+                <Button as="a" href="/clients/my-tasks" variant="ghost">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  isLoading={isSubmitting}
+                  colorScheme={"blue"}
+                  isDisabled={!isValid || isSubmitting
+                    // ? 'true' : 'false'
+                  }
+                >
+                  Continue
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
+          <Flex flexDir={"column"} mt={4}>
+            <Box>
+              <Text fontSize={{ base: "md", md: "xl" }} fontWeight={500}>
+                Example titles
+              </Text>
+            </Box>
+            <UnorderedList mt={2}>
+              <ListItem>
+                Build responsive WordPress site with booking/payment
+                functionality
+              </ListItem>
+              <ListItem>
+                Graphic designer needed to design ad creative for multiple
+                campaigns
+              </ListItem>
+              <ListItem>
+                Facebook ad specialist needed for product launch
+              </ListItem>
             </UnorderedList>
-            <Button mt={4} onClick={handleAddSection}>
-              Add Section
-            </Button>
-          </VStack>
-
-          <Button mt={4} colorScheme="blue" type="submit">
-            Create Task
-          </Button>
-        </Box>
-      </Flex>
-    </form>
+          </Flex>
+        </Flex>
+      </Stack>
+    </Flex>
   );
 };
 

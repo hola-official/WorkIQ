@@ -10,8 +10,9 @@ import AccountVerifyEmailForm from './components/authentications/AccountVerifyEm
 import { ROLES } from '../config/roles_list';
 import RequireAuth from './pages/Auth/features/RequireAuth';
 import DashboardPage from './pages/Dashboard/DashboardPage';
-import CreateTask from './pages/Tasks/CreateTaskPage';
+import CreateTask from './pages/Tasks/Pages/CreateTaskPage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import ClientTasks from './pages/Tasks/Pages/ClientTasks';
 
 function App() {
 
@@ -35,7 +36,9 @@ function App() {
       <Route
         element={<RequireAuth allowedRoles={[ROLES.Admin, ROLES.Client]} />}>
         <Route path='clients'>
-          <Route path="task/create" element={<CreateTask />} />
+          <Route path="my-tasks" element={<ClientTasks />} />
+          <Route path="create-tasks" element={<CreateTask />} />
+          <Route path="edit-task/:taskId" element={<EditCourse />} />
         </Route>
       </Route>
     </Routes>
