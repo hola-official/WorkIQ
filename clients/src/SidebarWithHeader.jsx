@@ -232,13 +232,6 @@ const MobileNav = ({ onOpen, ...rest }) => {
 	const logout = useLogout();
 	const user = useRecoilValue(userAtom);
 	const navigate = useNavigate();
-	if (!user && loading) {
-    return (
-      <Flex justifyContent={"center"}>
-        <Spinner size={"xl"} />
-      </Flex>
-    );
-  }
 
 	return (
 		<Flex

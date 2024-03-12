@@ -1,4 +1,6 @@
+const Category = require("../Model/CategoryModel.js");
 const Task = require("../Model/TaskModel");
+const userModel = require("../Model/userModel.js");
 const { sendMail } = require("../utils/sendMail.js");
 const cloudinary = require("cloudinary").v2;
 
@@ -22,13 +24,145 @@ const createTitle = async (req, res) => {
       return res.status(401).json({ error: `Title must be less than ${maxLength} characters` });
     }
     const userId = req.userId;
+    const user = await userModel.findById(userId).select("-password");
+
     const task = new Task({ title, client: userId });
+    user.tasksCreated.push(task._id)
+    await user.save()
     await task.save();
     res.status(201).json({ task });
   } catch (error) {
     res.status(500).json({ message: error.message });
     console.log(error)
   }
+};
+
+const getAllClientTasks = async (req, res) => {
+	try {
+		// console.log(req.userId)
+		const tasks = await Task.find({ client: req.userId });
+		// console.log(courses)
+		if (!tasks.length)
+			return res.status(404).json({ msg: "No task found" });
+		res.status(200).json(task);
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ message: error.message });
+	}
+};
+
+const updateTask = async (req, res) => {
+	try {
+		const userId = req.userId; // Assuming you have user information stored in req.user after authentication
+
+		// Check if userId exists
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+
+		// Check if the course exists and the user is the owner
+		const taskOwner = await Task.findOne({
+			_id: req.params.id,
+			client: userId,
+		});
+
+		if (!taskOwner) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+
+		const task = await Task.findById(req.params.id);
+
+		if (!task) {
+			return res.status(404).json({ msg: "Task not found" });
+		}
+
+		// Update the course price if provided in req.body
+		if (req.body.price !== undefined) {
+			task.price = req.body.price;
+		}
+
+		// Check if the task is free
+		const isFree =
+			task.price === 0 || task.price === null || task.price === "";
+
+		// Update each chapter's isFree property
+		if (isFree) {
+			task.chapters.forEach((chapter) => {
+				chapter.isFree = true;
+			});
+		}
+
+		// Save additional property from req.body if present
+		const propertyName = Object.keys(req.body)[0]; // Get the first (and only) property name
+		if (propertyName && propertyName !== "price") {
+			task[propertyName] = req.body[propertyName];
+		}
+
+		// Save the updated course
+		const updatedTask = await task.save();
+
+		res.status(200).json({ task: updatedTask });
+	} catch (error) {
+		res.status(500).json({ message: error.message });
+	}
+};
+
+const updateTaskCategory = async (req, res) => {
+	const taskId = req.params.id;
+	const categoryId = req.body.categoryId;
+
+	try {
+		const userId = req.userId; // Assuming you have user information stored in req.user after authentication
+
+		// Check if userId exists
+		if (!userId) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+
+		// Check if the task exists and the user is the owner
+		const taskOwner = await Task.findOne({
+			_id: req.params.id,
+			client: userId,
+		});
+		if (!taskOwner) {
+			return res.status(401).json({ message: "Unauthorized" });
+		}
+		// Find the task and update its category
+		const task = await Task.findById(taskId);
+		if (!task) {
+			return res.status(404).json({ message: "Task not found" });
+		}
+
+		const oldCategoryId = task.categoryId;
+
+		task.categoryId = categoryId;
+		await task.save();
+
+		// Update the old category
+		if (oldCategoryId) {
+			const oldCategory = await Task.findById(oldCategoryId);
+			if (oldCategory) {
+				oldCategory.tasks = oldCategory.tasks.filter(
+					(id) => id.toString() !== taskId
+				);
+				await oldCategory.save();
+			}
+		}
+
+		// Update the new category
+		if (categoryId) {
+			const newCategory = await Category.findById(categoryId);
+			if (newCategory) {
+				newCategory.tasks.push(taskId);
+				await newCategory.save();
+			}
+		}
+
+		res.status(200).json({ message: "Task category updated successfully" });
+	} catch (error) {
+		console.log("[UPDATE TASK CATEGORY]", error);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
 };
 
 // // Controller method to create a new task
@@ -117,17 +251,6 @@ const deleteTask = async (req, res) => {
   }
 };
 
-// Controller method to get all tasks
-const getAllClientTasks = async (req, res) => {
-  try {
-    const tasks = await Task.find({ client: req.userId });
-    res.status(200).json(tasks);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // Controller method to get a task by ID
 const getTaskById = async (req, res) => {
   try {
@@ -147,6 +270,8 @@ const getTaskById = async (req, res) => {
 // Export the controller methods
 module.exports = {
   // createTask,
+  updateTask,
+  updateTaskCategory,
   getCategories,
   createTitle,
   deleteTask,

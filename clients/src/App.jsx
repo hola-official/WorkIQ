@@ -13,6 +13,7 @@ import DashboardPage from './pages/Dashboard/DashboardPage';
 import CreateTask from './pages/Tasks/Pages/CreateTaskPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import ClientTasks from './pages/Tasks/Pages/ClientTasks';
+import EditTask from './pages/Tasks/Pages/editTask/component/EditTask';
 
 function App() {
 
@@ -38,7 +39,7 @@ function App() {
         <Route path='clients'>
           <Route path="my-tasks" element={<ClientTasks />} />
           <Route path="create-tasks" element={<CreateTask />} />
-          <Route path="edit-task/:taskId" element={<EditCourse />} />
+          <Route path="edit-task/:taskId" element={<EditTask />} />
         </Route>
       </Route>
     </Routes>
