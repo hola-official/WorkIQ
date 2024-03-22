@@ -84,24 +84,25 @@ export const columns = [
     enableHiding: false,
     cell: ({ row }) => {
       const { _id } = row.original;
-      console.log(_id)
 
-      const axiosInstance = useAxiosInstance()
-      const showToast = useShowToast()
-      const navigate = useNavigate()
-      
+      const axiosInstance = useAxiosInstance();
+      const showToast = useShowToast();
+      const navigate = useNavigate();
+
       const onDelete = async () => {
         try {
           await axiosInstance.delete(`/tasks/${_id}`);
           navigate(`/clients/my-tasks`);
           showToast("Success", "Task deleted", "success");
+          window.location.reload();
         } catch (error) {
           console.log(error);
           showToast("Error", "Something went wrong", "error");
         }
       };
+
       return (
-        <Flex gap={6}>
+        <div className="flex gap-2 items-center">
           <Link to={`/clients/edit-task/${_id}`}>
             <Pencil className="h-4 w-4 mr-2" />
           </Link>
@@ -109,7 +110,7 @@ export const columns = [
           <ConfirmModal onConfirm={onDelete}>
             <MdDelete size={25} color="blue.300" cursor={"pointer"} />
           </ConfirmModal>
-        </Flex>
+        </div>
       );
     },
   },

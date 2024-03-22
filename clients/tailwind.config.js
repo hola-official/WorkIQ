@@ -1,5 +1,11 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import withMT from "@material-tailwind/react/utils/withMT";
+const colors = require("tailwindcss/colors");
+const defaultTheme = require("tailwindcss/defaultTheme");
+
+
+
+module.exports = withMT({
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,jsx}',
@@ -17,6 +23,13 @@ module.exports = {
       },
     },
     extend: {
+      colors: {
+        ...colors,
+      },
+      screens: {
+
+        ...defaultTheme.screens,
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -34,4 +47,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+})

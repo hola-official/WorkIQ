@@ -27,8 +27,8 @@ const EditTask = () => {
   const [isError, setIsError] = useState(false);
   const [categories, setCategories] = useState([]);
   const [taskCategoriesData, setTaskCategoriesData] = useState(null);
-  const axiosInstance = useAxiosInstance()
-  const showToast = useShowToast()
+  const axiosInstance = useAxiosInstance();
+  const showToast = useShowToast();
 
   useEffect(() => {
     const fetchTaskData = async () => {
@@ -41,16 +41,18 @@ const EditTask = () => {
       } catch (error) {
         setIsError(true);
         setIsLoading(false);
-        showToast('Error', 'Something went wrong', 'error')
+        showToast("Error", "Something went wrong", "error");
         navigate("/clients/my-tasks");
       }
     };
 
     const fetchTaskCategories = async () => {
       try {
-        const categoriesResponse = await axiosInstance.get(`/tasks/task-categories`);
+        const categoriesResponse = await axiosInstance.get(
+          `/tasks/task-categories`
+        );
         const data = categoriesResponse.data;
-        setCategories(data)
+        setCategories(data);
         // setTaskCategoriesData(categoriesResponse.data);
       } catch (error) {
         console.error("Failed to fetch task categories:", error);
@@ -93,12 +95,11 @@ const EditTask = () => {
   if (isLoading) {
     return <p>Loading client Task</p>;
   } else if (!task) {
-    console.log('error error error')
+    console.log("error error error");
     return <Navigate to={"/dashboard"} />;
   } else if (task?.client !== _id) {
     return <Navigate to={"/dashboard"} />;
   }
-  console.log(task.isPublished)
 
   return (
     <>
@@ -135,7 +136,11 @@ const EditTask = () => {
                 value: category._id,
               }))}
             />
-            <DescriptionForm setTask={setTask} initialData={task} taskId={task._id} />
+            <DescriptionForm
+              setTask={setTask}
+              initialData={task}
+              taskId={task._id}
+            />
             <SkillForm initialData={task} taskId={task._id} />
           </div>
 
@@ -145,7 +150,11 @@ const EditTask = () => {
                 <IconBadge icon={ListChecks} />
                 <h2 className="text-xl">Task chapters</h2>
               </div>
-              <SectionForm setTask={setTask} initialData={task} taskId={task._id} />
+              <SectionForm
+                setTask={setTask}
+                initialData={task}
+                taskId={task._id}
+              />
             </div>
             <div>
               <div className="flex items-center gap-x-2">
@@ -154,7 +163,6 @@ const EditTask = () => {
               </div>
               <PriceForm initialData={task} taskId={task._id} />
             </div>
-
           </div>
         </div>
       </div>

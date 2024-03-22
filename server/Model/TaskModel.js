@@ -11,17 +11,30 @@ const sectionSchema = new Schema({
     // required: true
   },
   isPublished: Boolean,
-  price: { 
+  price: {
     type: Number,
     default: 5,
-   },
+  },
   attachments: [
-		{
-			name: String,
-			url: String,
-		},
-	],
+    {
+      name: String,
+      url: String,
+    },
+  ],
 });
+
+const proposalSchema = new mongoose.Schema({
+  freelancer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  isAssigned: { type: Boolean, default: false },
+  coverLetter: { type: String, required: true },
+},
+  {
+    timestamps: true,
+  });
 
 const taskSchema = new Schema({
   title: {
@@ -47,6 +60,7 @@ const taskSchema = new Schema({
   },
   skills: [{ type: String }],
   sections: [sectionSchema],
+  proposal: [proposalSchema],
   isPublished: {
     type: Boolean,
     default: false,
