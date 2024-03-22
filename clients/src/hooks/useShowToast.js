@@ -10,7 +10,7 @@ const useShowToast = () => {
                 description,
                 status,
                 duration: 2000,
-                isClosable: false,
+                isClosable: true,
                 // position: 'top-right',
                 position: 'top',
             })

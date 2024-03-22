@@ -1,17 +1,11 @@
 const Portfolio = require('../Model/portfolioModel');
 const cloudinary = require('cloudinary').v2;
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
 // Controller for creating a new portfolio
 exports.createPortfolio = async (req, res) => {
   try {
     const { title, description, imageUrl } = req.body;
+    const userId = req.userId
 
     // Upload image to Cloudinary
     const uploadedImage = await cloudinary.uploader.upload(imageUrl, {
@@ -19,7 +13,7 @@ exports.createPortfolio = async (req, res) => {
     });
 
     const newPortfolio = await Portfolio.create({
-      user: req.user._id,
+      user: userId,
       title,
       description,
       imageUrl: uploadedImage.secure_url

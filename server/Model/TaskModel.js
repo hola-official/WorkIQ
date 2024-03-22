@@ -5,10 +5,22 @@ const Schema = mongoose.Schema;
 const sectionSchema = new Schema({
   title: String,
   description: String,
-  durationDays: { type: Number, required: true },
+  durationDays: {
+    type: Number,
+    default: 3,
+    // required: true
+  },
   isPublished: Boolean,
-  price: { type: Number },
-  attachments: { type: String },
+  price: { 
+    type: Number,
+    default: 5,
+   },
+  attachments: [
+		{
+			name: String,
+			url: String,
+		},
+	],
 });
 
 const taskSchema = new Schema({
@@ -34,20 +46,22 @@ const taskSchema = new Schema({
     ref: "Category",
   },
   skills: [{ type: String }],
-  doc: { type: String },
   sections: [sectionSchema],
-  isApproved: {
+  isPublished: {
     type: Boolean,
     default: false,
   },
   client: { type: Schema.Types.ObjectId, ref: "User" },
-  status: {
-    type: String,
-    enum: ["pending", "approved", "completed", "rejected"],
-    default: "pending",
-  },
-  createdAt: { type: Date, default: Date.now },
-  visibleTo: [{ type: Schema.Types.ObjectId, ref: "User" }],
-});
+  // status: {
+  //   type: String,
+  //   enum: ["pending", "approved", "completed", "rejected"],
+  //   default: "pending",
+  // },
+  // visibleTo: [{ type: Schema.Types.ObjectId, ref: "User" }],
+},
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model("Task", taskSchema);

@@ -13,7 +13,8 @@ import DashboardPage from './pages/Dashboard/DashboardPage';
 import CreateTask from './pages/Tasks/Pages/CreateTaskPage';
 import ProfilePage from './pages/Profile/ProfilePage';
 import ClientTasks from './pages/Tasks/Pages/ClientTasks';
-import EditTask from './pages/Tasks/Pages/editTask/component/EditTask';
+import EditTaskPage from './pages/Tasks/Pages/editTask/EditTaskPage';
+import EditSection from './pages/Tasks/Pages/editTask/editSection/EditSection';
 
 function App() {
 
@@ -39,7 +40,8 @@ function App() {
         <Route path='clients'>
           <Route path="my-tasks" element={<ClientTasks />} />
           <Route path="create-tasks" element={<CreateTask />} />
-          <Route path="edit-task/:taskId" element={<EditTask />} />
+          <Route path="edit-task/:taskId" element={<EditTaskPage />} />
+          <Route path="edit-task/:taskId/section/:sectionId" element={<EditSection />} />
         </Route>
       </Route>
     </Routes>

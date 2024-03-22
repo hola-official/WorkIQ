@@ -14,33 +14,27 @@ import {
   UnorderedList,
   Center,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import * as z from "zod";
-import { useAxiosInstance } from '../../../../api/axios';
-import useShowToast from './../../../hooks/useShowToast';
-
-const formSchema = z.object({
-  title: z.string().min(1, {
-    message: "Title is required",
-  }),
-});
+import React, { useEffect, useState } from "react";
+import { useAxiosInstance } from "../../../../api/axios";
+import useShowToast from "./../../../hooks/useShowToast";
+import { useNavigate } from "react-router-dom";
 
 const CreateForm = () => {
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValid, setIsValid] = useState(false);
-  const axiosInstance = useAxiosInstance()
-  const showToast = useShowToast()
+  const axiosInstance = useAxiosInstance();
+  const showToast = useShowToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Validation logic
     if (title.trim().length < 1) {
       setIsValid(false);
-    } else{
-      setIsValid(true)
+    } else {
+      setIsValid(true);
     }
-  }, [title])
-
+  }, [title]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,21 +44,28 @@ const CreateForm = () => {
     try {
       // Your submit logic here
       const res = await axiosInstance.post(
-        `/tasks/create-title`,
+        "/tasks/create-title",
         JSON.stringify({ title })
       );
       const data = res.data;
+      const task = data.task
 
       if (data.error) {
         showToast("Error", data.error, "error");
         return;
       }
-      showToast('Success', 'Task created successfully!', 'success');
-      console.log(data)
+      showToast("Success", "Task created successfully!", "success");
+      console.log(data.task);
       setIsSubmitting(false);
+
+      navigate(`/clients/edit-task/${task._id}`);
     } catch (error) {
       if (error) {
-        showToast('Error', error.response.data.msg || error.response.data.error, 'error')
+        showToast(
+          "Error",
+          error.response.data.message || error.response.data.error,
+          "error"
+        );
       }
       console.error("Error submitting form:", error);
       setIsSubmitting(false);
@@ -72,18 +73,24 @@ const CreateForm = () => {
   };
 
   return (
-    <Flex justify="center" align="center" h={"100vh"} pos={"fixed"} px={30}>
+    <Flex
+      justify="center"
+      align="center"
+      h={"100vh"}
+      pos={{ md: "fixed" }}
+      px={30}
+    >
       <Stack spacing={8} direction={{ base: "column", md: "row" }}>
         <Flex flexDir="column" w={{ base: "100%", md: "50%" }}>
           <Text
-            fontSize={{ base: "md", md: "2xl", lg: "4xl" }}
+            fontSize={{ base: "2xl", lg: "4xl" }}
             fontWeight={500}
           >
             Let's start with a strong title.
           </Text>
           <Text fontSize="md" color="gray.600">
-            This helps your task post stand out to the right candidates. It's the
-            first thing they'll see, so make it count!
+            This helps your task post stand out to the right candidates. It's
+            the first thing they'll see, so make it count!
           </Text>
         </Flex>
 
@@ -107,7 +114,8 @@ const CreateForm = () => {
                   type="submit"
                   isLoading={isSubmitting}
                   colorScheme={"blue"}
-                  isDisabled={!isValid || isSubmitting
+                  isDisabled={
+                    !isValid || isSubmitting
                     // ? 'true' : 'false'
                   }
                 >

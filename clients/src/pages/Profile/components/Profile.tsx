@@ -63,6 +63,7 @@ const Profile = () => {
     avatar: "", // If you allow users to update their avatar
     socialMedia: user.socialMedia,
   });
+  
   const axiosInstance = useAxiosInstance();
   const { loading, users } = useGetUserProfile();
   const fileRef = useRef(null);
@@ -129,7 +130,7 @@ const Profile = () => {
 
     try {
       const res = await axiosInstance.put(
-        `/users/update/${user.loggedUser._id}`,
+        `/users/update/${user._id}`,
         JSON.stringify({
           ...inputs,
           profilePic: imgUrl,
@@ -245,7 +246,7 @@ const Profile = () => {
                     })}
                   </Text>
                 </Flex>
-                <Box display={!user?.username != users.username ?'none' : 'block'} >
+                {/* <Box display={!user?.username != users.username ?'none' : 'block'} > */}
                   <Button
                     color="white"
                     size={{ base: "md", md: "lg" }}
@@ -257,7 +258,7 @@ const Profile = () => {
                   >
                     Edit my data
                   </Button>
-                </Box>
+                {/* </Box> */}
 
                 <Modal isOpen={isModalOpen} onClose={onModalClose}>
                   <ModalOverlay />
