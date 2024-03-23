@@ -56,17 +56,16 @@ export const SectionActions = ({
 	};
 
 	const onClick = async () => {
-		console.log(isPublished)
 		try {
 			setIsLoading(true);
 			if (isPublished) {
 				await axiosInstance.put(`/tasks/edit-task/${taskId}/section/${sectionId}/toggle-publish`)
-				showToast("Success", "Section unpublished", "success");
+				showToast("Success", "Section unListed", "success");
 			} else {
 				await axiosInstance.put(`/tasks/edit-task/${taskId}/section/${sectionId}/toggle-publish`)
-				showToast("Success", "Section published", "success");
+				showToast("Success", "Section Listed", "success");
 			}
-			// navigate(`/clients/edit-task/${taskId}`);
+			navigate(`/clients/edit-task/${taskId}`);
 		} catch (error) {
 			console.log(error);
 			showToast(

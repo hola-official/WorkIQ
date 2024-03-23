@@ -120,7 +120,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       // setUploadTask(data)
       showToast("Success", "File uploaded successfully", "success");
       toggleEdit();
-			window.location.reload()
+      window.location.reload();
     } catch (error) {
       console.error("Error uploading file:", error);
       if (error?.code === "storage/canceled") {
@@ -137,14 +137,14 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
   };
 
   const onDelete = async (attachment) => {
-    console.log(attachment);
+    // console.log(attachment._id);
     try {
       setDelAttachId(attachment._id);
       const storage = getStorage(app);
       const fileRef = ref(storage, attachment.url);
       await deleteObject(fileRef);
 
-      // console.log(delAttachId, id);
+      
       // console.log(id)
       // await deleteSectionAttachment({
       //   taskId,
@@ -156,10 +156,14 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       //   // JSON.stringify({attachment})
       //   attachment._id
       // );
-			await axiosInstance.delete(
-        `tasks/edit-task/${taskId}/section/${sectionId}/attachment`,
-        JSON.stringify({ attachment })
+			console.log(attachment._id)
+      await axiosInstance.delete(
+        `tasks/edit-task/${taskId}/section/${sectionId}/attachment/${attachment._id}`,
+        // JSON.stringify({ attachment })
+				// delAttachId
+        // attachment._id
       );
+			console.log(delAttachId);
       showToast("Success", "Attachment deleted", "success");
       // router.refresh();
     } catch (error) {

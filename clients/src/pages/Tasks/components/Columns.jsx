@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatPrice } from "@/lib/format";
 import { MdDelete } from "react-icons/md";
 import { Flex } from "@chakra-ui/react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
@@ -41,13 +42,14 @@ export const columns = [
       return <Button variant="ghost">Price</Button>;
     },
     cell: ({ row }) => {
-      const price = parseFloat(row.getValue("price") || "0");
+      const { totalPrice } = row.original;
+      const price = parseFloat(row.getValue("totalPrice") || "0");
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }).format(price);
+      }).format(totalPrice);
       return (
-        <div className="ml-4">{row.getValue("price") ? formatted : "Free"}</div>
+        <div className="ml-4">{row.getValue("totalPrice") ? formatted :  formatPrice(totalPrice)}</div>
       );
     },
   },

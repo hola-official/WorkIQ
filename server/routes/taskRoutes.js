@@ -93,7 +93,7 @@ router.put(
   addAttachmentToSection
 );
 router.delete(
-  "/edit-task/:taskId/section/:sectionId/attachment",
+  "/edit-task/:taskId/section/:sectionId/attachment/:attachmentId",
   verifyJWT,
   verifyRoles(Admin, Client),
   deleteAttachmentFromSection
