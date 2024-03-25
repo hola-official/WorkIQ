@@ -35,6 +35,7 @@ import { BsGearFill } from "react-icons/bs";
 import useLogout from "./hooks/useLogout";
 import { ImArrowDownLeft2, ImArrowUpRight2 } from "react-icons/im";
 import { MdHome } from "react-icons/md";
+import { PiSuitcase } from "react-icons/pi";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
 import { HiLogout } from "react-icons/hi";
@@ -75,6 +76,18 @@ const SidebarContent = ({ onClose, ...rest }) => {
           icon={MdHome}
         >
           Dashboard
+        </NavItem>
+
+        <NavItem
+          as={NavLink}
+          to={"/projects"}
+          style={({ isActive }) => ({
+            color: isActive ? "#1F2937" : "",
+            background: isActive ? "#FFFFFF" : "",
+          })}
+          icon={PiSuitcase}
+        >
+          Project
         </NavItem>
 
         <Accordion allowToggle>

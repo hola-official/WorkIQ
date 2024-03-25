@@ -11,6 +11,7 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const refreshRoute = require("./routes/refresh");
 const userRoutes = require("./routes/userRoutes");
+const clentRoutes = require("./routes/clientRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const cloudinary = require("cloudinary").v2;
 require("./config/passport-setup");
@@ -21,28 +22,27 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 cloudinary.config({
-	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-	api_key: process.env.CLOUDINARY_API_KEY,
-	api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Set up MongoDB store
 const store = new MongoDBStore({
-    uri: process.env.MONGO_URI,
-    collection: "sessions",
-    expires: 1 * 60 * 60, // 1hr in seconds
+  uri: process.env.MONGO_URI,
+  collection: "sessions",
+  expires: 1 * 60 * 60, // 1hr in seconds
 });
 
 // Use express-session middleware
 app.use(
-    session({
-        secret: process.env.SESSION_SECRET, // Change this to a secure secret key
-        resave: false,
-        saveUninitialized: false,
-        store: store, // Use MongoDB store
-    })
+  session({
+    secret: process.env.SESSION_SECRET, // Change this to a secure secret key
+    resave: false,
+    saveUninitialized: false,
+    store: store, // Use MongoDB store
+  })
 );
-
 
 // Handle options credentials check - before CORS!
 // and fetch cookies credentials requirement
@@ -62,12 +62,13 @@ app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/refresh", refreshRoute);
 app.use("/users", userRoutes);
-app.use("/tasks", taskRoutes);
+app.use("/projects", taskRoutes);
+app.use("/tasks", clentRoutes);
 
 // Connect to MongoDB and start server
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => {
-        app.listen(PORT, () => console.log(`Server Is 🏃‍♂️ On PORT ${PORT}`));
-    })
-    .catch((err) => console.log(err));
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server Is 🏃‍♂️ On PORT ${PORT}`));
+  })
+  .catch((err) => console.log(err));

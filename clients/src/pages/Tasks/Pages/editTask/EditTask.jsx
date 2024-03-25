@@ -83,9 +83,11 @@ const EditTask = () => {
       task.title,
       task.description,
       task.categoryId,
+      task.skills,
       task.sections?.some((section) => section.isPublished),
     ];
   }
+  console.log(task);
 
   const totalFields = requiredFields?.length;
   const completedFields = requiredFields?.filter(Boolean).length;
@@ -148,7 +150,7 @@ const EditTask = () => {
             <div>
               <div className="flex items-center gap-x-2">
                 <IconBadge icon={ListChecks} />
-                <h2 className="text-xl">Task chapters</h2>
+                <h2 className="text-xl">Task sections</h2>
               </div>
               <SectionForm
                 setTask={setTask}

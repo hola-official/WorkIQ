@@ -1,7 +1,7 @@
 import * as z from "zod";
 // import axios from "axios";
 import { Pencil, PlusCircle, ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -14,7 +14,9 @@ import {
   Tag,
   TagLabel,
   TagCloseButton,
+  Icon,
 } from "@chakra-ui/react";
+import { CloseIcon } from "@chakra-ui/icons";
 
 // import {
 // 	getStorage,
@@ -26,82 +28,19 @@ import {
 import { Progress } from "@material-tailwind/react";
 import { useAxiosInstance } from "../../../../../../api/axios";
 import useShowToast from "@/hooks/useShowToast";
+import { Badge } from "@/components/ui/badge";
 // import { useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
+import { cn } from "@/lib/utils";
 
 export const SkillForm = ({ initialData, taskId }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [img, setImg] = useState("");
-  const [imgPerc, setImgPerc] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadTask, setUploadTask] = useState(null);
   const [skills, setSkills] = useState(initialData.skills || []);
   const [skillInputValue, setSkillInputValue] = useState("");
   const [skillError, setSkillError] = useState("");
   const axiosInstance = useAxiosInstance();
   const showToast = useShowToast();
 
-  // const [updateTask, { isLoading, isError, isSuccess, error }] =
-  // useUpdateTaskMutation();
   const toggleEdit = () => setIsEditing((current) => !current);
-
-  // const uploadImage = async (file, inputs) => {
-  // 	const storage = getStorage();
-  // 	const fileName = file.name;
-  // 	const folderPath = `Tasks/${taskId}/TaskImage`;
-
-  // 	// Check if there is an existing image URL
-  // 	const existingImageUrl = initialData.taskImage;
-
-  // 	// If an existing image URL is found, delete the corresponding file from Firebase Storage
-  // 	if (existingImageUrl) {
-  // 		const existingImageRef = ref(storage, existingImageUrl);
-  // 		try {
-  // 			await deleteObject(existingImageRef);
-  // 			console.log("Previous image deleted successfully");
-  // 		} catch (error) {
-  // 			console.error("Error deleting previous image:", error);
-  // 		}
-  // 	}
-
-  // 	// Concatenate the folder path with the file name to create storage reference
-  // 	const storageRef = ref(storage, `${folderPath}/${fileName}`);
-  // 	const uploadTask = uploadBytesResumable(storageRef, file);
-  // 	setUploadTask(uploadTask);
-
-  // 	return new Promise((resolve, reject) => {
-  // 		uploadTask.on(
-  // 			"state_changed",
-  // 			(snapshot) => {
-  // 				const progress =
-  // 					(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  // 				setImgPerc(Math.round(progress));
-  // 				switch (snapshot.state) {
-  // 					case "paused":
-  // 						console.log("Upload is paused");
-  // 						break;
-  // 					case "running":
-  // 						console.log("Upload is running");
-  // 						break;
-  // 					default:
-  // 						break;
-  // 				}
-  // 			},
-  // 			(error) => {
-  // 				reject(error); // Reject promise if there's an upload error
-  // 			},
-  // 			async () => {
-  // 				try {
-  // 					const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-  // 					// Update inputs state with the new image URL
-  // 					// setInputs((prev) => ({ ...prev, taskImage: downloadURL }));
-  // 					resolve(downloadURL); // Resolve promise with the download URL
-  // 				} catch (error) {
-  // 					reject(error); // Reject promise if there's an error getting the download URL
-  // 				}
-  // 			}
-  // 		);
-  // 	});
-  // };
 
   const handleSkillInputChange = (e) => {
     setSkillInputValue(e.target.value);
@@ -126,52 +65,19 @@ export const SkillForm = ({ initialData, taskId }) => {
     setSkills(updatedSkills);
   };
 
-  // const router = useRouter();
-  const onSubmit = async (values) => {
-    console.log(values);
+  const onSubmit = async () => {
     try {
-      const response = await axiosInstance.put(
-        `/tasks/edit-task/${taskId}`,
-        ...values
-      );
-      console.log("Task updated successfully:", response.data);
+      const response = await axiosInstance.put(`/tasks/edit-task/${taskId}`, {
+        skills: skills,
+      });
+      console.log("Task updated successfully:", response.data.task);
       toggleEdit();
+      showToast("Success", "Skills updated successfully", "success");
     } catch (error) {
       console.error("Error updating task:", error);
+      showToast("Error", "Error updating skills", "error");
     }
-
-    // try {
-    // 	// await axios.patch(`/api/tasks/${taskId}`, values);
-    // 	setIsUploading(true);
-    // 	const url = await uploadImage(img, values);
-    // 	// console.log(url);
-    // 	await updateTask({ id: taskId, taskImage: url }).unwrap();
-    // 	// toast.success("Task updated");
-    // 	toggleEdit();
-    // 	// router.refresh();
-    // } catch (error) {
-    // 	// console.log(error.code);
-    // 	if (error?.code === "storage/canceled") {
-    // 		return toast.error("Upload Cancelled");
-    // 	}
-    // 	// toast.error("Something went wrong");
-    // } finally {
-    // 	setImg("");
-    // 	setImgPerc(0);
-    // 	setIsUploading(false);
-    // 	setUploadTask(null);
-    // }
   };
-
-  // const handleCancel = () => {
-  // 	if (uploadTask) {
-  // 		uploadTask.cancel();
-  // 		setUploadTask(null);
-  // 		setImg("");
-  // 		setImgPerc(0);
-  // 		setIsUploading(false);
-  // 	}
-  // };
 
   return (
     <div className="mt-6 border border-solid border-1 border-blue-300 rounded-md p-4">
@@ -194,57 +100,26 @@ export const SkillForm = ({ initialData, taskId }) => {
         // 		<ImageIcon className="h-10 w-10 text-slate-500" />
         // 	</div>
         // ) :
-        <div className="  mt-2">
-          <HStack spacing={2}>
+        <div className="   mt-2">
+          <div className="flex gap-3 flex-wrap">
             {skills.map((skill, index) => (
-              <Tag key={index} borderRadius="lg" color="white" bg="blue.500">
-                <TagLabel>{skill}</TagLabel>
-              </Tag>
+              // <Tag key={index} borderRadius="lg" color="white" bg="blue.500">
+              //   <TagLabel>{skill}</TagLabel>
+              // </Tag>
+
+              <Badge
+                key={index}
+                className="text-[10px] font-medium leading-[13px] bg-light-800 dark:bg-dark-300 text-light-400 dark:text-light-500 flex items-center justify-center gap-1 rounded-md border-none px-4 py-2 capitalize"
+              >
+                {skill}
+              </Badge>
             ))}
-          </HStack>
+          </div>
+          <div className="text-xs text-muted-foreground mt-5">Add</div>
         </div>
       )}
       {isEditing && (
-        // <div>
-        // 	<input
-        // 		disabled={isUploading}
-        // 		type="file"
-        // 		name="taskImage"
-        // 		accept="image/*"
-        // 		onChange={(e) => setImg(e.target.files[0])}
-        // 		className="file-input file-input-bordered w-full "
-        // 	/>
-        // 	<div className="text-xs text-muted-foreground mt-4">
-        // 		16:9 aspect ratio recommended
-        // 	</div>
-        // 	<div className="flex justify-center mt-5 mb-5">
-        // 		{!isUploading && img && (
-        // 			<Button onClick={onSubmit} className="mx-auto">
-        // 				Upload Image
-        // 			</Button>
-        // 		)}
-        // 		{isUploading && (
-        // 			<Button
-        // 				onClick={handleCancel}
-        // 				variant="destructive"
-        // 				className="mx-auto"
-        // 			>
-        // 				Cancel
-        // 			</Button>
-        // 		)}
-        // 	</div>
-        // 	{isUploading && <Progress value={imgPerc} color="green" label=" " />}
-        // </div>
-
         <Box gap={10} mt={4}>
-          {/* <Text
-						as={"h2"}
-						fontSize={{ base: "md", md: "1xl" }}
-						fontWeight={600}
-					>
-						Skills
-					</Text> */}
-
           <Flex flexDir="column" gap={2} mt={2}>
             <Input
               value={skillInputValue}
@@ -261,16 +136,39 @@ export const SkillForm = ({ initialData, taskId }) => {
                 {skillError}
               </Alert>
             )}
-            <HStack spacing={2}>
+            <div className="flex gap-3 flex-wrap">
               {skills.map((skill, index) => (
-                <Tag key={index} borderRadius="lg" color="white" bg="blue.500">
-                  <TagLabel>{skill}</TagLabel>
-                  <TagCloseButton onClick={() => handleSkillRemove(skill)} />
-                </Tag>
+                // <Tag key={index} borderRadius="lg" color="white" bg="blue.500">
+                //   <TagLabel>{skill}</TagLabel>
+                //   <TagCloseButton onClick={() => handleSkillRemove(skill)} />
+                // </Tag>
+                <div>
+                  <Badge
+                    key={index}
+                    className="text-[10px] font-medium leading-[13px] bg-light-800 dark:bg-dark-300 text-light-400 dark:text-light-500 flex items-center justify-center gap-2 rounded-md border-none px-4 py-2 capitalize"
+                  >
+                    {skill}
+                    <Icon
+                      as={CloseIcon}
+                      cursor={"pointer"}
+                      onClick={() => handleSkillRemove(skill)}
+                    />
+                    {/* <CloseIcon
+                    boxSize={6}
+                    cursor={"pointer"}
+                    onClick={() => handleSkillRemove(skill)}
+                  /> */}
+                  </Badge>
+                </div>
               ))}
-            </HStack>
+            </div>
           </Flex>
-          <Button mt={2} onClick={onSubmit} colorScheme="blue">
+          <Button
+            mt={2}
+            onClick={onSubmit}
+            colorScheme="blue"
+            size={{ md: "sm" }}
+          >
             Save Skills
           </Button>
         </Box>

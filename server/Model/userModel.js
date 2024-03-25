@@ -27,6 +27,7 @@ const userSchema = new Schema(
     avatar: { type: String },
     bio: { type: String },
     balance: { type: Number, default: 500 },
+    escrowBalance: { type: Number, default: 0 }, // New field for escrow balance
     portfolios: [{ type: Schema.Types.ObjectId, ref: "Portfolio" }],
     tasksCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCreated: [{ type: Schema.Types.ObjectId, ref: "Task" }],

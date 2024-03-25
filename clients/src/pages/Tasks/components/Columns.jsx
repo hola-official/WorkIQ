@@ -43,13 +43,13 @@ export const columns = [
     },
     cell: ({ row }) => {
       const { totalPrice } = row.original;
-      const price = parseFloat(row.getValue("totalPrice") || "0");
+      const price = parseFloat(row.getValue("price") || "0");
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }).format(totalPrice);
+      }).format(price);
       return (
-        <div className="ml-4">{row.getValue("totalPrice") ? formatted :  formatPrice(totalPrice)}</div>
+        <div className="ml-4">{row.getValue("price") ? formatted :  formatPrice(totalPrice)}</div>
       );
     },
   },

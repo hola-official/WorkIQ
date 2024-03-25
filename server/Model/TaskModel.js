@@ -10,6 +10,8 @@ const proposalSchema = new mongoose.Schema(
     },
     isAssigned: { type: Boolean, default: false },
     coverLetter: { type: String, required: true },
+    bidPrice: { type: Number, required: true }, // New field for bid price
+    duration: { type: Number, required: true }, // New field for duration
   },
   {
     timestamps: true,
@@ -50,7 +52,7 @@ const taskSchema = new Schema(
     },
     totalPrice: {
       type: Number,
-      // default: 0,
+      default: 0,
       // required: true,
     },
     durationDays: {
@@ -79,5 +81,7 @@ const taskSchema = new Schema(
     timestamps: true,
   }
 );
+
+taskSchema.index({ skills: "text", bio: "text" });
 
 module.exports = mongoose.model("Task", taskSchema);

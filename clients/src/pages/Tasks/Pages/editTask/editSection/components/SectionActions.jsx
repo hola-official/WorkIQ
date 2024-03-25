@@ -2,7 +2,7 @@
 import { Trash } from "lucide-react";
 import { useState } from "react";
 // import toast from "react-hot-toast";
-import { Button } from "@/components/ui/button";
+import { Button } from "@chakra-ui/react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 // import { getStorage, ref, listAll, deleteObject } from "firebase/storage";
 // import app from "../../../../../../firebase";
@@ -70,7 +70,6 @@ export const SectionActions = ({
 			console.log(error);
 			showToast(
 				"Error",
-				"Something went wrong" ||
 				error.response.data.message ||
 				error.response.data.error,
 				"error"
@@ -110,7 +109,7 @@ export const SectionActions = ({
 		<div className="flex items-center gap-x-2">
 			<Button
 				onClick={onClick}
-				disabled={disabled || isLoading}
+				isDisabled={disabled || isLoading}
 				variant="outline"
 				size="sm"
 			>

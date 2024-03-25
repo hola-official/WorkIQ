@@ -199,12 +199,10 @@ export const SectionPriceForm = ({
       setTask((prev) => ({ ...prev, price: values.price }));
       // router.refresh();
     } catch (error) {
-      console.log(error);
+      console.log('price error goes here',error);
       showToast(
         "Error",
-        "Something went wrong" ||
-          error.response.data.message ||
-          error.response.data.error,
+        error.response.data.message || error.response.data.error,
         "error"
       );
     }
@@ -271,7 +269,7 @@ export const SectionPriceForm = ({
                       <Input
                         colorScheme={"blue"}
                         type="number"
-                        step="0.01"
+                        // step="0.01"
                         isDisabled={isSubmitting}
                         // min={5} // Minimum price of $5
                         placeholder="Set a price for your task"

@@ -101,7 +101,7 @@ export const TitleForm = ({ setTask, initialData, taskId }) => {
 						/>
 						<div className="flex items-center gap-x-2">
 							<Button
-								disabled={!isValid || isSubmitting}
+								isDisabled={!isValid || isSubmitting}
 								colorScheme="blue"
 								type="submit"
 							>

@@ -74,17 +74,11 @@ export const SectionForm = ({ setTask, initialData, taskId }) => {
 		console.log(updateData)
 		try {
 			setIsUpdating(true);
-			// await reorderSection({
-			// 	id: taskId,
-			// 	list: updateData
-			// }).unwrap();
 			await axiosInstance.put(`/tasks/edit-task/${taskId}/reorder-sections`, {
 			    list: updateData
 			});
 			showToast('Success', 'Section reordered', 'success')
-			// router.refresh();
 		} catch(error) {
-			// showToast('Error', 'Something went wrong', 'error')
 			if (error) {
         showToast(
           "Error",
@@ -98,10 +92,7 @@ export const SectionForm = ({ setTask, initialData, taskId }) => {
 	};
 	const onEdit = (id) => {
 		navigate(`/clients/edit-task/${taskId}/section/${id}`)
-
 		console.log(id)
-
-		// router.push(`/teacher/tasks/${taskId}/section/${id}`);
 	};
 	return (
 		
@@ -147,7 +138,7 @@ export const SectionForm = ({ setTask, initialData, taskId }) => {
 								</FormItem>
 							)}
 						/>
-						<Button colorScheme="blue" disabled={!isValid || isSubmitting} type="submit">
+						<Button colorScheme="blue" isDisabled={!isValid || isSubmitting} type="submit">
 							Create
 						</Button>
 					</form>

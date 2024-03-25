@@ -15,6 +15,7 @@ import { useAxiosInstance } from "../../../../../../api/axios";
 import useShowToast from "../../../../../hooks/useShowToast";
 
 export const Actions = ({ disabled, taskId, isPublished }) => {
+  console.log(disabled);
   // const router = useRouter();
   // const confetti = useConfettiStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -79,6 +80,7 @@ export const Actions = ({ disabled, taskId, isPublished }) => {
         showToast("Success", "Task published", "success");
         // confetti.onOpen();
         // dispatch(openConfetti());
+        navigate(`/clients/my-tasks`);
       }
       // router.refresh();
     } catch (error) {
@@ -114,7 +116,7 @@ export const Actions = ({ disabled, taskId, isPublished }) => {
     <div className="flex items-center gap-x-2">
       <Button
         onClick={onClick}
-        disabled={disabled || isLoading}
+        isDisabled={disabled || isLoading}
         variant="outline"
         size="sm"
       >
