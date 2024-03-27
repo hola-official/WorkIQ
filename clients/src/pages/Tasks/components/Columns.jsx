@@ -2,11 +2,12 @@ import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  deleteObject,
+  getDownloadURL,
+} from "firebase/storage";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/format";
@@ -15,6 +16,7 @@ import { Flex } from "@chakra-ui/react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useAxiosInstance } from "../../../../api/axios";
 import useShowToast from "@/hooks/useShowToast";
+import { useState } from "react";
 
 export const columns = [
   {
@@ -49,7 +51,9 @@ export const columns = [
         currency: "USD",
       }).format(price);
       return (
-        <div className="ml-4">{row.getValue("price") ? formatted :  formatPrice(totalPrice)}</div>
+        <div className="ml-4">
+          {row.getValue("price") ? formatted : formatPrice(totalPrice)}
+        </div>
       );
     },
   },
@@ -85,15 +89,41 @@ export const columns = [
     header: () => <div>Actions</div>,
     enableHiding: false,
     cell: ({ row }) => {
-      const { _id } = row.original;
+      const [delAttachId, setDelAttachId] = useState(null);
+      const { _id, sections } = row.original;
 
       const axiosInstance = useAxiosInstance();
       const showToast = useShowToast();
       const navigate = useNavigate();
-
-      const onDelete = async () => {
+      const onDelete = async (attachment) => {
         try {
+          // Assuming sectionId is nested within the sections array
+          // const sectionId = sections[0]?._id; // Accessing the first section's _id
+
+          // Delete task data from Firebase Firestore
           await axiosInstance.delete(`/tasks/${_id}`);
+
+          // Get download URL for the task attachment
+          // const storage = getStorage();
+          // const attachmentRef = ref(
+          //   storage,
+          //   `Tasks/${_id}/Sections/${sectionId}/Attachments`
+          // );
+          // const attachmentUrl = await getDownloadURL(attachmentRef);
+
+          // // Delete task attachment from Firebase Storage
+          // if (attachmentUrl) {
+          //   const attachmentObject = ref(storage, attachmentUrl);
+          //   await deleteObject(attachmentObject);
+          // }
+          setDelAttachId(attachment._id);
+          const storage = getStorage(app);
+          const fileRef = ref(storage, attachment.url);
+          await deleteObject(fileRef);
+
+          console.log(attachment._id);
+
+          // Display success message and reload the page
           navigate(`/clients/my-tasks`);
           showToast("Success", "Task deleted", "success");
           window.location.reload();

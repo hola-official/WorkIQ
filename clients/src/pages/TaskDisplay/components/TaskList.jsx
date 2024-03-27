@@ -1,47 +1,75 @@
+import { Badge } from "@/components/ui/badge";
+import { formatPrice } from "@/lib/format";
+// import { Tooltip } from "@material-tailwind/react";
 import React from "react";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
+import { Tooltip } from "@material-tailwind/react";
 
-const TaskList = ({ tasks }) => {
+const TaskList = ({ tasks, filter }) => {
+  // Apply filters to tasks based on filter criteria
+  const filteredTasks = tasks.filter((task) => {
+    // Filter by title
+    if (
+      filter.searchQuery &&
+      !task.title.toLowerCase().includes(filter.searchQuery.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Add more filtering criteria as needed
+
+    return true;
+  });
+
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Filtered Tasks</h2>
-      <ul>
-        {tasks.map(task => (
-          <li key={task._id} className="border-b border-gray-200 py-4">
-            <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
-            <p className="text-sm text-gray-600 mb-2">{task.description}</p>
-            <p className="text-sm text-gray-600 mb-2">Category: {task.categoryId.name}</p>
-            <p className="text-sm text-gray-600 mb-2">Duration: {task.durationDays} days</p>
-            <p className="text-sm text-gray-600 mb-2">Total Price: ${task.totalPrice}</p>
-            <div className="text-sm text-gray-600 mb-2">
-              <p>Client: {task.client.name}</p>
-              <p>Email: {task.client.email}</p>
+      {filteredTasks.length ? (
+        filteredTasks.map((task) => (
+          <div key={task._id} className="border-b border-gray-400 py-4 ">
+            <Link to={`/projects/${task._id}/overview`}>
+              <h3 className="text-xl md:text-2xl font-semibold text-[#676767] hover:text-blue-500 cursor-pointer active:text-blue-400 duration-75 mb-2">
+                {task.title}
+              </h3>
+            </Link>
+            <div className="text-xs md:text-base  text-gray-400">
+              Est. Budget: <span>{formatPrice(task.totalPrice)}</span>
             </div>
-            <div className="text-sm text-gray-600 mb-2">
-              <p>Skills:</p>
-              <ul className="list-disc pl-5">
-                {task.skills.map((skill, index) => (
-                  <li key={index}>{skill}</li>
-                ))}
-              </ul>
+            <p className="text-base md:text-xl text-gray-600 mb-2">
+              {task.description}
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {task.skills.map((skill, index) => (
+                <Tooltip
+                  content={skill}
+                  placement="top"
+                  animate={{
+                    mount: { scale: 1, y: 0 },
+                    unmount: { scale: 0, y: 25 },
+                  }}
+                  className="hidden md:block"
+                >
+                  <Badge
+                    key={index}
+                    className="text-[10px] font-medium leading-[13px] bg-light-800 dark:bg-dark-300 text-light-400 dark:text-light-500 flex items-center justify-center gap-1 rounded-lg border-none px-4 py-2 capitalize"
+                  >
+                    {skill}
+                  </Badge>
+                </Tooltip>
+              ))}
             </div>
-            <div className="text-sm text-gray-600 mb-2">
-              <p>Sections:</p>
-              <ul className="list-disc pl-5">
-                {task.sections.map((section, index) => (
-                  <li key={index}>
-                    <p>{section.title}</p>
-                    <p>{section.description}</p>
-                    <p>Price: ${section.price}</p>
-                  </li>
-                ))}
-              </ul>
+            <div className="text-xs md:text-sm text-gray-400">
+              Sections:{" "}
+              <span className="text-gray-500">
+                {task.sections.length} Listed
+              </span>
             </div>
-            {/* Add more details as needed */}
-          </li>
-        ))}
-      </ul>
+          </div>
+        ))
+      ) : (
+        <div className="text-center text-gray-500 py-4">No tasks found.</div>
+      )}
     </div>
-  
   );
 };
 

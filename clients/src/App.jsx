@@ -16,6 +16,7 @@ import ClientTasks from "./pages/Tasks/Pages/ClientTasks";
 import EditTaskPage from "./pages/Tasks/Pages/editTask/EditTaskPage";
 import EditSection from "./pages/Tasks/Pages/editTask/editSection/EditSection";
 import TasksIndex from "./pages/TaskDisplay/TasksIndex";
+import TaskInfo from "./pages/TaskDisplay/taskInfo/TaskInfo";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
       >
         <Route path="projects">
           <Route index element={<TasksIndex />} />
+          <Route path=":taskId/overview" element={<TaskInfo />} />
           {/* <Route path="search" element={<BrowseTasks />} /> */}
         </Route>
         <Route path="clients">

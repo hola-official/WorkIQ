@@ -144,24 +144,9 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       const fileRef = ref(storage, attachment.url);
       await deleteObject(fileRef);
 
-      
-      // console.log(id)
-      // await deleteSectionAttachment({
-      //   taskId,
-      //   sectionId,
-      //   attachmentId: attachment._id,
-      // }).unwrap();
-      // await axiosInstance.delete(
-      //   `tasks/edit-task/${taskId}/section/${sectionId}/attachment`,
-      //   // JSON.stringify({attachment})
-      //   attachment._id
-      // );
 			console.log(attachment._id)
       await axiosInstance.delete(
         `tasks/edit-task/${taskId}/section/${sectionId}/attachment/${attachment._id}`,
-        // JSON.stringify({ attachment })
-				// delAttachId
-        // attachment._id
       );
 			console.log(delAttachId);
       showToast("Success", "Attachment deleted", "success");

@@ -1,36 +1,18 @@
-import * as z from "zod";
-// import axios from "axios";
-import { Pencil, PlusCircle, ImageIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Pencil } from "lucide-react";
+import { useState } from "react";
 import {
   Box,
   Button,
-  Text,
   Flex,
   Input,
   Alert,
   AlertIcon,
-  HStack,
-  Tag,
-  TagLabel,
-  TagCloseButton,
   Icon,
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
-
-// import {
-// 	getStorage,
-// 	ref,
-// 	uploadBytesResumable,
-// 	deleteObject,
-// 	getDownloadURL,
-// } from "firebase/storage";
-import { Progress } from "@material-tailwind/react";
 import { useAxiosInstance } from "../../../../../../api/axios";
 import useShowToast from "@/hooks/useShowToast";
 import { Badge } from "@/components/ui/badge";
-// import { useUpdateTaskMutation } from "@/features/tasks/tasksApiSlice";
-import { cn } from "@/lib/utils";
 
 export const SkillForm = ({ initialData, taskId }) => {
   const [isEditing, setIsEditing] = useState(false);

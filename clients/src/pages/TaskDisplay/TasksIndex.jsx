@@ -16,6 +16,12 @@ const TasksIndex = () => {
   const [message, setMessage] = useState("");
   const axiosInstance = useAxiosInstance();
 
+  // Initialize filter state
+  const [filter, setFilter] = useState({
+    searchQuery: "", // Initialize search query to an empty string
+    filter: "", // Initialize filter to an empty string
+  });
+
   useEffect(() => {
     fetchTasks();
   }, [filterOptions, userId]);
@@ -47,7 +53,8 @@ const TasksIndex = () => {
       setMessage("You don't have any skills listed in your profile.");
     } else {
       setMessage("");
-      setFilterOptions(newFilterOptions);
+      setFilter(newFilterOptions); // Update filter state
+      setFilterOptions(newFilterOptions); // Update filter options state
     }
   };
 
@@ -61,7 +68,7 @@ const TasksIndex = () => {
         <h1 className="text-4xl font-semibold mb-8">Freelance Tasks</h1>
         <TaskFilter onFilter={handleFilter} />
         {message && <p className="text-red-500 mb-4">{message}</p>}
-        <TaskList tasks={tasks} />
+        <TaskList tasks={tasks} filter={filter} /> {/* Pass filter object to TaskList */}
       </div>
     </SidebarWithHeader>
   );

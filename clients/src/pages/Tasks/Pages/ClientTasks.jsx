@@ -29,7 +29,8 @@ const ClientTasks = () => {
 
         setTasks(data);
       } catch (error) {
-        showToast("Error", error.message, "error");
+        console.log(error)
+        showToast("Error", error.response.data.message, "error");
       } finally {
         setLoading(false);
       }

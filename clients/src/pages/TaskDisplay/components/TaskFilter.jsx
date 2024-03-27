@@ -2,28 +2,28 @@ import React, { useState } from "react";
 
 const TaskFilter = ({ onFilter }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("newest");
+  const [filter, setFilter] = useState(""); // Set initial state for filter
 
   const handleSearchQueryChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
+  const handleFilterChange = (value) => {
+    setFilter(value); // Set the filter value directly without using e.target.value
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Check if any filter button was clicked before calling onFilter
-    if (filter === "newest" || filter === "bestMatch") {
+    // Call onFilter only if the filter is set and "Filter" button is clicked
+    if (filter && (filter === "newest" || filter === "bestMatch")) {
       onFilter({ searchQuery, filter });
     }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Filter Tasks</h2>
-      <form onSubmit={handleSubmit} className="flex items-center space-x-4">
+      <form onSubmit={handleSubmit} className="flex items-center space-x-4 w-full">
         <input
           type="text"
           placeholder="Search..."

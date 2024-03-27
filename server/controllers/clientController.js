@@ -44,7 +44,7 @@ const getAllClientTasks = async (req, res) => {
     // console.log(req.userId)
     const tasks = await Task.find({ client: req.userId });
     // console.log(tasks)
-    if (!tasks.length) return res.status(404).json({ msg: "No task found" });
+    if (!tasks.length) return res.status(404).json({ message: "No task found" });
     res.status(200).json(tasks);
   } catch (error) {
     console.log(error);

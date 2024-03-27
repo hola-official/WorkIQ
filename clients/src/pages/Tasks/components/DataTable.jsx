@@ -38,8 +38,6 @@ export function DataTable({ columns, data }) {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
-  const navigate = useNavigate();
-
   const table = useReactTable({
     data,
     columns,
