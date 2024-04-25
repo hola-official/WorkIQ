@@ -10,8 +10,10 @@ const proposalSchema = new mongoose.Schema(
     },
     isAssigned: { type: Boolean, default: false },
     coverLetter: { type: String, required: true },
-    bidPrice: { type: Number, required: true }, // New field for bid price
-    duration: { type: Number, required: true }, // New field for duration
+    sectionPrice: { type: Number, required: true }, // Price from the section
+    link: { type: String },
+    sectionId: { type: mongoose.Schema.Types.ObjectId, ref: "Section" }, // ID of the section the proposal is for
+    sectionDurationDays: { type: Number, required: true }, // Duration days from the section
   },
   {
     timestamps: true,

@@ -11,7 +11,6 @@ const TaskFilter = ({ onFilter }) => {
   const handleFilterChange = (value) => {
     setFilter(value); // Set the filter value directly without using e.target.value
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,8 +21,11 @@ const TaskFilter = ({ onFilter }) => {
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="flex items-center space-x-4 w-full">
+    <div className="flex justify-between">
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center space-x-4 w-full"
+      >
         <input
           type="text"
           placeholder="Search..."
@@ -39,7 +41,7 @@ const TaskFilter = ({ onFilter }) => {
           Filter
         </button>
       </form>
-      <div className="flex flex-wrap">
+      {/* <div className="flex flex-wrap">
         <button
           type="button"
           onClick={() => handleFilterChange("newest")}
@@ -58,7 +60,7 @@ const TaskFilter = ({ onFilter }) => {
         >
           Best Match
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };

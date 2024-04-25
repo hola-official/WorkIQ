@@ -12,6 +12,8 @@ const authRoutes = require("./routes/authRoutes");
 const refreshRoute = require("./routes/refresh");
 const userRoutes = require("./routes/userRoutes");
 const clentRoutes = require("./routes/clientRoutes");
+const transactionRoutes = require("./routes/transactionRoute");
+const ProposalRoutes = require("./routes/proposalRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const cloudinary = require("cloudinary").v2;
 require("./config/passport-setup");
@@ -63,7 +65,9 @@ app.use("/auth", authRoutes);
 app.use("/refresh", refreshRoute);
 app.use("/users", userRoutes);
 app.use("/projects", taskRoutes);
+app.use("/proposal", ProposalRoutes);
 app.use("/tasks", clentRoutes);
+app.use("/transactions", transactionRoutes);
 
 // Connect to MongoDB and start server
 mongoose

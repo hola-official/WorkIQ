@@ -81,19 +81,12 @@ export default function SplitScreen() {
     }
   };
 
-  const handleGoogleAuth = async () => {
-    try {
-      const response = await axiosInstance.get("/auth/google/callback");
-      const data = response.data;
-      console.log(data);
-      // navigate("/auth/google-verify");
-    } catch (error) {
-      console.log(error);
-    }
 
-    // window.location.href =
-    // 	"https://quickbill-2oy7.onrender.com/auth/googleauth/callback";
-  };
+	const baseUrl= import.meta.env.VITE_SERVER_BASE_URL
+
+	const handleGoogleAuth = () => {
+			window.location.href = `${baseUrl}/auth/googleauth`;
+	}
 
   return (
     <Stack

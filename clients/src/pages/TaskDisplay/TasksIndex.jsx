@@ -6,6 +6,7 @@ import SidebarWithHeader from "@/SidebarWithHeader";
 import useAuth from "@/hooks/useAuth";
 import { useRecoilValue } from "recoil";
 import userAtom from "@/atoms/userAtom";
+import Footer from "@/components/Footer";
 
 const TasksIndex = () => {
   const [tasks, setTasks] = useState([]);
@@ -64,12 +65,16 @@ const TasksIndex = () => {
 
   return (
     <SidebarWithHeader>
-      <div className="container mx-auto py-8">
-        <h1 className="text-4xl font-semibold mb-8">Freelance Tasks</h1>
-        <TaskFilter onFilter={handleFilter} />
-        {message && <p className="text-red-500 mb-4">{message}</p>}
-        <TaskList tasks={tasks} filter={filter} /> {/* Pass filter object to TaskList */}
-      </div>
+      <>
+        <div className="container mx-auto py-8">
+          <h1 className="text-4xl font-semibold mb-8">Freelance Tasks</h1>
+          <TaskFilter onFilter={handleFilter} />
+          {message && <p className="text-red-500 mb-4">{message}</p>}
+          <TaskList tasks={tasks} filter={filter} />{" "}
+          {/* Pass filter object to TaskList */}
+        </div>
+        <Footer />
+      </>
     </SidebarWithHeader>
   );
 };

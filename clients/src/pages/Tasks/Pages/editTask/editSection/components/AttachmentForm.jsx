@@ -222,7 +222,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
             type="file"
             name="fileUpload"
             onChange={handleFileChange}
-            className="file-input file-input-bordered w-full "
+            className="file-input file-input-bordered w-full cursor-pointer"
           />
           <div className="text-xs text-muted-foreground mt-4">
             Add anything your students might need to complete this section.

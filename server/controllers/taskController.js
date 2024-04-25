@@ -71,14 +71,6 @@ const browseAllTasks = async (req, res) => {
     const skipAmount = (page - 1) * pageSize;
     const query = { isPublished: true };
 
-    // Apply search query if provided
-    if (searchQuery) {
-      query.$or = [
-        { title: { $regex: new RegExp(searchQuery, "i") } },
-        { description: { $regex: new RegExp(searchQuery, "i") } },
-      ];
-    }
-
     // Apply filter options
     let sortOptions = {};
     switch (filter) {
@@ -90,9 +82,11 @@ const browseAllTasks = async (req, res) => {
         const freelancer = await User.findById(userId);
         if (freelancer && freelancer.skills && freelancer.skills.length > 0) {
           const freelancerSkills = freelancer.skills;
-          const freelancerDescription = freelancer.bio || ''; // Assume bio is the description field
+          const freelancerDescription = freelancer.bio || ""; // Assume bio is the description field
           sortOptions = { $meta: "textScore" };
-          query.$text = { $search: `${freelancerSkills.join(" ")} ${freelancerDescription}` };
+          query.$text = {
+            $search: `${freelancerSkills.join(" ")} ${freelancerDescription}`,
+          };
         } else {
           // If freelancer has no skills, return all tasks sorted by newest
           sortOptions = { createdAt: -1 };
@@ -116,6 +110,32 @@ const browseAllTasks = async (req, res) => {
       .skip(skipAmount)
       .limit(pageSize)
       .sort(sortOptions);
+
+    // const tasks = await Task.find(query)
+    //   .populate("categoryId", "name") // Populate category field with name
+    //   .populate({
+    //     path: "sections",
+    //     match: { isPublished: true }, // Filter published sections
+    //   })
+    //   .populate({
+    //     path: "tutor",
+    //     select: "name avatar", // Populate tutor field with name and avatar
+    //   })
+    //   .sort({ createdAt: "desc" });
+
+    const tasksWithDetails = await Promise.all(
+      tasks.map(async (task) => {
+        // Filter populated sections to remove those without isPublished property
+        task.sections = task.sections.filter((section) => section.isPublished);
+      })
+    );
+    // Apply search query if provided
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: new RegExp(searchQuery, "i") } },
+        { description: { $regex: new RegExp(searchQuery, "i") } },
+      ];
+    }
 
     res.status(200).json(tasks);
   } catch (error) {

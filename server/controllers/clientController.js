@@ -2,7 +2,6 @@ const Category = require("../Model/CategoryModel.js");
 const Task = require("../Model/TaskModel");
 const userModel = require("../Model/userModel.js");
 const { sendMail } = require("../utils/sendMail.js");
-const cloudinary = require("cloudinary").v2;
 
 //Get all tasks categories
 const getCategories = async (req, res) => {
@@ -44,7 +43,8 @@ const getAllClientTasks = async (req, res) => {
     // console.log(req.userId)
     const tasks = await Task.find({ client: req.userId });
     // console.log(tasks)
-    if (!tasks.length) return res.status(404).json({ message: "No task found" });
+    if (!tasks.length)
+      return res.status(404).json({ message: "No task found" });
     res.status(200).json(tasks);
   } catch (error) {
     console.log(error);
@@ -660,6 +660,26 @@ const toggleSectionPublicationStatus = async (req, res) => {
       return res.status(404).json({ message: "Section not found" });
     }
 
+    // Check if the section is assigned to a freelancer
+    if (sectionToUpdate.isAssigned) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Section is already assigned to a freelancer. Please contact support for assistance.",
+        });
+    }
+
+    // Check if there are pending transactions for this section
+    if (sectionToUpdate.transactions.length > 0) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "There are pending transactions for this section. Please wait until they are completed.",
+        });
+    }
+
     // Toggle the section's publication status
     const previousPublicationStatus = sectionToUpdate.isPublished;
     sectionToUpdate.isPublished = !previousPublicationStatus;
@@ -682,19 +702,18 @@ const toggleSectionPublicationStatus = async (req, res) => {
 
       // Deduct the section price from the user's balance and hold it in escrow
       user.balance -= sectionPrice;
-
-      // Update the user's balance and hold the escrow amount
       user.escrowBalance = (user.escrowBalance || 0) + sectionPrice;
-      console.log(user.balance);
-      console.log(user.escrowBalance);
+
       // Save the updated user's balance
       await user.save();
     } else {
+      // If section is unpublished, return funds to client's balance
       user.balance += sectionPrice;
       user.escrowBalance = (user.escrowBalance || 0) - sectionPrice;
 
       await user.save();
     }
+
     // If balance deduction is successful, update the section's publication status
     if (user.balance >= 0) {
       if (sectionToUpdate.isPublished !== previousPublicationStatus) {
@@ -730,91 +749,66 @@ const toggleSectionPublicationStatus = async (req, res) => {
   }
 };
 
-// // Controller method to create a new task
-// const createTask = async (req, res) => {
-//   try {
-//     const { title, description, price, durationDays, category, skills } = req.body;
-//     const { doc } = req.body;
-//     const createdBy = req.userId;
+const createProposalForSection = async (req, res) => {
+  try {
+    const { taskId, sectionId } = req.params;
+    const { coverLetter } = req.body;
+    const freelancerId = req.userId; // Assuming the freelancer's information is in the request user object
 
-//     const creatorDetails = await userModel.findById(createdBy);
-//     const email = creatorDetails.email;
+    // Check if the task exists
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
-//     if (price > creatorDetails.balance) {
-//       return res.status(400).json({ error: "Insufficient balance" });
-//     }
+    const freelancer = await userModel.findById(freelancerId);
 
-//     creatorDetails.balance -= price;
-//     await creatorDetails.save();
+    // Find the section in the task
+    const section = task.sections.find(
+      (sec) => sec._id.toString() === sectionId
+    );
+    if (!section) {
+      return res.status(404).json({ message: "Section not found in the task" });
+    }
 
-//     const maxTitleLength = 50;
-//     if (title.length > maxTitleLength) {
-//       return res.status(400).json({ message: `Text must be less than ${maxTitleLength} characters` });
-//     }
+    // Check if the freelancer has already submitted a proposal for this section
+    const existingProposal = section.proposal.find(
+      (prop) => prop.freelancer.toString() === freelancerId
+    );
+    if (existingProposal) {
+      return res.status(400).json({
+        message: "You have already submitted a proposal for this section",
+      });
+    }
 
-//     const maxLength = 250;
-//     if (description.length > maxLength) {
-//       return res.status(400).json({ message: `Title must be less than ${maxLength} characters` });
-//     }
+    // Create a new proposal with only the coverLetter submitted by the freelancer
+    const newProposal = {
+      freelancer: freelancerId,
+      coverLetter,
+      sectionPrice: section.price,
+      sectionId,
+      sectionDurationDays: section.durationDays,
+    };
 
-//     if (doc) {
-//       const uploadedResponse = await cloudinary.uploader.upload(doc);
-//       doc = uploadedResponse.secure_url;
-//     }
+    // Add the new proposal to the section's proposals array
+    section.proposal.push(newProposal);
 
-//     const newTask = await Task.create({
-//       title,
-//       description,
-//       price,
-//       durationDays,
-//       category,
-//       skills,
-//       client: createdBy,
-//     });
+    // Save the task
+    await task.save();
 
-//     res.status(201).json({ message: "Task created successfully", task: newTask });
+    // Save the proposal ID to the setProposal array in the user document
+    freelancer.setProposal.push(task._id);
+    await freelancer.save();
 
-//     try {
-//       await sendMail({
-//         email,
-//         subject: "New Task Created",
-//         template: "new-task-create.ejs",
-//         data: { user: { name: creatorDetails.username }, task: newTask },
-//       });
-//     } catch (error) {
-//       console.error("Error sending email:", error);
-//     }
-//   } catch (error) {
-//     console.error("Error creating task:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
-// Controller method to delete a task by ID
-// const deleteTask = async (req, res) => {
-//   try {
-//     const taskId = req.params.id;
-//     const task = await Task.findById(taskId);
-//     if (!task) {
-//       return res.status(404).json({ error: "Task not found" });
-//     }
-
-//     if (
-//       task.createdBy.toString() !== req.user._id.toString() &&
-//       !req.user.isAdmin
-//     ) {
-//       return res.status(403).json({ error: "Unauthorized access" });
-//     }
-
-//     task.visibleTo = [];
-//     await task.save();
-
-//     res.json({ message: "Task hidden successfully" });
-//   } catch (error) {
-//     console.error("Error hiding task:", error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
+    res.status(201).json({
+      message: "Proposal created successfully",
+      proposal: newProposal,
+    });
+  } catch (error) {
+    console.error("Error creating proposal for section:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // Controller method to get a task by ID
 const getTaskById = async (req, res) => {
@@ -824,7 +818,6 @@ const getTaskById = async (req, res) => {
     if (!task) {
       return res.status(404).json({ error: "Task not found" });
     }
-
     res.json(task);
   } catch (error) {
     console.error("Error getting task:", error);
@@ -847,6 +840,7 @@ module.exports = {
   deleteSection,
   toggleSectionPublicationStatus,
   toggleTaskPublicationStatus,
+  createProposalForSection,
   getTaskById,
   deleteTask,
 };

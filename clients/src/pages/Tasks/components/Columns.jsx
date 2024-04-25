@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatPrice } from "@/lib/format";
 import { MdDelete } from "react-icons/md";
+import { IoEyeSharp } from "react-icons/io5";
 import { Flex } from "@chakra-ui/react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { useAxiosInstance } from "../../../../api/axios";
@@ -142,6 +143,9 @@ export const columns = [
           <ConfirmModal onConfirm={onDelete}>
             <MdDelete size={25} color="blue.300" cursor={"pointer"} />
           </ConfirmModal>
+          <Link to={`/projects/applicants/${_id}/details`}>
+            <IoEyeSharp className="h-4 w-4 mr-2" />
+          </Link>
         </div>
       );
     },

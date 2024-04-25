@@ -18,7 +18,7 @@ const ClientTasks = () => {
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const res = await axiosInstance.get(`/tasks/all-tasks`);
+        const res = await axiosInstance.get(`tasks/all-tasks`);
         const data = res.data;
 
         if (data.error) {

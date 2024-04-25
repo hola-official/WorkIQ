@@ -97,7 +97,7 @@ export const SkillForm = ({ initialData, taskId }) => {
               </Badge>
             ))}
           </div>
-          <div className="text-xs text-muted-foreground mt-5">Add</div>
+          <div className="text-xs text-muted-foreground mt-5">Add skill to get related </div>
         </div>
       )}
       {isEditing && (

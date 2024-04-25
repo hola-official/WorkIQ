@@ -9,42 +9,44 @@ import { extendTheme } from "@chakra-ui/theme-utils";
 
 import { RecoilRoot } from "recoil";
 import { ThemeProvider } from "@material-tailwind/react";
+import { StreamChatProvider } from "./context/StreamChatContext.jsx";
 
 const styles = {
-	global: (props) => ({
-		body: {
-			color: mode("gray.800", "whiteAlpha: 900")(props),
-			bg: mode("gray.100", "#101010")(props),
-		},
-	}),
+  global: (props) => ({
+    body: {
+      color: mode("gray.800", "whiteAlpha: 900")(props),
+      bg: mode("gray.100", "#101010")(props),
+    },
+  }),
 };
 
 const config = {
-	initialColorMode: "light",
-	useSystemColorMode: true,
+  initialColorMode: "light",
+  useSystemColorMode: true,
 };
 
 const colors = {
-	gray: {
-		light: "#616161",
-		dark: "#1e1e1e",
-	},
+  gray: {
+    light: "#616161",
+    dark: "#1e1e1e",
+  },
 };
 
 const theme = extendTheme({ config, styles, colors });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-
-	<RecoilRoot>
-		{/* <React.StrictMode> */}
-		<ThemeProvider>
-			<BrowserRouter>
-				<ChakraProvider theme={theme}>
-					<ColorModeScript initialColorMode={theme.config.initialColorMode} />
-					<App />
-				</ChakraProvider>
-			</BrowserRouter>
-			{/* </React.StrictMode> */}
-		</ThemeProvider>
-	</RecoilRoot>
+  <RecoilRoot>
+    {/* <React.StrictMode> */}
+    <ThemeProvider>
+      <StreamChatProvider>
+        <BrowserRouter>
+          <ChakraProvider theme={theme}>
+            <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+            <App />
+          </ChakraProvider>
+        </BrowserRouter>
+        {/* </React.StrictMode> */}
+      </StreamChatProvider>
+    </ThemeProvider>
+  </RecoilRoot>
 );

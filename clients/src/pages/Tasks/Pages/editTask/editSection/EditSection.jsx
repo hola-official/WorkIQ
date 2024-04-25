@@ -194,7 +194,8 @@ import { SectionPriceForm } from "./components/SectionPriceForm";
 import { AttachmentForm } from "./components/AttachmentForm";
 import { SectionDurationForm } from "./components/SectionDurationForm";
 import { useAxiosInstance } from "../../../../../../api/axios";
-import { Spinner, Text, Flex } from "@chakra-ui/react";
+import { Text, Flex } from "@chakra-ui/react";
+import Loading from "@/components/ui/Loading";
 
 const EditSection = () => {
   const { taskId, sectionId } = useParams();
@@ -232,7 +233,7 @@ const EditSection = () => {
         align={"center"}
         h={"100vh"}
       >
-        <Spinner size={"xl"} />
+        <Loading />
         <Text as={"h1"}>Setting up section</Text>
       </Flex>
     );

@@ -34,118 +34,118 @@ import { AiFillGift } from "react-icons/ai";
 import { BsGearFill } from "react-icons/bs";
 import useLogout from "./hooks/useLogout";
 import { ImArrowDownLeft2, ImArrowUpRight2 } from "react-icons/im";
-import { MdHome } from "react-icons/md";
+// import { GoHome } from "react-icons/md";
+import { GoHome } from "react-icons/go";
 import { PiSuitcase } from "react-icons/pi";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
 import { HiLogout } from "react-icons/hi";
-import useGetUserProfile from "./hooks/useGetProfile";
+import { FaRegMessage } from "react-icons/fa6";
+import { StreamChatProvider } from "./context/StreamChatContext";
+import useAuth from "./hooks/useAuth";
 
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
-      <Box
-        transition="3s ease"
-        bg={"gray.200"}
-        boxShadow="1px 0px 2px 1px rgba(0,0,0,0.6)"
-        zIndex={99}
-        w={{ base: "full", md: 60 }}
-        pos="fixed"
-        h="full"
-        color={"#000"} ///////////////////////////////////////////////////For the sidebar
-        {...rest}
-      >
-        <Flex h="20" alignItems="center" mx="6" justifyContent="space-between">
-          {/* <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
+    <Box
+      transition="3s ease"
+      bg={"gray.200"}
+      boxShadow="1px 0px 2px 1px rgba(0,0,0,0.6)"
+      zIndex={99}
+      w={{ base: "full", md: 60 }}
+      pos="fixed"
+      h="full"
+      color={"#000"} ///////////////////////////////////////////////////For the sidebar
+      {...rest}
+    >
+      <Flex h="20" alignItems="center" mx="6" justifyContent="space-between">
+        {/* <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
 						Logo
 					</Text> */}
-          <Image src="/SidebarLogo.svg" />
+        <Image src="/SidebarLogo.svg" />
 
-          <CloseButton
-            display={{ base: "flex", md: "none" }}
-            onClick={onClose}
-          />
-        </Flex>
+        <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
+      </Flex>
 
-        <NavItem
-          as={NavLink}
-          to={"/dashboard"}
-          style={({ isActive }) => ({
-            color: isActive ? "#1F2937" : "",
-            background: isActive ? "#FFFFFF" : "",
-          })}
-          icon={MdHome}
-        >
-          Dashboard
-        </NavItem>
+      <NavItem
+        as={NavLink}
+        to={"/dashboard"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={GoHome}
+      >
+        Dashboard
+      </NavItem>
 
-        <NavItem
-          as={NavLink}
-          to={"/projects"}
-          style={({ isActive }) => ({
-            color: isActive ? "#1F2937" : "",
-            background: isActive ? "#FFFFFF" : "",
-          })}
-          icon={PiSuitcase}
-        >
-          Project
-        </NavItem>
+      <NavItem
+        as={NavLink}
+        to={"/projects"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={PiSuitcase}
+      >
+        Project
+      </NavItem>
 
-        <Accordion allowToggle>
-          <AccordionItem>
-            <AccordionButton>
-              <Flex
-                align="center"
-                p="4"
-                // mx="4"
-                borderRadius="lg"
-                role="group"
-                cursor="pointer"
-              >
-                <Icon mr="4" fontSize="16" as={ImArrowDownLeft2} />
-                Tasks
-              </Flex>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4}>
-              <NavItem
-                as={NavLink}
-                to={"/clients/my-tasks"}
-                style={({ isActive }) => ({
-                  color: isActive ? "#1F2937" : "",
-                  background: isActive ? "#FFFFFF" : "",
-                })}
-                pl="10"
-                py="2"
-              >
-                My Tasks
-              </NavItem>
-              <NavItem
-                as={NavLink}
-                to={"/tasks/sent"}
-                style={({ isActive }) => ({
-                  color: isActive ? "#1F2937" : "",
-                  background: isActive ? "#FFFFFF" : "",
-                })}
-                pl="10"
-                py="2"
-              >
-                All Tasks
-              </NavItem>
-              <NavItem
-                as={NavLink}
-                to={"/clients"}
-                style={({ isActive }) => ({
-                  color: isActive ? "#1F2937" : "",
-                  background: isActive ? "#FFFFFF" : "",
-                })}
-                pl="10"
-                py="2"
-              >
-                Sent proposal
-              </NavItem>
-            </AccordionPanel>
-          </AccordionItem>
+      <NavItem
+        as={NavLink}
+        to={"/messages"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={FaRegMessage}
+      >
+        Message
+      </NavItem>
 
+      <Accordion allowToggle>
+        <AccordionItem>
+          <AccordionButton>
+            <Flex
+              align="center"
+              p="4"
+              // mx="4"
+              borderRadius="lg"
+              role="group"
+              cursor="pointer"
+            >
+              <Icon mr="4" fontSize="16" as={ImArrowDownLeft2} />
+              Tasks
+            </Flex>
+            <AccordionIcon />
+          </AccordionButton>
+          <AccordionPanel pb={4}>
+            <NavItem
+              as={NavLink}
+              to={"/clients/my-tasks"}
+              style={({ isActive }) => ({
+                color: isActive ? "#1F2937" : "",
+                background: isActive ? "#FFFFFF" : "",
+              })}
+              pl="10"
+              py="2"
+            >
+              My Tasks
+            </NavItem>
+            <NavItem
+              as={NavLink}
+              to={"/tasks/sent"}
+              style={({ isActive }) => ({
+                color: isActive ? "#1F2937" : "",
+                background: isActive ? "#FFFFFF" : "",
+              })}
+              pl="10"
+              py="2"
+            >
+              All Tasks
+            </NavItem>
+          </AccordionPanel>
+        </AccordionItem>
+        {/* 
           <AccordionItem>
             <AccordionButton>
               <Flex
@@ -187,42 +187,42 @@ const SidebarContent = ({ onClose, ...rest }) => {
                 Payroll
               </NavItem>
             </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+          </AccordionItem> */}
+      </Accordion>
 
-        <NavItem
-          as={NavLink}
-          to={"/invoice-me"}
-          style={({ isActive }) => ({
-            color: isActive ? "#1F2937" : "",
-            background: isActive ? "#FFFFFF" : "",
-          })}
-          icon={AiFillGift}
+      {/* <NavItem
+        as={NavLink}
+        to={"/invoice-me"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={AiFillGift}
+      >
+        InvoiceMe
+      </NavItem>
+      <NavItem
+        as={NavLink}
+        to={"/employees"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={BsGearFill}
+      >
+        Employees
+      </NavItem> */}
+      <div className="flex w-[80%] items-center mx-auto">
+        <Button
+          cursor={"pointer"}
+          leftIcon={<HiLogout />}
+          colorScheme={"gray"}
+          variant="outline"
         >
-          InvoiceMe
-        </NavItem>
-        <NavItem
-          as={NavLink}
-          to={"/employees"}
-          style={({ isActive }) => ({
-            color: isActive ? "#1F2937" : "",
-            background: isActive ? "#FFFFFF" : "",
-          })}
-          icon={BsGearFill}
-        >
-          Employees
-        </NavItem>
-        <div className="flex w-[80%] items-center mx-auto">
-          <Button
-            cursor={"pointer"}
-            leftIcon={<HiLogout />}
-            colorScheme={"gray"}
-            variant="outline"
-          >
-            Logout
-          </Button>
-        </div>
-      </Box>
+          Logout
+        </Button>
+      </div>
+    </Box>
   );
 };
 
@@ -253,6 +253,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
   const logout = useLogout();
   const user = useRecoilValue(userAtom);
   const navigate = useNavigate();
+  const {_id} = useAuth()
 
   return (
     <Flex
@@ -294,7 +295,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               _focus={{ boxShadow: "none" }}
             >
               <HStack>
-                <Avatar size={"sm"} src={user.avatar} />
+                <Avatar size={"sm"} src={user?.avatar} />
                 <VStack
                   display={{ base: "none", md: "flex" }}
                   alignItems="flex-start"
@@ -302,7 +303,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                   ml="2"
                 >
                   <Text fontSize="sm" color="gray.600">
-                    {user.name}
+                    {user?.name}
                   </Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
@@ -314,7 +315,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem onClick={() => navigate(`/profile/${user.username}`)}>
+              <MenuItem onClick={() => navigate(`/profile/${user?.username}`)}>
                 Profile
               </MenuItem>
               <MenuDivider />
@@ -331,32 +332,33 @@ const SidebarWithHeader = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box
-      minH="100vh"
-      bg={"#fff"} ///////////////////////////////////////////////////////////For the whole box
-    >
-      <SidebarContent
-        onClose={() => onClose}
-        display={{ base: "none", md: "block" }}
-      />
-      <Drawer
-        isOpen={isOpen}
-        placement="left"
-        onClose={onClose}
-        returnFocusOnClose={false}
-        onOverlayClick={onClose}
-        size="full"
+      <Box
+        minH="100vh"
+        bg={"#fff"} ///////////////////////////////////////////////////////////For the whole box
       >
-        <DrawerContent>
-          <SidebarContent onClose={onClose} />
-        </DrawerContent>
-      </Drawer>
-      {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }} minH={"100%"} p="2">
-        {children}
+        <SidebarContent
+          onClose={() => onClose}
+          display={{ base: "none", md: "block" }}
+        />
+        <Drawer
+          isOpen={isOpen}
+          placement="left"
+          onClose={onClose}
+          returnFocusOnClose={false}
+          onOverlayClick={onClose}
+          size="full"
+        >
+          <DrawerContent>
+            <SidebarContent onClose={onClose} />
+          </DrawerContent>
+        </Drawer>
+        {/* mobilenav */}
+        <MobileNav onOpen={onOpen} />
+        <Box ml={{ base: 0, md: 60 }} minH={"100%"} p="2">
+          {children}
+        </Box>
       </Box>
-    </Box>
+    
   );
 };
 

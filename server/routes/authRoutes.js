@@ -4,11 +4,12 @@ const {
 	signUp,
 	login,
 	logout,
-	getCurrentUserInfo,
+	// getCurrentUserInfo,
 	activateUser,
 	passwordReset,
 	confirmPasswordResetOTP,
 	passwordResetConfirmed,
+	generateGoogleAuthCookie,
 } = require("../controllers/authController");
 const { googleAuthCallback, authenticateGoogle } = require("../middleware/passportMiddleware");
 
@@ -20,8 +21,8 @@ router.get(
 	authenticateGoogle
 );
 
-router.get("/google/callback", googleAuthCallback);
-router.get("/google/success", getCurrentUserInfo);
+router.get("/google/callback", googleAuthCallback, generateGoogleAuthCookie);
+// router.get("/google/success", getCurrentUserInfo);
 router.post("/signup", signUp);
 router.post("/login", login);
 router.post("/activate-account", activateUser);

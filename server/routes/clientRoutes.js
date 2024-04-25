@@ -14,6 +14,7 @@ const {
   deleteSection,
   toggleSectionPublicationStatus,
   toggleTaskPublicationStatus,
+  createProposalForSection,
   getTaskById,
   deleteTask,
 } = require("../controllers/clientController");
@@ -98,10 +99,19 @@ router.delete(
   verifyRoles(Admin, Client),
   deleteAttachmentFromSection
 );
+
+// Route to create a proposal for a section within a task
+router.post(
+  "/:taskId/section/:sectionId/create-proposal",
+  verifyJWT,
+  verifyRoles(Freelancer), // Only freelancers can create proposals
+  createProposalForSection
+);
+
 // Route to delete a task by ID
 router.delete("/:id", verifyJWT, verifyRoles(Admin, Client), deleteTask);
 
 // Route to get a task by ID
-router.get("/:id", verifyJWT, verifyRoles(Admin, Client), getTaskById);
+router.get("/:id", verifyJWT, getTaskById);
 
 module.exports = router;
