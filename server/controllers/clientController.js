@@ -659,25 +659,28 @@ const toggleSectionPublicationStatus = async (req, res) => {
     if (!sectionToUpdate) {
       return res.status(404).json({ message: "Section not found" });
     }
+    // Toggle the section's publication status
+    sectionToUpdate.isPublished = !sectionToUpdate.isPublished;
 
+    // If the section unpublished is the only section, unpublish the course
+    if (!sectionToUpdate.isPublished && ownCourse.sections.length === 1) {
+      ownCourse.isPublished = false;
+    }
+    
     // Check if the section is assigned to a freelancer
     if (sectionToUpdate.isAssigned) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Section is already assigned to a freelancer. Please contact support for assistance.",
-        });
+      return res.status(400).json({
+        message:
+          "Section is already assigned to a freelancer. Please contact support for assistance.",
+      });
     }
 
     // Check if there are pending transactions for this section
     if (sectionToUpdate.transactions.length > 0) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "There are pending transactions for this section. Please wait until they are completed.",
-        });
+      return res.status(400).json({
+        message:
+          "There are pending transactions for this section. Please wait until they are completed.",
+      });
     }
 
     // Toggle the section's publication status

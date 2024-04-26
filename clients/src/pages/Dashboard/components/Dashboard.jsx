@@ -10,8 +10,6 @@ const Dashboard = () => {
   const { _id } = useAuth();
   const [user, setUser] = useState();
   const axiosInstance = useAxiosInstance();
-  const [showDepositModal, setShowDepositModal] = React.useState(false);
-  const [data = [], setData] = React.useState([]);
 
   useEffect(() => {
     handleUserInfo();
@@ -27,7 +25,6 @@ const Dashboard = () => {
       console.error(error);
     }
   };
-
   if (user) {
     return (
       <div className="flex flex-col px-4 py-4 gap-4">

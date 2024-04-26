@@ -1,45 +1,54 @@
-import React from "react";
-import { Modal, Form, message } from "antd";
+import React, { useState } from "react";
+import {
+  Modal,
+  // Form,
+  message,
+} from "antd";
+// import { Modal, useDisclosure } from "@chakra-ui/react";
 import StripeCheckout from "react-stripe-checkout";
 import { useAxiosInstance } from "../../../../api/axios";
-import { Button } from "@chakra-ui/react";
+import { Button, Input } from "@chakra-ui/react";
+import useShowToast from "@/hooks/useShowToast";
+import tokenAtom from "@/atoms/tokenAtom";
+import { useRecoilValue } from "recoil";
 
 const apiKey = import.meta.env.VITE_STRIPE_KEY;
 
 function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
-  const [form] = Form.useForm();
-  // const dispatch = useDispatch();
+  // const [form] = Form.useForm();
+  const showToast = useShowToast();
+  const [amount, setAmount] = useState();
   const axiosInstance = useAxiosInstance();
+  // const token = useRecoilValue(tokenAtom);
+  // const { isOpen, onOpen, onClose } = useDisclosure()
 
   const DepositFunds = async (payload) => {
     try {
-      const { data } = await axiosInstance.post(
-        "transactions/deposit-funds",
-        payload
-      );
+      const { data } = await axiosInstance.post("transactions/deposit-funds", {
+        token: payload,
+        amount: amount,
+      });
+      console.log(data);
       return data;
     } catch (error) {
+      console.log(error);
       return error.response.data;
     }
   };
 
   const onToken = async (token) => {
     try {
-      const response = await DepositFunds({
-        token,
-        amount: form.getFieldValue("amount"),
-      });
-      // dispatch(HideLoading());
+      const response = await DepositFunds(token);
+      console.log(response);
       if (response.success) {
-        reloadData();
         setShowDepositModal(false);
-        message.success(response.message);
+        showToast("Success", `${response.message}`, "success");
       } else {
-        message.error(response.message);
+        showToast("Error", `${response.message}`, "error");
       }
     } catch (error) {
-      // dispatch(HideLoading());
-      message.error(error.message);
+      console.log(error);
+      showToast("Error", `${error.message}`, "error");
     }
   };
 
@@ -50,35 +59,38 @@ function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
       onCancel={() => setShowDepositModal(false)}
       footer={null}
     >
-      <div className="flex-col gap-1">
-        <Form layout="vertical" form={form}>
-          <Form.Item
-            label="Amount"
-            name="amount"
-            rules={[
-              {
-                required: true,
-                message: "Please input amount",
-              },
-            ]}
-          >
-            <input type="number" />
-          </Form.Item>
+      <form
+        layout="vertical"
+        // form={form}
+      >
+        <div className="flex-col gap-2">
+          <div className="mb-2">
+            <Input
+              type="number"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </div>
 
           <div className="flex justify-end gap-1">
-            <Button variant={'outline'}>Cancel</Button>
+            <Button variant={"outline"} size={["sm", "md"]}>Cancel</Button>
             <StripeCheckout
               token={onToken}
               currency="USD"
-              amount={form.getFieldValue("amount") * 100}
+              amount={parseFloat(amount) * 100}
               shippingAddress
+              billingAddress
               stripeKey={apiKey}
             >
-              <Button colorScheme='blue' size={['lg', 'md', 'sm']}>Deposit</Button>
+              <Button colorScheme="blue" size={["sm", "md"]}>
+                Deposit
+              </Button>
             </StripeCheckout>
           </div>
-        </Form>
-      </div>
+        </div>
+      </form>
     </Modal>
   );
 }

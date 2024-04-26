@@ -58,6 +58,7 @@ app.use(express.urlencoded({ extended: true })); // parse form data inside the r
 
 // Cross Origin Resource Sharing
 app.use(cors(corsOptions));
+// app.use(cors);
 app.use(cookieParser());
 
 // Routes

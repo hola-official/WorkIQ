@@ -33,6 +33,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { AiFillGift } from "react-icons/ai";
 import { BsGearFill } from "react-icons/bs";
 import useLogout from "./hooks/useLogout";
+import React from 'react'
 import { ImArrowDownLeft2, ImArrowUpRight2 } from "react-icons/im";
 // import { GoHome } from "react-icons/md";
 import { GoHome } from "react-icons/go";
@@ -43,6 +44,7 @@ import { HiLogout } from "react-icons/hi";
 import { FaRegMessage } from "react-icons/fa6";
 import { StreamChatProvider } from "./context/StreamChatContext";
 import useAuth from "./hooks/useAuth";
+import DepositModal from "./pages/Dashboard/components/DepositModal";
 
 const SidebarContent = ({ onClose, ...rest }) => {
   return (
@@ -253,7 +255,9 @@ const MobileNav = ({ onOpen, ...rest }) => {
   const logout = useLogout();
   const user = useRecoilValue(userAtom);
   const navigate = useNavigate();
-  const {_id} = useAuth()
+  const { _id } = useAuth();
+  const [showDepositModal, setShowDepositModal] = React.useState(false);
+  const [data = [], setData] = React.useState([]);
 
   return (
     <Flex
@@ -318,12 +322,22 @@ const MobileNav = ({ onOpen, ...rest }) => {
               <MenuItem onClick={() => navigate(`/profile/${user?.username}`)}>
                 Profile
               </MenuItem>
+              <MenuItem onClick={() => setShowDepositModal(true)}>
+                Deposit
+              </MenuItem>
               <MenuDivider />
               <MenuItem onClick={logout}>Sign out</MenuItem>
             </MenuList>
           </Menu>
         </Flex>
       </HStack>
+      {showDepositModal && (
+        <DepositModal
+          showDepositModal={showDepositModal}
+          setShowDepositModal={setShowDepositModal}
+          // reloadData={getData}
+        />
+      )}
     </Flex>
   );
 };
@@ -332,33 +346,32 @@ const SidebarWithHeader = ({ children }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-      <Box
-        minH="100vh"
-        bg={"#fff"} ///////////////////////////////////////////////////////////For the whole box
+    <Box
+      minH="100vh"
+      bg={"#fff"} ///////////////////////////////////////////////////////////For the whole box
+    >
+      <SidebarContent
+        onClose={() => onClose}
+        display={{ base: "none", md: "block" }}
+      />
+      <Drawer
+        isOpen={isOpen}
+        placement="left"
+        onClose={onClose}
+        returnFocusOnClose={false}
+        onOverlayClick={onClose}
+        size="full"
       >
-        <SidebarContent
-          onClose={() => onClose}
-          display={{ base: "none", md: "block" }}
-        />
-        <Drawer
-          isOpen={isOpen}
-          placement="left"
-          onClose={onClose}
-          returnFocusOnClose={false}
-          onOverlayClick={onClose}
-          size="full"
-        >
-          <DrawerContent>
-            <SidebarContent onClose={onClose} />
-          </DrawerContent>
-        </Drawer>
-        {/* mobilenav */}
-        <MobileNav onOpen={onOpen} />
-        <Box ml={{ base: 0, md: 60 }} minH={"100%"} p="2">
-          {children}
-        </Box>
+        <DrawerContent>
+          <SidebarContent onClose={onClose} />
+        </DrawerContent>
+      </Drawer>
+      {/* mobilenav */}
+      <MobileNav onOpen={onOpen} />
+      <Box ml={{ base: 0, md: 60 }} minH={"100%"} p="2">
+        {children}
       </Box>
-    
+    </Box>
   );
 };
 

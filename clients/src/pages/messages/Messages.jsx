@@ -10,6 +10,7 @@ import {
   MessageList,
   ChannelHeader,
   Thread,
+  Avatar,
 } from "stream-chat-react";
 // import { useChatContext } from "stream-chat-react/dist/context";
 import "stream-chat-react/dist/css/index.css";
@@ -20,14 +21,12 @@ import { useStreamChat } from "@/context/StreamChatContext";
 import "@/styles/streamChatStyles.css";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+// import { EmojiPicker } from 'stream-chat-react/emojis';
 
-// import { CustomMessage } from "./components/CustomMessage";
-// import useStreamChat from "@/hooks/useStreamChat";
-// import { useLoggedInAuth } from "./context/AuthContext";
 export function Messages() {
   const { _id } = useAuth();
   const { streamChat } = useStreamChat();
-  console.log(streamChat);
+  // console.log(streamChat);
   // console.log(_id);
 
   // const { user, streamChat } = useLoggedInAuth();
@@ -40,7 +39,10 @@ export function Messages() {
           sendChannelsToList
           filters={{ members: { $in: [_id] } }}
         />
-        <Channel PinIndicator={CustomPinIndicator}>
+        <Channel
+          // EmojiPicker={EmojiPicker}
+          PinIndicator={CustomPinIndicator}
+        >
           <Window>
             <ChannelHeader />
             <MessageList />
@@ -73,7 +75,7 @@ function Channels({ loadedChannels }) {
       });
     }
   }, [applicant, setActiveChannel]);
-  console.log(activeChannel);
+  // console.log(activeChannel);
   let members;
   // if (activeChannel)
   //   members = Object.values(channel.state.members).filter(
@@ -95,9 +97,9 @@ function Channels({ loadedChannels }) {
 
             // Assuming channel.members contains the list of members and channel.user is the logged-in user
             const secondMember = Object.values(channel.state.members).filter(
-							({ user }) => user.id !== client.userID
-						)[0];
-						// channel._data.members.find(
+              ({ user }) => user.id !== client.userID
+            )[0];
+            // channel._data.members.find(
             //   (member) => member.id !== channel.user.id
             // );
 
@@ -108,14 +110,20 @@ function Channels({ loadedChannels }) {
                 className={`p-4 rounded-lg flex gap-3 items-center ${extraClasses}`}
                 key={channel.id}
               >
-                {secondMember && secondMember?.user?.image && (
+                {/* {secondMember && secondMember?.user?.image && (
                   <img
                     src={secondMember?.user?.image}
                     className="w-10 h-10 rounded-full object-center object-cover"
                   />
-                )}
-                <div className="text-ellipsis overflow-hidden whitespace-nowrap">
-                  {secondMember ? secondMember?.user?.fullName : channel.id}
+                )} */}
+                <div className=" flex items-center text-ellipsis overflow-hidden whitespace-nowrap">
+                  {secondMember && secondMember?.user?.image && (
+                    <Avatar
+                      src={secondMember?.user?.image}
+                      className="w-10 h-10 rounded-full object-center object-cover"
+                    />
+                  )}
+                  {secondMember ? secondMember?.user?.name : channel.id}
                 </div>
               </button>
             );
