@@ -19,6 +19,69 @@ const proposalSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+const orderSchema = new Schema(
+  {
+    client: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    freelancer: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    task: {
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+    },
+    sectionPrice: {
+      type: Number,
+      required: true,
+    },
+    isDelivered: {
+      type: Boolean,
+      default: false,
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
+    requirements: {
+      coverLetter: {
+        type: String,
+      },
+      isSubmitted: {
+        type: Boolean,
+        default: false,
+      },
+      attachments: [
+        {
+          name: String,
+          url: String,
+        },
+      ],
+    },
+    deliver: {
+      coverLetter: {
+        type: String,
+      },
+      attachments: [
+        {
+          name: String,
+          url: String,
+        },
+      ],
+    },
+    status: {
+      type: String,
+      default: "in_progress",
+      enum: ["pending", "in_progress", "completed", "cancelled"],
+    },
+    section: [{ type: Schema.Types.ObjectId, ref: "task.section" }],
+  },
+  {
+    timestamps: true,
+  }
+);
 
 const sectionSchema = new Schema({
   title: String,
@@ -26,14 +89,19 @@ const sectionSchema = new Schema({
   durationDays: {
     type: Number,
     default: 3,
-    // required: true
   },
   isPublished: Boolean,
+  assignTo: String,
+  isAssigned: {
+    type: Boolean,
+    default: false,
+  },
   price: {
     type: Number,
     default: 5,
   },
   proposal: [proposalSchema],
+  order: [orderSchema],
   attachments: [
     {
       name: String,
@@ -50,7 +118,6 @@ const taskSchema = new Schema(
     },
     description: {
       type: String,
-      // required: true
     },
     totalPrice: {
       type: Number,

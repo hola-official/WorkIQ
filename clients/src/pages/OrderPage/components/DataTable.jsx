@@ -1,10 +1,5 @@
 import React, { useState } from "react";
 import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
-import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -14,13 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import { downloadToExcel } from "@/lib/sentTask_xlsx";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -30,8 +18,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button as Chakrabutton, Flex, Select, Text } from "@chakra-ui/react";
-import { useNavigate, Link } from "react-router-dom";
-import { PlusCircle } from "lucide-react";
 
 export function DataTable({ columns, data }) {
   const [sorting, setSorting] = useState([]);
@@ -59,24 +45,15 @@ export function DataTable({ columns, data }) {
   let currentPage = table.options.state.pagination.pageIndex + 1;
   if (!data?.length) {
     return (
-      <Link to="/clients/create-tasks">
-        <Chakrabutton colorScheme={"blue"}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          New Task
-        </Chakrabutton>
-      </Link>
+      <div>
+        <h1 className="text-2xl md:text-4xl font-medium">My Orders</h1>
+      </div>
     );
   }
 
   return (
     <div className="w-full">
       <div className="flex items-center py-4 justify-between">
-        <Link to="/clients/create-tasks">
-          <Chakrabutton colorScheme={"blue"}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            New Task
-          </Chakrabutton>
-        </Link>
         <Input
           placeholder="Filter names..."
           value={table.getColumn("title")?.getFilterValue() || ""}

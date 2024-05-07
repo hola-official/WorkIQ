@@ -3,15 +3,13 @@ import withMT from "@material-tailwind/react/utils/withMT";
 const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
-
-
 module.exports = withMT({
   darkMode: ["class"],
   content: [
-    './pages/**/*.{js,jsx}',
-    './components/**/*.{js,jsx}',
-    './app/**/*.{js,jsx}',
-    './src/**/*.{js,jsx}',
+    "./pages/**/*.{js,jsx}",
+    "./components/**/*.{js,jsx}",
+    "./app/**/*.{js,jsx}",
+    "./src/**/*.{js,jsx}",
   ],
   prefix: "",
   theme: {
@@ -26,16 +24,15 @@ module.exports = withMT({
       colors: {
         ...colors,
         light: {
-					900: "#FFFFFF",
-					800: "#F4F6F8",
-					850: "#FDFDFD",
-					700: "#DCE3F1",
-					500: "#7B8EC8",
-					400: "#858EAD",
-				},
+          900: "#FFFFFF",
+          800: "#F4F6F8",
+          850: "#FDFDFD",
+          700: "#DCE3F1",
+          500: "#7B8EC8",
+          400: "#858EAD",
+        },
       },
       screens: {
-
         ...defaultTheme.screens,
       },
       keyframes: {
@@ -54,5 +51,9 @@ module.exports = withMT({
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-})
+  plugins: [
+    require("daisyui"),
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+  ],
+});

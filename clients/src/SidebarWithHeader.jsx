@@ -1,14 +1,6 @@
 import {
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
   Image,
-  Spinner,
   Button,
-} from "@chakra-ui/react";
-import {
   IconButton,
   Avatar,
   Box,
@@ -30,23 +22,21 @@ import {
 } from "@chakra-ui/react";
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
-import { AiFillGift } from "react-icons/ai";
-import { BsGearFill } from "react-icons/bs";
 import useLogout from "./hooks/useLogout";
-import React from 'react'
-import { ImArrowDownLeft2, ImArrowUpRight2 } from "react-icons/im";
-// import { GoHome } from "react-icons/md";
+import React from "react";
 import { GoHome } from "react-icons/go";
 import { PiSuitcase } from "react-icons/pi";
 import { useRecoilValue } from "recoil";
 import userAtom from "./atoms/userAtom";
 import { HiLogout } from "react-icons/hi";
 import { FaRegMessage } from "react-icons/fa6";
-import { StreamChatProvider } from "./context/StreamChatContext";
 import useAuth from "./hooks/useAuth";
 import DepositModal from "./pages/Dashboard/components/DepositModal";
+import { FaListUl } from "react-icons/fa";
+import { FiBriefcase } from "react-icons/fi";
 
 const SidebarContent = ({ onClose, ...rest }) => {
+  const logout = useLogout();
   return (
     <Box
       transition="3s ease"
@@ -104,122 +94,37 @@ const SidebarContent = ({ onClose, ...rest }) => {
         Message
       </NavItem>
 
-      <Accordion allowToggle>
-        <AccordionItem>
-          <AccordionButton>
-            <Flex
-              align="center"
-              p="4"
-              // mx="4"
-              borderRadius="lg"
-              role="group"
-              cursor="pointer"
-            >
-              <Icon mr="4" fontSize="16" as={ImArrowDownLeft2} />
-              Tasks
-            </Flex>
-            <AccordionIcon />
-          </AccordionButton>
-          <AccordionPanel pb={4}>
-            <NavItem
-              as={NavLink}
-              to={"/clients/my-tasks"}
-              style={({ isActive }) => ({
-                color: isActive ? "#1F2937" : "",
-                background: isActive ? "#FFFFFF" : "",
-              })}
-              pl="10"
-              py="2"
-            >
-              My Tasks
-            </NavItem>
-            <NavItem
-              as={NavLink}
-              to={"/tasks/sent"}
-              style={({ isActive }) => ({
-                color: isActive ? "#1F2937" : "",
-                background: isActive ? "#FFFFFF" : "",
-              })}
-              pl="10"
-              py="2"
-            >
-              All Tasks
-            </NavItem>
-          </AccordionPanel>
-        </AccordionItem>
-        {/* 
-          <AccordionItem>
-            <AccordionButton>
-              <Flex
-                align="center"
-                p="4"
-                // mx="4"
-                borderRadius="lg"
-                role="group"
-                cursor="pointer"
-              >
-                <Icon mr="4" fontSize="16" as={ImArrowUpRight2} />
-                Pay
-              </Flex>
-              <AccordionIcon />
-            </AccordionButton>
-            <AccordionPanel pb={4}>
-              <NavItem
-                as={NavLink}
-                to={"/bills"}
-                style={({ isActive }) => ({
-                  color: isActive ? "#1F2937" : "",
-                  background: isActive ? "#FFFFFF" : "",
-                })}
-                pl="10"
-                py="2"
-              >
-                Bills
-              </NavItem>
-              <NavItem
-                as={NavLink}
-                to={"/payrolls"}
-                style={({ isActive }) => ({
-                  color: isActive ? "#1F2937" : "",
-                  background: isActive ? "#FFFFFF" : "",
-                })}
-                pl="10"
-                py="2"
-              >
-                Payroll
-              </NavItem>
-            </AccordionPanel>
-          </AccordionItem> */}
-      </Accordion>
-
-      {/* <NavItem
-        as={NavLink}
-        to={"/invoice-me"}
-        style={({ isActive }) => ({
-          color: isActive ? "#1F2937" : "",
-          background: isActive ? "#FFFFFF" : "",
-        })}
-        icon={AiFillGift}
-      >
-        InvoiceMe
-      </NavItem>
       <NavItem
         as={NavLink}
-        to={"/employees"}
+        to={"/manage-orders"}
         style={({ isActive }) => ({
           color: isActive ? "#1F2937" : "",
           background: isActive ? "#FFFFFF" : "",
         })}
-        icon={BsGearFill}
+        icon={FaListUl}
       >
-        Employees
-      </NavItem> */}
+        Orders
+      </NavItem>
+
+      <NavItem
+        as={NavLink}
+        to={"/clients/my-tasks"}
+        style={({ isActive }) => ({
+          color: isActive ? "#1F2937" : "",
+          background: isActive ? "#FFFFFF" : "",
+        })}
+        icon={FiBriefcase}
+      >
+        My Tasks
+      </NavItem>
+
       <div className="flex w-[80%] items-center mx-auto">
         <Button
           cursor={"pointer"}
           leftIcon={<HiLogout />}
           colorScheme={"gray"}
           variant="outline"
+          onClick={logout}
         >
           Logout
         </Button>
@@ -255,9 +160,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
   const logout = useLogout();
   const user = useRecoilValue(userAtom);
   const navigate = useNavigate();
-  const { _id } = useAuth();
   const [showDepositModal, setShowDepositModal] = React.useState(false);
-  const [data = [], setData] = React.useState([]);
 
   return (
     <Flex

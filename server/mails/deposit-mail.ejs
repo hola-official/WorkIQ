@@ -91,6 +91,9 @@
       padding: 12px 24px;
       border-radius: 4px;
     }
+    span{
+      font-weight: 800;
+    }
   </style>
 </head>
 
@@ -101,7 +104,7 @@
     </div>
     <div class="email-body">
       <p>Hello <%= user.username %>,</p>
-      <p>Your deposit of <%= amount %> USD has been successfully completed.</p>
+      <p>Your deposit of <span><%= amount %> USD</span> has been successfully completed.</p>
       <p>Date & Time: <%= time.timestamp %>
       <p>Thank you for using WorkIQ!</p>
     </div>

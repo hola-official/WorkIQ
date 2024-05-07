@@ -13,17 +13,18 @@ import {
 import { getTimestamp } from "@/lib/utils";
 import { useAxiosInstance } from "../../../../../api/axios";
 import { formatPrice } from "@/lib/format";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { GoChevronRight } from "react-icons/go";
 
 const Proposal = ({ task, proposal, section }) => {
+  // const { sectionId } = useParams();
   const axiosInstance = useAxiosInstance();
   const [freelancer, setFreelancer] = useState(null);
 
   useEffect(() => {
     handleFreelancerInfo();
   }, [task]);
-
+  // console.log(section)
   const handleFreelancerInfo = async () => {
     try {
       const res = await axiosInstance.get(`users/${proposal.freelancer}`);
@@ -34,6 +35,20 @@ const Proposal = ({ task, proposal, section }) => {
       console.error(error);
     }
   };
+
+  const handleCreateOrder = async () => {
+    try {
+      const res = await axiosInstance.post(`order/create-order/${section._id}`, {
+        freelancerId: freelancer._id,
+      });
+
+      const data = await res.data;
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  //  handleCreateOrder()
 
   return (
     <>
@@ -129,6 +144,29 @@ const Proposal = ({ task, proposal, section }) => {
                 <Icon as={GoChevronRight} w={4} h={4} />
               </HStack>
             </Stack>
+
+            <Box>
+              <HStack
+                // as={Link}
+                spacing={1}
+                p={1}
+                alignItems="center"
+                height="2rem"
+                onClick={handleCreateOrder}
+                cursor={'pointer'}
+                // to={``}
+                w="max-content"
+                margin="auto 0"
+                rounded="md"
+                color="blue.400"
+                _hover={{
+                  bg: useColorModeValue("gray.200", "gray.700"),
+                }}
+              >
+                <Text fontSize="sm">Assign</Text>
+                <Icon as={GoChevronRight} w={4} h={4} />
+              </HStack>
+            </Box>
           </Box>
         </Box>
         {/* Render freelancer information */}

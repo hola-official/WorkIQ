@@ -583,8 +583,6 @@ const deleteSection = async (req, res) => {
 
 //     // Adjust task's total price based on section's publication status
 //     const sectionPrice = sectionToUpdate.price;
-//     console.log(sectionToUpdate);
-//     console.log(ownTask);
 //     if (sectionToUpdate.isPublished !== previousPublicationStatus) {
 //       if (sectionToUpdate.isPublished) {
 //         ownTask.totalPrice += sectionPrice; // Add section price
@@ -592,34 +590,35 @@ const deleteSection = async (req, res) => {
 //         ownTask.totalPrice -= sectionPrice; // Remove section price
 //       }
 //     }
-//     console.log(ownTask.totalPrice);
 
 //     // If the section unpublished is the only section, unpublish the task
 //     if (!sectionToUpdate.isPublished && ownTask.sections.length === 1) {
 //       ownTask.isPublished = false;
 //     }
+
 //     // Retrieve the user from the database
 //     const user = await userModel.findById(userId);
-
 //     if (!user) {
 //       return res.status(404).json({ msg: "User not found" });
 //     }
 
-//     // Check if the user has sufficient balance
-//     if (user.balance < sectionPrice) {
-//       return res.status(400).json({ message: "Insufficient balance" });
-//     }
-//     user.balance -= sectionPrice;
+//     // Check if the section is being published
+//     if (sectionToUpdate.isPublished) {
+//       // Check if the user has sufficient balance
+//       if (user.balance < sectionPrice) {
+//         return res.status(400).json({ message: "Insufficient balance" });
+//       }
 
-//     if (user.balance > sectionPrice) {
-//       return res
-//         .status(200)
-//         .json({
-//           message: `${sectionPrice} has been deducted from your account`,
-//         });
+//       // Deduct the section price from the user's balance and hold it in escrow
+//       user.balance -= sectionPrice;
+//       user.escrowBalance = (user.escrowBalance || 0) + sectionPrice;
+//     } else {
+//       // If section is unpublished, return funds to client's balance
+//       user.balance += sectionPrice;
+//       user.escrowBalance = (user.escrowBalance || 0) - sectionPrice;
 //     }
 
-//     // Deduct the section price from the user's balance
+//     // Save the updated user's balance
 //     await user.save();
 
 //     // Save the updated task with toggled publication status of the section
@@ -659,29 +658,6 @@ const toggleSectionPublicationStatus = async (req, res) => {
     if (!sectionToUpdate) {
       return res.status(404).json({ message: "Section not found" });
     }
-    // Toggle the section's publication status
-    sectionToUpdate.isPublished = !sectionToUpdate.isPublished;
-
-    // If the section unpublished is the only section, unpublish the course
-    if (!sectionToUpdate.isPublished && ownCourse.sections.length === 1) {
-      ownCourse.isPublished = false;
-    }
-    
-    // Check if the section is assigned to a freelancer
-    if (sectionToUpdate.isAssigned) {
-      return res.status(400).json({
-        message:
-          "Section is already assigned to a freelancer. Please contact support for assistance.",
-      });
-    }
-
-    // Check if there are pending transactions for this section
-    if (sectionToUpdate.transactions.length > 0) {
-      return res.status(400).json({
-        message:
-          "There are pending transactions for this section. Please wait until they are completed.",
-      });
-    }
 
     // Toggle the section's publication status
     const previousPublicationStatus = sectionToUpdate.isPublished;
@@ -705,18 +681,19 @@ const toggleSectionPublicationStatus = async (req, res) => {
 
       // Deduct the section price from the user's balance and hold it in escrow
       user.balance -= sectionPrice;
-      user.escrowBalance = (user.escrowBalance || 0) + sectionPrice;
 
+      // Update the user's balance and hold the escrow amount
+      user.escrowBalance = (user.escrowBalance || 0) + sectionPrice;
+      console.log(user.balance);
+      console.log(user.escrowBalance);
       // Save the updated user's balance
       await user.save();
     } else {
-      // If section is unpublished, return funds to client's balance
       user.balance += sectionPrice;
       user.escrowBalance = (user.escrowBalance || 0) - sectionPrice;
 
       await user.save();
     }
-
     // If balance deduction is successful, update the section's publication status
     if (user.balance >= 0) {
       if (sectionToUpdate.isPublished !== previousPublicationStatus) {
@@ -751,6 +728,121 @@ const toggleSectionPublicationStatus = async (req, res) => {
     return res.status(500).json({ message: "Internal Error" });
   }
 };
+
+// const toggleSectionPublicationStatus = async (req, res) => {
+//   try {
+//     const { userId } = req; // Assuming you have user information stored in req.user after authentication
+//     if (!userId) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     const { sectionId, taskId } = req.params;
+
+//     // Check if the user owns the task
+//     const ownTask = await Task.findOne({
+//       _id: taskId,
+//       client: userId,
+//     });
+//     if (!ownTask) {
+//       return res.status(401).json({ message: "Unauthorized" });
+//     }
+
+//     // Find the section by its ID
+//     const sectionToUpdate = ownTask.sections.find((section) =>
+//       section._id.equals(sectionId)
+//     );
+//     if (!sectionToUpdate) {
+//       return res.status(404).json({ message: "Section not found" });
+//     }
+
+//     // Check if the section is assigned to a freelancer
+//     if (sectionToUpdate.isAssigned) {
+//       return res
+//         .status(400)
+//         .json({
+//           message:
+//             "Section is already assigned to a freelancer. Please contact support for assistance.",
+//         });
+//     }
+
+//     // Check if there are pending transactions for this section
+//     if (sectionToUpdate.transactions.length > 0) {
+//       return res
+//         .status(400)
+//         .json({
+//           message:
+//             "There are pending transactions for this section. Please wait until they are completed.",
+//         });
+//     }
+
+//     // Toggle the section's publication status
+//     const previousPublicationStatus = sectionToUpdate.isPublished;
+//     sectionToUpdate.isPublished = !previousPublicationStatus;
+
+//     // Adjust task's total price based on section's publication status
+//     const sectionPrice = sectionToUpdate.price;
+
+//     // Retrieve the user from the database
+//     const user = await userModel.findById(userId);
+
+//     if (!user) {
+//       return res.status(404).json({ msg: "User not found" });
+//     }
+
+//     if (sectionToUpdate.isPublished) {
+//       // Check if the user has sufficient balance
+//       if (user.balance < sectionPrice) {
+//         return res.status(400).json({ message: "Insufficient balance" });
+//       }
+
+//       // Deduct the section price from the user's balance and hold it in escrow
+//       user.balance -= sectionPrice;
+//       user.escrowBalance = (user.escrowBalance || 0) + sectionPrice;
+
+//       // Save the updated user's balance
+//       await user.save();
+//     } else {
+//       // If section is unpublished, return funds to client's balance
+//       user.balance += sectionPrice;
+//       user.escrowBalance = (user.escrowBalance || 0) - sectionPrice;
+
+//       await user.save();
+//     }
+
+//     // If balance deduction is successful, update the section's publication status
+//     if (user.balance >= 0) {
+//       if (sectionToUpdate.isPublished !== previousPublicationStatus) {
+//         if (sectionToUpdate.isPublished) {
+//           ownTask.totalPrice += sectionPrice; // Add section price to task's total price
+//         } else {
+//           ownTask.totalPrice -= sectionPrice; // Remove section price from task's total price
+//         }
+//       }
+//     } else {
+//       // If balance is insufficient after deduction, revert the publication status and balance deduction
+//       sectionToUpdate.isPublished = previousPublicationStatus;
+//       user.balance += sectionPrice;
+//       user.escrowBalance -= sectionPrice; // Remove escrow amount
+//       await user.save();
+//       return res.status(400).json({ message: "Insufficient balance" });
+//     }
+
+//     // If the section unpublished is the only section, unpublish the task
+//     if (!sectionToUpdate.isPublished && ownTask.sections.length === 1) {
+//       ownTask.isPublished = false;
+//     }
+
+//     // Save the updated task with toggled publication status of the section
+//     await ownTask.save();
+
+//     return res
+//       .status(200)
+//       .json({ message: "Section publication status toggled successfully" });
+//   } catch (error) {
+//     console.log("[TOGGLE SECTION PUBLICATION STATUS]", error);
+//     return res.status(500).json({ message: "Internal Error" });
+//   }
+// };
 
 const createProposalForSection = async (req, res) => {
   try {

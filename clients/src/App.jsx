@@ -20,10 +20,16 @@ import TasksIndex from "./pages/TaskDisplay/TasksIndex";
 import TaskInfo from "./pages/TaskDisplay/taskInfo/TaskInfo";
 import Proposal from "./pages/TaskDisplay/proposal/Proposal";
 import Applicants from "./pages/Tasks/applicants/Applicants";
+import Home from "./pages/home/Home";
+import PageNotFound from "./pages/PageNotFound";
+import OrderTrack from "./pages/OrderPage/OrderTrack";
+import OrderTrackPage from "./pages/OrderPage/OrderTrackPage";
 
 function App() {
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="*" element={<PageNotFound />} />
       <Route path="/auth/google-verify" element={<GoogleAuth />} />
       <Route path="/confirm-email" element={<AccountConfirmation />} />
       <Route path="/auth" element={<AuthPage />} />
@@ -34,6 +40,8 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="messages" element={<Messages />} />
         <Route path="profile/:query" element={<ProfilePage />} />
+        <Route path="manage-orders" element={<OrderTrack />} />
+        <Route path="track/:sectionId" element={<OrderTrackPage />} />
       </Route>
       <Route
         element={

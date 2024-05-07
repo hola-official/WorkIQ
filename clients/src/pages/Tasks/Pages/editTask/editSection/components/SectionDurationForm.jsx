@@ -102,9 +102,9 @@ export const SectionDurationForm = ({
               // {...field}
               className="input"
             >
-              {[...Array(33).keys()].map((index) => (
-                <option key={index + 2} value={index + 3}>
-                  {index + 3} days
+              {[...Array(35).keys()].map((index) => (
+                <option key={index + 2} value={index + 4}>
+                  {index + 1} days
                 </option>
               ))}
             </Select>

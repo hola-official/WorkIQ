@@ -41,22 +41,22 @@ const TaskList = ({ tasks, filter }) => {
               </p>
               <div className="flex gap-3 flex-wrap">
                 {task.skills.map((skill, index) => (
-                  <Tooltip
-                    content={skill}
-                    placement="top"
-                    animate={{
-                      mount: { scale: 1, y: 0 },
-                      unmount: { scale: 0, y: 25 },
-                    }}
-                    className="hidden md:block"
+                  <Badge
+                    key={index}
+                    className="text-[10px] font-medium leading-[13px] bg-light-800 dark:bg-dark-300 text-light-400 dark:text-light-500 flex items-center justify-center gap-1 rounded-lg border-none px-4 py-2 capitalize"
                   >
-                    <Badge
-                      key={index}
-                      className="text-[10px] font-medium leading-[13px] bg-light-800 dark:bg-dark-300 text-light-400 dark:text-light-500 flex items-center justify-center gap-1 rounded-lg border-none px-4 py-2 capitalize"
+                    <Tooltip
+                      content={skill}
+                      placement="right"
+                      animate={{
+                        mount: { scale: 1, y: 0 },
+                        unmount: { scale: 0, y: 25 },
+                      }}
+                      className="hidden md:block"
                     >
                       {skill}
-                    </Badge>
-                  </Tooltip>
+                    </Tooltip>
+                  </Badge>
                 ))}
               </div>
               <div className="text-xs md:text-sm text-gray-400">

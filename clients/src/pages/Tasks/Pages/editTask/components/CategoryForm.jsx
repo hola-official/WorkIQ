@@ -16,11 +16,12 @@ const CategoryForm = ({ initialData, taskId, options, setTask }) => {
   const onSubmit = async () => {
     try {
       // setIsLoading(true);
-      await axiosInstance.put(`/tasks/edit-task/${taskId}/category`, { categoryId: selectedCategory });
+      await axiosInstance.put(`tasks/edit-task/${taskId}/category`, { categoryId: selectedCategory });
       showToast('Success', "Task updated", 'success')
       toggleEdit();
       setTask((prev) => ({ ...prev, title: values.title }));
     } catch (error) {
+      console.log(error)
       showToast('Error', 'Something went wrong', 'error')
     }
     // finally {
