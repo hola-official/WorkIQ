@@ -36,11 +36,13 @@ export const columns = [
       );
     },
     cell: ({ row }) => {
+      const { id } = row.original;
       const title = row.getValue("title");
-      
+      // const id = row.getValue("id");
+      // console.log(original)
 
       return (
-        <Link to={"/track"}>
+        <Link to={`/track/order/${id}`}>
           <p className="min-w-[350px] ml-4 ">{title}</p>
         </Link>
       );
@@ -73,7 +75,7 @@ export const columns = [
     },
   },
   {
-    accessorKey: "date",
+    accessorKey: "price",
     header: ({ column }) => {
       return <Button variant="ghost">Price </Button>;
     },
@@ -92,21 +94,30 @@ export const columns = [
     },
   },
   {
-    accessorKey: "isPublished",
+    accessorKey: "status",
     header: () => {
       return <Button variant="ghost">Status</Button>;
     },
     cell: ({ row }) => {
-      const isPublished = row.getValue("isPublished") || false;
+      const status = row.getValue("status");
+      let statusColor = "text-[#E0BF00]";
+      switch (status) {
+        case "in_progress":
+          statusColor = "text-[#7d85f5]";
+          break;
+        case "completed":
+          statusColor = "text-green-700";
+          break;
+        case "cancelled":
+          statusColor = "text-red-700";
+          break;
+        case "Overdue":
+          statusColor = "text-[#E40DC4]";
+          break;
+      }
+      // console.log(statusColor);
       return (
-        <Badge
-          className={cn(
-            "bg-slate-400 text-white",
-            isPublished && "bg-blue-700 text-white"
-          )}
-        >
-          {isPublished ? "Published" : "Draft"}
-        </Badge>
+        <div className={`${statusColor} font-medium text-left`}>{status}</div>
       );
     },
   },

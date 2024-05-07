@@ -37,6 +37,9 @@ const orderSchema = new Schema(
       type: Number,
       required: true,
     },
+    deliveryStartDate: Date,
+    deliveryEndDate: Date,
+    remainingDeliveryDays: Date,
     isDelivered: {
       type: Boolean,
       default: false,
@@ -74,9 +77,9 @@ const orderSchema = new Schema(
     status: {
       type: String,
       default: "in_progress",
-      enum: ["pending", "in_progress", "completed", "cancelled"],
+      enum: ["pending", "in_progress", "delivered", "completed", "cancelled"],
     },
-    section: [{ type: Schema.Types.ObjectId, ref: "task.section" }],
+    sectionId: { type: Schema.Types.ObjectId, ref: "task.section" },
   },
   {
     timestamps: true,

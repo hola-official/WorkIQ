@@ -20,6 +20,7 @@ import {
 import { Button as Chakrabutton, Flex, Select, Text } from "@chakra-ui/react";
 
 export function DataTable({ columns, data }) {
+  console.log(data)
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -46,7 +47,7 @@ export function DataTable({ columns, data }) {
   if (!data?.length) {
     return (
       <div>
-        <h1 className="text-2xl md:text-4xl font-medium">My Orders</h1>
+        <h1 className="text-2xl md:text-4xl font-medium">You have no order</h1>
       </div>
     );
   }

@@ -1,35 +1,47 @@
 import React, { useEffect, useState } from "react";
-
 import {
   Box,
-  HStack,
   Stack,
-  Link as ChakraLink,
   Text,
   Icon,
   Avatar,
   useColorModeValue,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  FormControl,
+  FormLabel,
+  Input,
+  FormHelperText,
+  Button,
+  HStack,
 } from "@chakra-ui/react";
 import { getTimestamp } from "@/lib/utils";
 import { useAxiosInstance } from "../../../../../api/axios";
 import { formatPrice } from "@/lib/format";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoChevronRight } from "react-icons/go";
+import useShowToast from "@/hooks/useShowToast";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const Proposal = ({ task, proposal, section }) => {
-  // const { sectionId } = useParams();
   const axiosInstance = useAxiosInstance();
   const [freelancer, setFreelancer] = useState(null);
+  const navigate = useNavigate();
+  const showToast = useShowToast();
 
   useEffect(() => {
     handleFreelancerInfo();
   }, [task]);
-  // console.log(section)
+
   const handleFreelancerInfo = async () => {
     try {
       const res = await axiosInstance.get(`users/${proposal.freelancer}`);
       const data = await res.data;
-      console.log(data);
       setFreelancer(data);
     } catch (error) {
       console.error(error);
@@ -38,17 +50,23 @@ const Proposal = ({ task, proposal, section }) => {
 
   const handleCreateOrder = async () => {
     try {
-      const res = await axiosInstance.post(`order/create-order/${section._id}`, {
-        freelancerId: freelancer._id,
-      });
+      const res = await axiosInstance.post(
+        `order/create-order/${section._id}`,
+        {
+          freelancerId: freelancer._id,
+        }
+      );
 
       const data = await res.data;
       console.log(data);
+      // navigate(`/track/order/${data._id}`)
+
+      showToast("Success", data.message, "success");
     } catch (error) {
       console.log(error);
+      showToast("Error", error.response.data.message, "error");
     }
   };
-  //  handleCreateOrder()
 
   return (
     <>
@@ -69,7 +87,7 @@ const Proposal = ({ task, proposal, section }) => {
         rounded="lg"
       >
         <Box textAlign="left">
-          <ChakraLink
+          <Link
             fontSize="xl"
             lineheight={1.2}
             fontWeight="bold"
@@ -80,7 +98,7 @@ const Proposal = ({ task, proposal, section }) => {
             }}
           >
             Section: {section.title}
-          </ChakraLink>
+          </Link>
           <Box mb={4}>
             <Text
               fontSize="md"
@@ -91,17 +109,6 @@ const Proposal = ({ task, proposal, section }) => {
             >
               Cover Letter: {proposal.coverLetter}
             </Text>
-            {/* Display freelancer username */}
-            {/* <Text fontSize="sm" color="gray.500">
-              Freelancer:{" "}
-              {freelancer
-                ? freelancer.username
-                : "N/A"}
-            </Text>
-            <Text fontSize="sm" color="gray.500">
-              Assigned:{" "}
-              {proposal.isAssigned ? "Yes" : "No"}
-            </Text> */}
             <Text fontSize="sm" color="gray.500">
               Proposal Price: {formatPrice(proposal.sectionPrice)}
             </Text>
@@ -146,30 +153,50 @@ const Proposal = ({ task, proposal, section }) => {
             </Stack>
 
             <Box>
-              <HStack
-                // as={Link}
-                spacing={1}
-                p={1}
-                alignItems="center"
-                height="2rem"
-                onClick={handleCreateOrder}
-                cursor={'pointer'}
-                // to={``}
-                w="max-content"
-                margin="auto 0"
-                rounded="md"
-                color="blue.400"
-                _hover={{
-                  bg: useColorModeValue("gray.200", "gray.700"),
-                }}
-              >
-                <Text fontSize="sm">Assign</Text>
-                <Icon as={GoChevronRight} w={4} h={4} />
-              </HStack>
+              <ConfirmModal onConfirm={handleCreateOrder}>
+                <Button
+                  // onClick={() => setIsOpen(true)}
+                  colorScheme={"blue"}
+                  size={"md"}
+                  float={"right"}
+                >
+                  Assign
+                </Button>
+              </ConfirmModal>
+              {/* <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                  <ModalHeader>Assign Task</ModalHeader>
+                  <ModalCloseButton />
+                  <ModalBody>
+                    <FormControl mb={4}>
+                      <FormLabel>Cover Letter</FormLabel>
+                      <Input placeholder="Enter cover letter" />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Attachment</FormLabel>
+                      <input
+                        type="file"
+                        className="block w-full mb-5 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                      />
+                      <FormHelperText>Upload file here</FormHelperText>
+                    </FormControl>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button
+                      colorScheme="blue"
+                      onClick={handleCreateOrder}
+                      mr={3}
+                    >
+                      Assign
+                    </Button>
+                    <Button onClick={onClose}>Cancel</Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal> */}
             </Box>
           </Box>
         </Box>
-        {/* Render freelancer information */}
       </Stack>
     </>
   );

@@ -5,11 +5,10 @@ const userModel = require("../Model/userModel.js");
 const createOrder = async (req, res) => {
   try {
     const { sectionId } = req.params;
-    const {  freelancerId } = req.body;
-    const clientId = req.userId; // Assuming the freelancer's information is in the request user object
-    console.log(clientId);
-    console.log(sectionId);
+    const { freelancerId } = req.body;
+    const clientId = req.userId; // Assuming the client's information is in the request user object
 
+    // Check if the section is already assigned to a freelancer
     const task = await Task.findOne({
       "sections._id": sectionId,
       client: clientId,
@@ -24,6 +23,17 @@ const createOrder = async (req, res) => {
     );
     if (!section) {
       return res.status(404).json({ message: "Section not found in the task" });
+    }
+
+    if (section.isAssigned) {
+      // Section is already assigned to a freelancer
+      return res.status(400).json({ message: "Section is already assigned" });
+    }
+
+    // Check if the section has any existing orders
+    if (section.order.length > 0) {
+      // Section already has an order
+      return res.status(400).json({ message: "Section already has an order" });
     }
 
     // Find the proposal for this section and freelancer
@@ -43,6 +53,7 @@ const createOrder = async (req, res) => {
       task: task._id, // Use the task's ID from the task object
       sectionPrice: proposal.sectionPrice, // Use the price from the proposal
       status: "pending",
+      sectionId: proposal.sectionId,
     };
 
     // Add the order to the section's orders array
@@ -131,32 +142,240 @@ const submitRequirements = async (req, res) => {
 
 const getOrderById = async (req, res) => {
   try {
-    const { sectionId, orderId } = req.params;
+    const orderId = req.params.orderId;
 
-    // Find the task containing the section
-    const task = await Task.findOne({ "sections._id": sectionId });
+    // Find the task containing the order
+    const task = await Task.findOne({ "sections.order._id": orderId });
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return res
+        .status(404)
+        .json({ message: "Task containing the order not found" });
     }
 
-    // Find the section
-    const section = task.sections.find(sec => sec._id.toString() === sectionId);
+    // Find the section containing the order
+    const section = task.sections.find((sec) =>
+      sec.order.some((order) => order._id.toString() === orderId)
+    );
 
     if (!section) {
-      return res.status(404).json({ message: "Section not found" });
+      return res
+        .status(404)
+        .json({ message: "Section containing the order not found" });
     }
 
-    // Find the order by ID within the section
-    const order = section.order.id(orderId);
+    // Find the order within the section
+    const order = section.order.find((o) => o._id.toString() === orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    res.status(200).json({ order });
+    // Respond with the order and its associated section details
+    res.status(200).json({ order, section });
   } catch (error) {
-    console.error("Error fetching order:", error);
+    console.error("Error fetching order by ID:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getOrdersByClient = async (req, res) => {
+  try {
+    const userId = req.userId; // Assuming the client's information is in the request user object
+
+    // Find all tasks where the client is the creator
+    const tasks = await Task.find({
+      $or: [
+        { client: userId }, // Tasks created by the client
+        { "sections.assignTo": userId }, // Tasks assigned to the freelancer
+      ],
+    }).populate("sections.order");
+
+    // Extract orders and their corresponding section details from all sections of all tasks
+    const ordersWithSections = [];
+    tasks.forEach((task) => {
+      task.sections.forEach((section) => {
+        section.order.forEach((order) => {
+          ordersWithSections.push({
+            order,
+            section: {
+              _id: section._id,
+              title: section.title,
+              price: order.sectionPrice,
+              // Add other section details as needed
+            },
+          });
+        });
+      });
+    });
+
+    res.status(200).json({ ordersWithSections });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const submitOrderCompletion = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const freelancerId = req.userId; // Assuming the freelancer's information is in the request user object
+    const { coverLetter, attachments } = req.body;
+
+    // Find the order
+    const task = await Task.findOne({
+      "sections.order._id": orderId,
+      // "sections.assignTo": freelancerId,
+    });
+    console.log(task)
+    if (!task) {
+      return res
+        .status(404)
+        .json({ message: "Order not found or not assigned to you" });
+    }
+
+    const section = task.sections.find((sec) =>
+      sec.order.some((ord) => ord._id.equals(orderId))
+    );
+
+    // Update the order
+    const order = section.order.find((ord) => ord._id.equals(orderId));
+    order.isDelivered = true;
+    order.status = "completed"; // Update status to completed
+    order.deliver = {
+      coverLetter: coverLetter || "", // Include cover letter if provided
+      attachments: attachments || [], // Include attachments if provided
+    };
+
+    // Save the updated task
+    await task.save();
+
+    res.status(200).json({ message: "Order completed successfully", order });
+  } catch (error) {
+    console.error("Error submitting order completion:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const approveOrderDelivery = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const clientId = req.userId; // Assuming the client's information is in the request user object
+
+    // Find the order
+    const task = await Task.findOne({
+      "sections.order._id": orderId,
+      // client: clientId,
+    });
+    if (!task) {
+      return res.status(404).json({
+        message: "Order not found or not associated with your account",
+      });
+    }
+
+    const section = task.sections.find((sec) =>
+      sec.order.some((ord) => ord._id.equals(orderId))
+    );
+
+    // Find the order to approve
+    const order = section.order.find((ord) => ord._id.equals(orderId));
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Check if the order is already completed
+    if (order.status !== "completed") {
+      return res.status(400).json({ message: "Order is not yet completed" });
+    }
+
+    // Update the order status to approved
+    order.status = "approved";
+
+    // Calculate and award points to freelancer
+    const freelancerId = order.freelancer;
+    const pointsEarned = 100; // Points earned by the freelancer
+    // Update freelancer's points
+    const freelancer = await User.findById(freelancerId);
+    if (freelancer) {
+      freelancer.points.push({
+        description: `Earned 100 points for completing order "${section.title}"`,
+        amount: pointsEarned,
+        date: new Date(),
+      });
+      await freelancer.save();
+    }
+
+    // Deduct section price from client's escrow balance
+    const client = await User.findById(clientId);
+    if (client) {
+      const sectionPrice = order.sectionPrice;
+      if (client.escrowBalance >= sectionPrice) {
+        client.escrowBalance -= sectionPrice;
+        await client.save();
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Insufficient funds in escrow balance" });
+      }
+    }
+
+    // Add section price to freelancer's balance
+    if (freelancer) {
+      freelancer.balance += order.sectionPrice;
+      await freelancer.save();
+    }
+
+    // Save the updated task
+    await task.save();
+
+    // Set the description as the title of the section
+    const description = section.title;
+
+    res
+      .status(200)
+      .json({ message: "Order delivery approved successfully", description });
+  } catch (error) {
+    console.error("Error approving order delivery:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const clientId = req.userId; // Assuming the client's information is in the request user object
+
+    // Find the order
+    const task = await Task.findOne({
+      "sections.order._id": orderId,
+      client: clientId,
+    });
+    if (!task) {
+      return res.status(404).json({
+        message: "Order not found or not associated with your account",
+      });
+    }
+
+    const section = task.sections.find((sec) =>
+      sec.order.some((ord) => ord._id.equals(orderId))
+    );
+
+    // Find the order to cancel
+    const order = section.order.find((ord) => ord._id.equals(orderId));
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    // Update the order status to cancelled
+    order.status = "cancelled";
+
+    // Save the updated task
+    await task.save();
+
+    // Return success response
+    res.status(200).json({ message: "Order cancelled successfully" });
+  } catch (error) {
+    console.error("Error cancelling order:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -165,4 +384,8 @@ module.exports = {
   createOrder,
   submitRequirements,
   getOrderById,
+  getOrdersByClient,
+  submitOrderCompletion,
+  approveOrderDelivery,
+  cancelOrder,
 };

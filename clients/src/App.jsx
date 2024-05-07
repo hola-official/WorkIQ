@@ -41,7 +41,7 @@ function App() {
         <Route path="messages" element={<Messages />} />
         <Route path="profile/:query" element={<ProfilePage />} />
         <Route path="manage-orders" element={<OrderTrack />} />
-        <Route path="track/:sectionId" element={<OrderTrackPage />} />
+        <Route path="track/order/:orderId" element={<OrderTrackPage />} />
       </Route>
       <Route
         element={

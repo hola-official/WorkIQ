@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from "react";
 import SidebarWithHeader from "@/SidebarWithHeader";
 import { Breadcrumbs, Tooltip } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Avatar, Card, Typography } from "@material-tailwind/react";
-import { Button, Divider } from "@chakra-ui/react";
+import {
+  Button,
+  Divider,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAxiosInstance } from "../../../api/axios";
+import useShowToast from "@/hooks/useShowToast";
+import { formatPrice } from "@/lib/format";
+import useAuth from "@/hooks/useAuth";
+import { ConfirmModal } from "@/ui/confirm-modal";
 
 const TABLE_HEAD = ["Section", "Delivery", "Amount"];
 
@@ -20,53 +35,146 @@ const TABLE_ROWS = [
 const OrderTrackPage = () => {
   // State to store countdown values
   const [countdown, setCountdown] = useState({
-    days: 15,
+    days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
   });
+  const { orderId } = useParams();
 
-  // Function to update countdown every second
+  const axiosInstance = useAxiosInstance();
+  const { _id } = useAuth();
+  const [order, setOrder] = useState({});
+  const [section, setSection] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false); // State variable to manage modal visibility
+  const showToast = useShowToast();
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCountdown((prevCountdown) => {
-        // Calculate new countdown values
-        const newSeconds = prevCountdown.seconds - 1;
-        const newMinutes = prevCountdown.minutes - (newSeconds < 0 ? 1 : 0);
-        const newHours = prevCountdown.hours - (newMinutes < 0 ? 1 : 0);
-        const newDays = prevCountdown.days - (newHours < 0 ? 1 : 0);
+    const getOrders = async () => {
+      try {
+        const res = await axiosInstance.get(`order/track/${orderId}`);
+        const data = res.data;
 
-        // Update countdown
-        return {
-          days: newDays,
-          hours: newHours < 0 ? 23 : newHours,
-          minutes: newMinutes < 0 ? 59 : newMinutes,
-          seconds: newSeconds < 0 ? 59 : newSeconds,
-        };
-      });
-    }, 1000);
+        console.log(data);
 
-    // Clear interval on component unmount
+        if (data.error) {
+          showToast("Error", data.error, "error");
+          return;
+        }
+
+        setOrder(data.order);
+        setSection(data.section);
+      } catch (error) {
+        console.log(error);
+        showToast("Error", error.response.data.message, "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getOrders();
+  }, [showToast, orderId]);
+
+  useEffect(() => {
+    const calculateCountdown = () => {
+      if (!order.createdAt) return;
+
+      const createdAtDate = new Date(order.createdAt);
+      const currentDate = new Date();
+
+      // Calculate the difference in milliseconds between the current date and createdAt date
+      const difference = currentDate - createdAtDate;
+
+      // Calculate remaining milliseconds
+      let remaining = section.durationDays * 24 * 60 * 60 * 1000 - difference;
+
+      // Convert remaining milliseconds to days, hours, minutes, and seconds
+      const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+      remaining -= days * 1000 * 60 * 60 * 24;
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      remaining -= hours * 1000 * 60 * 60;
+      const minutes = Math.floor(remaining / (1000 * 60));
+      remaining -= minutes * 1000 * 60;
+      const seconds = Math.floor(remaining / 1000);
+
+      // Update the countdown state
+      setCountdown({ days, hours, minutes, seconds });
+    };
+
+    // Call calculateCountdown initially
+    calculateCountdown();
+
+    // Set interval to update the countdown every second
+    const interval = setInterval(calculateCountdown, 1000);
+
+    // Clean up the interval when component unmounts
     return () => clearInterval(interval);
-  }, []); // Empty dependency array to run effect only once on mount
+  }, [order, section]);
+
+  const handleMarkCompleted = async () => {
+    // Implement mark as completed functionality
+    try {
+      const res = await axiosInstance.put(`order/${orderId}/complete`);
+      const data = await res.data;
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeliver = async () => {
+    try {
+      const res = await axiosInstance.put(`order/${orderId}/approve`);
+      const data = await res.data;
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    // Implement cancel order functionality
+    try {
+      const res = await axiosInstance.put(`orders/cancel/${orderId}`);
+      const data = await res.data;
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const handleConfirmDelivery = async () => {
+  //   // Implement delivery confirmation functionality
+  //   // Close the modal
+  //   try {
+  //     const res = await axiosInstance.put(`orders/${orderId}/approve`);
+  //     const data = await res.data;
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  if (loading) return <p>Fetching all client tasks</p>;
+
+  const classes = "p-4 border-b border-blue-gray-50";
 
   return (
     <SidebarWithHeader>
-      <div className="flex px-10 sm:px-24 md:px-20 lg:px-0 lg:py-4 lg:flex-row flex-col  justify-around">
+      <div className="flex px-10 sm:px-24 md:px-20 lg:px-0 lg:py-4 lg:flex-row flex-col  justify-center">
         <div className="flex flex-col items-center gap-2 py-8 px-4">
           <div class="flex w-full justify-center bg-gray-200 rounded-md shadow-inner">
             <div className="px-4 py-4">
               <div>
                 <div className="flex gap-2 items-center justify-center">
                   <Avatar
-                    src={"/portrait.jpg"}
+                    src={"/mm avatar.jpg"}
                     alt="freelancer"
                     size={"xl"}
                     // className="rounded-full h-[74px] w-[74px]"
                   />
-                  <h1 className="text-lg lg:text-xl">
-                    timestamp as input and returns a formatted
-                  </h1>
+                  <h1 className="text-lg lg:text-xl">{section?.title}</h1>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="hidden md:block">
@@ -79,7 +187,9 @@ const OrderTrackPage = () => {
                       </Link>
                     </Breadcrumbs>
                   </div>
-                  <p className="text-gray-500 text-sm">May 25, 2025</p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(order?.createdAt).toLocaleString()}
+                  </p>
                 </div>
 
                 <Card className="h-full w-full shadow mt-2">
@@ -103,45 +213,35 @@ const OrderTrackPage = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {TABLE_ROWS.map(({ title, date, amount }, index) => {
-                        const isLast = index === TABLE_ROWS.length - 1;
-                        const classes = isLast
-                          ? "p-4"
-                          : "p-4 border-b border-blue-gray-50";
-                        const display = "hidden md:block";
-
-                        return (
-                          <tr key={title}>
-                            <td className={classes}>
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal text-sm lg:text-base"
-                              >
-                                {title}
-                              </Typography>
-                            </td>
-                            <td className={classes}>
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                              >
-                                {date}
-                              </Typography>
-                            </td>
-                            <td className={classes}>
-                              <Typography
-                                variant="small"
-                                color="blue-gray"
-                                className="font-normal"
-                              >
-                                {amount}
-                              </Typography>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      <tr>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal text-sm lg:text-base"
+                          >
+                            {section.title}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {section.durationDays}d
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {formatPrice(order.sectionPrice)}
+                          </Typography>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </Card>
@@ -180,12 +280,39 @@ const OrderTrackPage = () => {
             </div>
           </div>
           <div className="flex flex-col md:flex-row justify-center md:justify-between items-center">
-            <Button colorScheme={"blue"} size={["lg", "md"]}>
-              Approve Delivery
-            </Button>
-            <Button variant={"ghost"} size={["lg", "md"]}>
-              Cancel Order
-            </Button>
+            {_id === order.client ? (
+              <ConfirmModal onConfirm={handleMarkCompleted}>
+                <Button
+                  id="markCompletedButton"
+                  colorScheme={"blue"}
+                  size={["lg", "md"]}
+                  // onClick={handleMarkCompleted}
+                >
+                  Mark as Completed
+                </Button>
+              </ConfirmModal>
+            ) : (
+              <ConfirmModal onConfirm={handleDeliver}>
+                <Button
+                  id="deliverButton"
+                  float={"right"}
+                  colorScheme={"blue"}
+                  size={["lg", "md"]}
+                >
+                  Deliver
+                </Button>
+              </ConfirmModal>
+            )}
+            {_id === order.client && (
+              <Button
+                id="cancelOrderButton"
+                variant={"ghost"}
+                size={["lg", "md"]}
+                onClick={handleCancelOrder}
+              >
+                Cancel Order
+              </Button>
+            )}
           </div>
         </div>
 
@@ -209,13 +336,13 @@ const OrderTrackPage = () => {
                     className="hidden md:block"
                     content="The seller started working on the order."
                   >
-                    in-progress
+                    {order.status}
                   </Tooltip>
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
                 <p className="text-gray-500">order Price</p>
-                <p>$50</p>
+                <p>{formatPrice(order.sectionPrice)}</p>
               </div>
 
               <div className="flex justify-between items-center">
@@ -267,10 +394,9 @@ const OrderTrackPage = () => {
               </div>
             </div>
 
-            <Divider variant={'solid'} size={'xl'} />
+            <Divider variant={"solid"} size={"xl"} />
 
             <div className="flex justify-between mt-2">
-              
               <p>freelancer</p>
               <div className="flex items-center justify-center">
                 <div>
@@ -278,18 +404,51 @@ const OrderTrackPage = () => {
                   <h3>Muhammed Musa</h3>
                 </div>
                 <Avatar
-                  src={"/portrait.jpg"}
+                  src={"/mm avatar.jpg"}
                   alt="freelancer"
                   size={"lg"}
                   // className="rounded-full h-[74px] w-[74px]"
                 />
               </div>
-
             </div>
 
+            <div className="flex justify-between mt-2">
+              <p>client</p>
+              <div className="flex items-center justify-center">
+                <div>
+                  <h3>hishola</h3>
+                  <h3>Muhammed Olayinka</h3>
+                </div>
+                <Avatar
+                  src={"/mm avatar.jpg"}
+                  alt="freelancer"
+                  size={"lg"}
+                  // className="rounded-full h-[74px] w-[74px]"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+
+      {/* <Modal isOpen={showModal} onClose={handleCloseModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Delivery</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>Are you sure you want to deliver this order?</ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleConfirmDelivery}>
+              Confirm
+            </Button>
+            <Button variant="ghost" onClick={handleCloseModal}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal> */}
     </SidebarWithHeader>
   );
 };

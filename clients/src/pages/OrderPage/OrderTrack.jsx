@@ -12,18 +12,30 @@ const OrderTrack = () => {
   const showToast = useShowToast();
 
   useEffect(() => {
-    const getUsers = async () => {
+    const getOrders = async () => {
       try {
-        const res = await axiosInstance.get(`tasks/all-tasks`);
+        const res = await axiosInstance.get(`order/get-all-orders`);
         const data = res.data;
+
+        console.log(data.ordersWithSections)
 
         if (data.error) {
           showToast("Error", data.error, "error");
           return;
         }
-        console.log(data);
 
-        setTasks(data);
+        const allTasks = data.ordersWithSections.map((ordersWithSection) => {
+          return {
+            id: ordersWithSection.order._id,
+            title: ordersWithSection.section.title,
+            status: ordersWithSection.order.status,
+            price: ordersWithSection.order.sectionPrice,
+            createdAt: ordersWithSection.order.createdAt,
+          };
+        });
+        console.log(allTasks);
+
+        setTasks(allTasks);
       } catch (error) {
         console.log(error);
         showToast("Error", error.response.data.message, "error");
@@ -32,7 +44,7 @@ const OrderTrack = () => {
       }
     };
 
-    getUsers();
+    getOrders();
   }, [showToast]);
 
   if (loading) return <p>Fetching all client tasks</p>;
