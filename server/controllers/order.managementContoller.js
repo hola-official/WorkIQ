@@ -49,7 +49,7 @@ const createOrder = async (req, res) => {
     // Create the order
     const order = {
       client: task.client, // Use the client from the task object
-      freelancerId: proposal.freelancer, // Use the freelancer's ID from the request
+      freelancer: proposal.freelancer, // Use the freelancer's ID from the request
       task: task._id, // Use the task's ID from the task object
       sectionPrice: proposal.sectionPrice, // Use the price from the proposal
       status: "pending",
@@ -225,9 +225,9 @@ const submitOrderCompletion = async (req, res) => {
     // Find the order
     const task = await Task.findOne({
       "sections.order._id": orderId,
-      // "sections.assignTo": freelancerId,
+      "sections.assignTo": freelancerId,
     });
-    console.log(task)
+    console.log(task);
     if (!task) {
       return res
         .status(404)
@@ -241,7 +241,7 @@ const submitOrderCompletion = async (req, res) => {
     // Update the order
     const order = section.order.find((ord) => ord._id.equals(orderId));
     order.isDelivered = true;
-    order.status = "completed"; // Update status to completed
+    order.status = "delivered"; // Update status to delivered
     order.deliver = {
       coverLetter: coverLetter || "", // Include cover letter if provided
       attachments: attachments || [], // Include attachments if provided
@@ -250,9 +250,9 @@ const submitOrderCompletion = async (req, res) => {
     // Save the updated task
     await task.save();
 
-    res.status(200).json({ message: "Order completed successfully", order });
+    res.status(200).json({ message: "Order delivered successfully", order });
   } catch (error) {
-    console.error("Error submitting order completion:", error);
+    console.log("Error submitting order completion:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -260,7 +260,7 @@ const submitOrderCompletion = async (req, res) => {
 const approveOrderDelivery = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const clientId = req.userId; // Assuming the client's information is in the request user object
+    // const clientId = req.userId; // Assuming the client's information is in the request user object
 
     // Find the order
     const task = await Task.findOne({
@@ -284,20 +284,24 @@ const approveOrderDelivery = async (req, res) => {
     }
 
     // Check if the order is already completed
-    if (order.status !== "completed") {
-      return res.status(400).json({ message: "Order is not yet completed" });
+    if (order.status === "completed") {
+      return res.status(400).json({ message: "Order is already completed" });
     }
 
     // Update the order status to approved
-    order.status = "approved";
+    order.isApproved = true;
+    order.status = "completed";
+
+    console.log("seen order:", order);
 
     // Calculate and award points to freelancer
-    const freelancerId = order.freelancer;
+    const freelancerId = section.assignTo;
     const pointsEarned = 100; // Points earned by the freelancer
     // Update freelancer's points
-    const freelancer = await User.findById(freelancerId);
+    const freelancer = await userModel.findById(freelancerId);
     if (freelancer) {
       freelancer.points.push({
+        orderId: orderId,
         description: `Earned 100 points for completing order "${section.title}"`,
         amount: pointsEarned,
         date: new Date(),
@@ -305,8 +309,16 @@ const approveOrderDelivery = async (req, res) => {
       await freelancer.save();
     }
 
+    // console.log("freelancerId :", freelancerId)
+    // console.log("freelancer :", freelancer)
+
+    const clientById = order.client
+
     // Deduct section price from client's escrow balance
-    const client = await User.findById(clientId);
+    const client = await userModel.findById(clientById);
+
+    console.log("clientId :", clientById)
+    console.log("client :", client)
     if (client) {
       const sectionPrice = order.sectionPrice;
       if (client.escrowBalance >= sectionPrice) {
@@ -329,11 +341,11 @@ const approveOrderDelivery = async (req, res) => {
     await task.save();
 
     // Set the description as the title of the section
-    const description = section.title;
+    // const description = section.title;
 
     res
       .status(200)
-      .json({ message: "Order delivery approved successfully", description });
+      .json({ message: "Order delivery approved successfully", order });
   } catch (error) {
     console.error("Error approving order delivery:", error);
     res.status(500).json({ message: "Internal server error" });

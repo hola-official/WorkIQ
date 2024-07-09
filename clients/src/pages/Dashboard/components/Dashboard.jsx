@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoMdCheckmarkCircleOutline } from "react-icons/io";
 import { formatPrice } from "@/lib/format";
-import { Modal, Form, message } from "antd";
-import StripeCheckout from "react-stripe-checkout";
 import { useAxiosInstance } from "../../../../api/axios";
 import useAuth from "@/hooks/useAuth";
 

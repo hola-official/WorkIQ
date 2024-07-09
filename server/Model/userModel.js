@@ -38,6 +38,7 @@ const userSchema = new Schema(
     refreshToken: [String],
     points: [
       {
+        orderId: {type: Schema.Types.ObjectId, ref: "task.section.order"},
         description: String,
         amount: Number,
         date: Date,

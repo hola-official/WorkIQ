@@ -19,6 +19,7 @@ import {
   FormHelperText,
   Button,
   HStack,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { getTimestamp } from "@/lib/utils";
 import { useAxiosInstance } from "../../../../../api/axios";
@@ -26,11 +27,13 @@ import { formatPrice } from "@/lib/format";
 import { Link, useNavigate } from "react-router-dom";
 import { GoChevronRight } from "react-icons/go";
 import useShowToast from "@/hooks/useShowToast";
-import { ConfirmModal } from "@/components/ui/confirm-modal";
+// import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const Proposal = ({ task, proposal, section }) => {
   const axiosInstance = useAxiosInstance();
   const [freelancer, setFreelancer] = useState(null);
+  const [input, setInput] = useState('')
+  const { isOpen, onOpen, onClose } = useDisclosure()
   const navigate = useNavigate();
   const showToast = useShowToast();
 
@@ -59,7 +62,7 @@ const Proposal = ({ task, proposal, section }) => {
 
       const data = await res.data;
       console.log(data);
-      // navigate(`/track/order/${data._id}`)
+      navigate(`/track/order/${data._id}`)
 
       showToast("Success", data.message, "success");
     } catch (error) {
@@ -155,7 +158,7 @@ const Proposal = ({ task, proposal, section }) => {
             <Box>
               <ConfirmModal onConfirm={handleCreateOrder}>
                 <Button
-                  // onClick={() => setIsOpen(true)}
+                  // onClick={onOpen}
                   colorScheme={"blue"}
                   size={"md"}
                   float={"right"}

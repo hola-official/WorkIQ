@@ -102,7 +102,7 @@ export const columns = [
       const status = row.getValue("status");
       let statusColor = "text-[#E0BF00]";
       switch (status) {
-        case "in_progress":
+        case "delivered":
           statusColor = "text-[#7d85f5]";
           break;
         case "completed":

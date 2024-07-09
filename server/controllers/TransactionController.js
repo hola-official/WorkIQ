@@ -5,21 +5,38 @@ const TransactionModel = require("../Model/TransactionModel");
 const userModel = require("../Model/userModel");
 
 const clientUrl = process.env.CLIENT_URL;
+
 const depositFunds = async (req, res) => {
   try {
     const userId = req.userId;
     const { token, amount } = req.body;
-    console.log(amount);
-    console.log(token);
-    // create a customer
+
+    const parsedAmount = parseFloat(amount);
+
+    // Validate the amount
+    if (isNaN(parsedAmount) || parsedAmount < 0.5) {
+      return res.status(400).json({
+        message: "Transaction failed",
+        data: "Amount must be at least $0.50 USD",
+        success: false,
+      });
+    }
+
+    // Convert amount to cents for Stripe
+    const amountInCents = Math.round(parsedAmount * 100);
+    console.log("Amount in cents:", amountInCents); // Log amount in cents
+
+    // Create a customer
     const customer = await stripe.customers.create({
       email: token.email,
       source: token.id,
     });
-    // create a charge
+    console.log("Customer created:", customer.id); // Log customer ID
+
+    // Create a charge
     const charge = await stripe.charges.create(
       {
-        amount: amount,
+        amount: amountInCents,
         currency: "usd",
         customer: customer.id,
         receipt_email: token.email,
@@ -29,12 +46,11 @@ const depositFunds = async (req, res) => {
         idempotencyKey: uuid(),
       }
     );
+    console.log("Charge created:", charge.status); // Log charge status
 
-    // save the transaction
+    // Save the transaction
     if (charge.status === "succeeded") {
-      // Get user's current balance
       const user = await userModel.findById(userId);
-      // Check if user exists
       if (!user) {
         return res.status(404).json({
           message: "User not found",
@@ -43,32 +59,28 @@ const depositFunds = async (req, res) => {
       }
 
       const currentBalance = user.balance;
+      const newBalance = Number(currentBalance) + parsedAmount;
 
-      // Calculate new balance
-      const newBalance = Number(currentBalance) + Number(amount);
-
-      // Update user's balance
       await userModel.findByIdAndUpdate(userId, {
         balance: newBalance,
       });
 
-      // Create new transaction
       const newTransaction = new TransactionModel({
         buyer: userId,
         seller: userId,
-        amount: amount,
+        amount: parsedAmount,
+        depositAmount: amount,
         type: "deposit",
         reference: "stripe deposit",
         status: "success",
       });
 
-      // Save new transaction
       await newTransaction.save();
-      // Send logout confirmation email
+
       const userData = {
         name: user.name,
         email: user.email,
-        location: user.location, // You can customize this based on your user model
+        location: user.location,
         timestamp: new Date().toLocaleString("default", {
           month: "long",
           day: "numeric",
@@ -76,10 +88,8 @@ const depositFunds = async (req, res) => {
           hour: "numeric",
           minute: "numeric",
         }),
-        // Add more relevant data if needed
       };
 
-      // Send email
       try {
         await sendMail({
           email: userData.email,
@@ -87,16 +97,14 @@ const depositFunds = async (req, res) => {
           template: "deposit-mail.ejs",
           data: {
             user: { username: user.username },
-            amount: amount,
+            amount: parsedAmount,
             time: { timestamp: userData.timestamp },
           },
         });
       } catch (error) {
         console.log("Error sending deposit email:", error);
-        // Handle error if needed
       }
 
-      // Send response
       res.send({
         message: "Transaction successful",
         data: newTransaction,
