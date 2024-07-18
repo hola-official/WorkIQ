@@ -6,6 +6,7 @@ dotenv.config();
 
 let config = {
 	service: "gmail",
+	host: "smtp.gmail.com",
 	auth: {
 		user: process.env.EMAIL,
 		pass: process.env.PASSWORD,

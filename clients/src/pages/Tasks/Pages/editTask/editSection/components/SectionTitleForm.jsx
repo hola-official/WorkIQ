@@ -25,7 +25,7 @@ export const SectionTitleForm = ({
   initialData,
   taskId,
   sectionId,
-  setTask,
+  setRefetchSection,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const showToast = useShowToast();
@@ -37,6 +37,7 @@ export const SectionTitleForm = ({
   });
   const { isSubmitting, isValid } = form.formState;
 
+  console.log(initialData)
   const onSubmit = async (values) => {
     try {
       await axiosInstance.put(
@@ -45,7 +46,7 @@ export const SectionTitleForm = ({
       );
       showToast("Success", "Task updated successfully", "success");
       toggleEdit();
-      setTask((prev) => ({ ...prev, title: values.title }));
+      setRefetchSection(prev => prev + 1)
       // router.refresh();
     } catch (error) {
       console.log(error);

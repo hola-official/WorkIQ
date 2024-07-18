@@ -54,7 +54,11 @@ export const SectionForm = ({ setTask, initialData, taskId }) => {
 			// 	...values,
 			// }).unwrap();
 			await axiosInstance.put(`/tasks/edit-task/${taskId}/create-section`, values);
-			setTask((prev) => ({ ...prev, title: values.title }));
+			const res = await axiosInstance.get(`/tasks/${taskId}`);
+			const data = await res.data;
+
+
+			setTask((prev) => ({ ...prev, ...data }));
 			showToast('Success', 'Section created', 'success')
 			toggleCreating();
 			form.reset();

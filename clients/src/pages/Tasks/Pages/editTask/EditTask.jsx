@@ -87,7 +87,7 @@ const EditTask = () => {
       task.sections?.some((section) => section.isPublished),
     ];
   }
-  console.log(task);
+  // console.log(task);
 
   const totalFields = requiredFields?.length;
   const completedFields = requiredFields?.filter(Boolean).length;

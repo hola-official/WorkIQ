@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 export const SectionDescriptionForm = ({
   initialData,
-  setTask,
+  setRefetchSection,
   taskId,
   sectionId,
 }) => {
@@ -52,7 +52,7 @@ export const SectionDescriptionForm = ({
       );
       showToast("Success", "Task updated successfully", "success");
       setIsEditing(false);
-      setTask((prev) => ({ ...prev, description: values.description }));
+      setRefetchSection(prev => prev + 1)
     } catch (error) {
       if (error) {
         showToast(

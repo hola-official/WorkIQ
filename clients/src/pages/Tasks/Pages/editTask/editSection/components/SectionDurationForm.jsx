@@ -16,7 +16,7 @@ const formSchema = z.object({
 export const SectionDurationForm = ({
   initialData,
   taskId,
-  setTask,
+  setRefetchSection,
   sectionId,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -42,7 +42,7 @@ export const SectionDurationForm = ({
       );
       showToast("Success", "Task updated successfully", "success");
       toggleEdit();
-      setTask((prev) => ({ ...prev, durationDays: value }));
+      setRefetchSection(prev => prev + 1)
       // router.refresh();
     } catch (error) {
       console.log(error);
@@ -55,7 +55,7 @@ export const SectionDurationForm = ({
       );
     }
   };
-  console.log(isValid);
+  // console.log(isValid);
   return (
     <div className="mt-6 border bg-slate-100 rounded-md p-4">
       <div className="font-medium flex items-center justify-between">
@@ -96,6 +96,7 @@ export const SectionDurationForm = ({
                     <FormControl> */}
             <Select
               colorScheme={"blue"}
+              defaultValue={value}
               icon={<ChevronDownIcon />}
               onChange={(e) => setValue(e.target.value)}
               isDisabled={isSubmitting}
@@ -103,8 +104,8 @@ export const SectionDurationForm = ({
               className="input"
             >
               {[...Array(35).keys()].map((index) => (
-                <option key={index + 2} value={index + 4}>
-                  {index + 1} days
+                <option key={index + 3} value={index + 3}>
+                  {index + 3} days
                 </option>
               ))}
             </Select>

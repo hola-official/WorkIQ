@@ -201,6 +201,7 @@ const EditSection = () => {
   const { taskId, sectionId } = useParams();
   const [task, setTask] = useState();
   const [section, setSection] = useState(null);
+  const [refetchSection, setRefetchSection] = useState(0)
   const navigate = useNavigate();
   const axiosInstance = useAxiosInstance();
   console.log(taskId, sectionId);
@@ -223,7 +224,7 @@ const EditSection = () => {
       }
     };
     fetchSection();
-  }, [taskId]);
+  }, [taskId, refetchSection]);
 
   if (!section) {
     return (
@@ -294,12 +295,12 @@ const EditSection = () => {
               <SectionTitleForm
                 initialData={section}
                 taskId={taskId}
-                setTask={setTask}
+                setRefetchSection={setRefetchSection}
                 sectionId={sectionId}
               />
               <SectionDescriptionForm
                 initialData={section}
-                setTask={setTask}
+                setRefetchSection={setRefetchSection}
                 taskId={taskId}
                 sectionId={sectionId}
               />
@@ -313,7 +314,7 @@ const EditSection = () => {
                 taskPrice={task.price}
                 initialData={section}
                 taskId={taskId}
-                setTask={setTask}
+                setRefetchSection={setRefetchSection}
                 sectionId={sectionId}
               />
             </div>
@@ -328,7 +329,7 @@ const EditSection = () => {
               <SectionDurationForm
                 initialData={section}
                 taskId={taskId}
-                setTask={setTask}
+                setRefetchSection={setRefetchSection}
                 sectionId={sectionId}
               />
             </div>
@@ -341,7 +342,7 @@ const EditSection = () => {
               <AttachmentForm
                 initialData={section}
                 taskId={taskId}
-                setTask={setTask}
+                setRefetchSection={setRefetchSection}
                 sectionId={sectionId}
               />
             </div>

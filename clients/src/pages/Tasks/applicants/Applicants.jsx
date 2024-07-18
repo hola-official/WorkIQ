@@ -61,7 +61,7 @@ const Applicants = () => {
   const axiosInstance = useAxiosInstance();
   const [isLoading, setIsLoading] = useState(false);
   const [task, setTask] = useState(null);
-  const [user, setUser] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
   const [freelancer, setFreelancer] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -96,7 +96,7 @@ const Applicants = () => {
       const res = await axiosInstance.get(`users/${task.client}`);
       const data = await res.data;
       console.log(data);
-      setUser(data);
+      setUserInfo(data);
     } catch (error) {
       console.error(error);
     }
@@ -115,6 +115,7 @@ const Applicants = () => {
   //   }
   // };
 
+  const user = userInfo;
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleModal = () => {

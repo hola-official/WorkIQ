@@ -39,6 +39,7 @@ const createTitle = async (req, res) => {
 };
 
 const getAllClientTasks = async (req, res) => {
+  
   try {
     // console.log(req.userId)
     const tasks = await Task.find({ client: req.userId });
@@ -126,6 +127,7 @@ const updateTask = async (req, res) => {
 };
 
 const updateTaskCategory = async (req, res) => {
+  console.log("first updating category...")
   const taskId = req.params.id;
   const categoryId = req.body.categoryId;
 
@@ -891,8 +893,8 @@ const createProposalForSection = async (req, res) => {
     // Save the task
     await task.save();
 
-    // Save the proposal ID to the setProposal array in the user document
-    freelancer.setProposal.push(task._id);
+    // Save the proposal ID to the sentProposal array in the user document
+    freelancer.sentProposal.push(task._id);
     await freelancer.save();
 
     res.status(201).json({

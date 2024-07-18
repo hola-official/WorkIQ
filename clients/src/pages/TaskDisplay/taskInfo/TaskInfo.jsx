@@ -47,9 +47,10 @@ const TaskInfo = () => {
     }
   };
 
+  console.log(task)
   const handleClientInfo = async () => {
     try {
-      const res = await axiosInstance.get(`/users/${task.client}`);
+      const res = await axiosInstance.get(`/users/${task?.client}`);
       const data = await res.data;
       console.log(data);
       setUser(data);
@@ -65,6 +66,8 @@ const TaskInfo = () => {
   if (!task) {
     return <p>Task not found</p>;
   }
+
+  // const user = userInfo?.user;
   console.log(taskId);
   console.log(user);
   if (user) {
@@ -170,19 +173,19 @@ const TaskInfo = () => {
                                 role="img"
                               >
                                 <path
-                                  vector-effect="non-scaling-stroke"
+                                  vectorEffect="non-scaling-stroke"
                                   stroke="var(--icon-color, #001e00)"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="1.5"
                                   d="M13.17 3H21v7.83L10.83 21 3 13.17 13.17 3z"
                                 ></path>
                                 <path
-                                  vector-effect="non-scaling-stroke"
+                                  vectorEffect="non-scaling-stroke"
                                   stroke="var(--icon-color, #001e00)"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="1.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="1.5"
                                   d="M9.63 11.51a1.86 1.86 0 00.3 2.56 1.86 1.86 0 002.56.3 1.51 1.51 0 00.27-1.68c-.25-.54-.87-1.56-1.08-2.12A1.4 1.4 0 0112 9.12a1.84 1.84 0 012.55.31 1.84 1.84 0 01.33 2.57m-.31-2.57l.81-.81m-6.26 6.26l.81-.81m7.94-7.39a.55.55 0 100-1.1.55.55 0 000 1.1z"
                                 ></path>
                               </svg>

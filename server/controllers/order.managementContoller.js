@@ -1,4 +1,5 @@
 const Task = require("../Model/TaskModel");
+const TransactionModel = require("../Model/TransactionModel.js");
 const userModel = require("../Model/userModel.js");
 
 // Controller logic for creating an order
@@ -260,13 +261,12 @@ const submitOrderCompletion = async (req, res) => {
 const approveOrderDelivery = async (req, res) => {
   try {
     const { orderId } = req.params;
-    // const clientId = req.userId; // Assuming the client's information is in the request user object
 
     // Find the order
     const task = await Task.findOne({
       "sections.order._id": orderId,
-      // client: clientId,
     });
+
     if (!task) {
       return res.status(404).json({
         message: "Order not found or not associated with your account",
@@ -279,6 +279,7 @@ const approveOrderDelivery = async (req, res) => {
 
     // Find the order to approve
     const order = section.order.find((ord) => ord._id.equals(orderId));
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -292,33 +293,29 @@ const approveOrderDelivery = async (req, res) => {
     order.isApproved = true;
     order.status = "completed";
 
-    console.log("seen order:", order);
-
     // Calculate and award points to freelancer
     const freelancerId = section.assignTo;
     const pointsEarned = 100; // Points earned by the freelancer
+
     // Update freelancer's points
     const freelancer = await userModel.findById(freelancerId);
+
     if (freelancer) {
       freelancer.points.push({
         orderId: orderId,
         description: `Earned 100 points for completing order "${section.title}"`,
-        amount: pointsEarned,
+        point: pointsEarned,
         date: new Date(),
       });
       await freelancer.save();
+    } else {
+      return res.status(404).json({ message: "Freelancer not found" });
     }
 
-    // console.log("freelancerId :", freelancerId)
-    // console.log("freelancer :", freelancer)
-
-    const clientById = order.client
-
     // Deduct section price from client's escrow balance
+    const clientById = order.client;
     const client = await userModel.findById(clientById);
 
-    console.log("clientId :", clientById)
-    console.log("client :", client)
     if (client) {
       const sectionPrice = order.sectionPrice;
       if (client.escrowBalance >= sectionPrice) {
@@ -329,28 +326,45 @@ const approveOrderDelivery = async (req, res) => {
           .status(400)
           .json({ message: "Insufficient funds in escrow balance" });
       }
+
+      const newClientTransaction = new TransactionModel({
+        user: client._id,
+        amount: order.sectionPrice,
+        type: "order_completed",
+        status: "success",
+        reference: "Order Completed",
+      });
+      await newClientTransaction.save();
+    } else {
+      return res.status(404).json({ message: "Client not found" });
     }
 
     // Add section price to freelancer's balance
     if (freelancer) {
       freelancer.balance += order.sectionPrice;
       await freelancer.save();
+
+      const newFreelancerTransaction = new TransactionModel({
+        user: freelancer._id,
+        amount: order.sectionPrice,
+        type: "earning",
+        status: "success",
+        reference: "Order Completed",
+      });
+      await newFreelancerTransaction.save();
     }
 
-    // Save the updated task
+    freelancer.tasksCompleted.push(orderId);
     await task.save();
 
-    // Set the description as the title of the section
-    // const description = section.title;
-
-    res
-      .status(200)
-      .json({ message: "Order delivery approved successfully", order });
+    // Respond with the updated order details
+    res.status(200).json({ message: "Order delivery approved successfully", order });
   } catch (error) {
     console.error("Error approving order delivery:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const cancelOrder = async (req, res) => {
   try {

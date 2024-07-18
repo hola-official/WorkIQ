@@ -27,6 +27,7 @@ import { formatPrice } from "@/lib/format";
 import { Link, useNavigate } from "react-router-dom";
 import { GoChevronRight } from "react-icons/go";
 import useShowToast from "@/hooks/useShowToast";
+import { ConfirmModal } from "@/ui/confirm-modal";
 // import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const Proposal = ({ task, proposal, section }) => {
@@ -62,7 +63,7 @@ const Proposal = ({ task, proposal, section }) => {
 
       const data = await res.data;
       console.log(data);
-      navigate(`/track/order/${data._id}`)
+      navigate(`/track/order/${data?.order?._id}`)
 
       showToast("Success", data.message, "success");
     } catch (error) {
@@ -70,7 +71,7 @@ const Proposal = ({ task, proposal, section }) => {
       showToast("Error", error.response.data.message, "error");
     }
   };
-
+  console.log(freelancer)
   return (
     <>
       <Stack
@@ -119,9 +120,9 @@ const Proposal = ({ task, proposal, section }) => {
           <Box>
             <Avatar
               size="sm"
-              name={freelancer ? freelancer.name : ""}
+              name={freelancer ? freelancer?.name : ""}
               mb={2}
-              src={freelancer ? freelancer.userAvatar : ""}
+              src={freelancer ? freelancer?.Avatar : ""}
             />
             <Stack
               justifyContent="space-between"
@@ -129,7 +130,7 @@ const Proposal = ({ task, proposal, section }) => {
             >
               <Box>
                 <Text fontSize="sm" fontWeight="bold">
-                  {freelancer ? freelancer.username : "N/A"}
+                  {freelancer ? freelancer?.username : "N/A"}
                 </Text>
                 <Text fontSize="sm" color="gray.500">
                   {getTimestamp(proposal.createdAt)}

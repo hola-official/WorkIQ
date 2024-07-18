@@ -1,6 +1,34 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const badgeSchema = new Schema({
+  type: {
+    type: String,
+    enum: ["BRONZE", "SILVER", "GOLD"],
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const portfolioSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    imageUrl: { type: String },
+    projectUrl: { type: String },
+    githubUrl: { type: String },
+    skills: [String],
+    testimonial: { type: String },
+    tags: [String],
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
@@ -15,36 +43,39 @@ const userSchema = new Schema(
       // required: true
     },
     roles: {
-      Freelancer: {
+      Client: {
         type: String,
-        default: "Freelancer",
+        default: "Client",
       },
-      Client: String,
+      Freelancer: String,
       Admin: String,
     },
+    isVerified: { type: Boolean, default: false }, // New field for verification status
     googleId: String,
     location: { type: String },
     avatar: { type: String },
     bio: { type: String },
     balance: {
       type: Number,
-      // default: 500
     },
     escrowBalance: { type: Number, default: 0 }, // New field for escrow balance
-    portfolios: [{ type: Schema.Types.ObjectId, ref: "Portfolio" }],
-    setProposal: [{ type: Schema.Types.ObjectId, ref: "Task" }],
+    stripeAccountId: String,
+    stripeOnboardingComplete: { type: Boolean, default: false },
+    portfolios: [portfolioSchema],
+    sentProposal: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCreated: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     refreshToken: [String],
     points: [
       {
-        orderId: {type: Schema.Types.ObjectId, ref: "task.section.order"},
+        orderId: { type: Schema.Types.ObjectId, ref: "task.section.order" },
         description: String,
-        amount: Number,
+        point: Number,
         date: Date,
       },
     ],
-    badges: [{ type: Schema.Types.ObjectId, ref: "Badge" }],
+    totalPoints: { type: Number, default: 0 },
+    badges: [badgeSchema],
     skills: [{ type: String }],
     category: { type: String },
     website: { type: String },

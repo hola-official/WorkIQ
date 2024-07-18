@@ -6,34 +6,36 @@ import { TbShieldDollar } from "react-icons/tb";
 import { FaCircleDollarToSlot } from "react-icons/fa6";
 import { useUser } from '@/context/UserContext';
 import useAuth from '@/hooks/useAuth';
-import { useRecoilValue } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import userAtom from '@/atoms/userAtom';
 
 const Dashboardche = () => {
-  // const { _id } = useAuth();
-  // const { user, updateUser } = useUser();
-  // const axiosInstance = useAxiosInstance();
+  const { _id } = useAuth();
+  // const { user, updateUser } = useUser(null);
+  const [userInfo, setUserInfo] = useRecoilState(userAtom)
+  const axiosInstance = useAxiosInstance();
   const [chart, setChart] = useState(null);
-  const user = useRecoilValue(userAtom)
-
-  // useEffect(() => {
-  //   handleUserInfo();
-  // }, []);
-
-  // const handleUserInfo = async (values) => {
-  //   try {
-  //     const res = await axiosInstance.get(`/users/${_id}`);
-  //     updateUser((prev) => ({ ...prev, data: data }));
-  //     const data = await res.data;
-  //     updateUser(data);
-  //     console.log(data);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   useEffect(() => {
-    if (user) {
+    const handleUserInfo = async () => {
+      try {
+        const res = await axiosInstance.get(`/users/${_id}`);
+        // updateUser(prev => prev + 1);
+        const data = await res.data;
+        console.log(data)
+        setUserInfo(data);
+        console.log(data);
+        // setRefetchDashboard((prev) => ({ ...prev, ...data }));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    handleUserInfo();
+  }, []);
+
+
+  useEffect(() => {
+    if (userInfo) {
       const chartElement = document.querySelector('#chartline');
       const options = {
         series: [
@@ -101,9 +103,9 @@ const Dashboardche = () => {
         setChart(chartInstance);
       }
     }
-  }, [user, chart]);
+  }, [userInfo, chart]);
 
-  if (!user) {
+  if (!userInfo) {
     return <div>Loading...</div>;
   }
 
@@ -116,7 +118,7 @@ const Dashboardche = () => {
               <div className="flex items-center h-10 intro-y">
                 <h2 className="mr-5 text-lg font-medium truncate">Dashboard</h2>
               </div>
-              <h2 className="text-2xl text-gray-600">Hello {user?.username} 👋</h2>
+              <h2 className="text-2xl text-gray-600">Hello {userInfo?.username} 👋</h2>
               <div className="grid grid-cols-12 gap-6 mt-5">
                 <div className="transform hover:scale-105 transition duration-300 shadow-xl rounded-lg col-span-12 sm:col-span-6 xl:col-span-3 intro-y bg-white">
                   <div className="p-5">
@@ -127,7 +129,7 @@ const Dashboardche = () => {
                     </div>
                     <div className="ml-2 w-full flex-1">
                       <div>
-                        <div className="mt-3 text-3xl font-bold leading-8">{formatPrice(user?.balance)}</div>
+                        <div className="mt-3 text-3xl font-bold leading-8">{formatPrice(userInfo?.balance)}</div>
                         <div className="mt-1 text-base text-gray-600">Balance</div>
                       </div>
                     </div>
@@ -142,7 +144,7 @@ const Dashboardche = () => {
                     </div>
                     <div className="ml-2 w-full flex-1">
                       <div>
-                        <div className="mt-3 text-3xl font-bold leading-8">{formatPrice(user?.escrowBalance)}</div>
+                        <div className="mt-3 text-3xl font-bold leading-8">{formatPrice(userInfo?.escrowBalance)}</div>
                         <div className="mt-1 text-base text-gray-600">Freezed</div>
                       </div>
                     </div>
@@ -156,7 +158,7 @@ const Dashboardche = () => {
                 {/* <div className="bg-white shadow-lg" id="chartpie"></div> */}
               </div>
             </div>
-            <div className="col-span-12 mt-5">  
+            <div className="col-span-12 mt-5">
               <div className="grid gap-2 grid-cols-1 lg:grid-cols-1">
                 <div className="bg-white p-4 shadow-lg rounded-lg">
                   <h1 className="font-bold text-base">Table</h1>

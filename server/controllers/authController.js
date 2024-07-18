@@ -518,6 +518,39 @@ const login = async (req, res) => {
       // console.log(accessToken)
       // console.log(accessToken)
 
+      // Send logout confirmation email
+      const userData = {
+        name: foundUser.name,
+        email: foundUser.email,
+        // location: foundUser.location, // You can customize this based on your user model
+        timestamp: new Date().toLocaleString("default", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+        }),
+        // Add more relevant data if needed
+      };
+
+      // console.log(userData)
+
+      // Send email
+      try {
+        await sendMail({
+          email: userData.email,
+          subject: "Welcome Back Onboard",
+          template: "login-successful-mail.ejs",
+          data: {
+            user: { username: foundUser.username },
+            time: { timestamp: userData.timestamp },
+          },
+        });
+      } catch (error) {
+        console.log("Error sending logout email:", error);
+        // Handle error if needed
+      }
+
       // Send authorization roles and access token to user
       res.json({ accessToken, loggedUser: result });
     } else {

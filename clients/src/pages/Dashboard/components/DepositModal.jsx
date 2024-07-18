@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Modal, message } from "antd";
 import StripeCheckout from "react-stripe-checkout";
 import { useAxiosInstance } from "../../../../api/axios";
-import { Button, Input } from "@chakra-ui/react";
+import { Button, Input, InputGroup, InputLeftElement, InputRightElement, Stack } from "@chakra-ui/react";
 import useShowToast from "@/hooks/useShowToast";
-import { useSetRecoilState, useRecoilState } from "recoil";
+import { useSetRecoilState, useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "@/atoms/userAtom";
 import { prevPathAtom } from "@/atoms/prevPathAtom";
 import { useNavigate } from "react-router-dom";
+import { CheckIcon } from "@chakra-ui/icons";
 
 const apiKey = import.meta.env.VITE_STRIPE_KEY;
 
@@ -15,7 +16,7 @@ function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
   const showToast = useShowToast();
   const [amount, setAmount] = useState("");
   const axiosInstance = useAxiosInstance();
-  const user = useRecoilState(userAtom)
+  const user = useRecoilValue(userAtom)
   const setUser = useSetRecoilState(userAtom);
   // const navigate = useNavigate();
 
@@ -28,12 +29,16 @@ function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
       if (data.status === "success") {
         setShowDepositModal(false);
         showToast("Success", `${data.message}`, "success");
+        console.log(data)
+
+        const newBalance = user.balance + data.data.depositAmount
+        console.log(newBalance)
 
 
-        const updatedUser = { ...user, balance: data.newBalance };
+        const updatedUser = { ...user, balance: newBalance };
+        console.log(updatedUser)
 
 
-        setUser(updatedUser);
 
       }
       return data;
@@ -48,10 +53,13 @@ function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
       console.log("Token received:", token);
       console.log("Amount to deposit (dollars):", amount);
       const response = await DepositFunds(token);
-      console.log("Deposit response:", response);
+
+      const newBalance = user.balance + response.data.amount;
       if (response.success) {
         setShowDepositModal(false);
         showToast("Success", `${response.message}`, "success");
+        const updatedUser = { ...user, balance: newBalance };
+        setUser(updatedUser);
       } else {
         showToast("Error", `${response.message}`, "error");
       }
@@ -81,13 +89,24 @@ function DepositModal({ showDepositModal, setShowDepositModal, reloadData }) {
       <form layout="vertical">
         <div className="flex-col gap-2">
           <div className="mb-2">
-            <Input
-              type="number"
-              id="amount"
-              value={amount}
-              onChange={handleAmountChange}
-              required
-            />
+
+            <Stack spacing={4}>
+              <InputGroup>
+                <InputLeftElement pointerEvents='none' color='gray.300' fontSize='1.2em'>
+                  $
+                </InputLeftElement>
+                <Input
+                  placeholder='Enter amount' type="number"
+                  id="amount"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  required
+                />
+                <InputRightElement>
+                  <CheckIcon color='green.500' />
+                </InputRightElement>
+              </InputGroup>
+            </Stack>
           </div>
 
           <div className="flex justify-end gap-1">

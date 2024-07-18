@@ -11,11 +11,12 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/authRoutes");
 const refreshRoute = require("./routes/refresh");
 const userRoutes = require("./routes/userRoutes");
-const clentRoutes = require("./routes/clientRoutes");
+const clientRoutes = require("./routes/clientRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const transactionRoutes = require("./routes/transactionRoute");
 const ProposalRoutes = require("./routes/proposalRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const webhookRoute = require("./routes/webhookRoute");
 const cloudinary = require("cloudinary").v2;
 require("./config/passport-setup");
 
@@ -52,6 +53,7 @@ app.use(
 app.use(credentials);
 
 // Middleware to initialize passport
+app.use("/api", express.raw({ type: "application/json" }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json({ limit: "50mb" })); //parse json data inside the req body
@@ -65,10 +67,11 @@ app.use(cookieParser());
 // Routes
 app.use("/auth", authRoutes);
 app.use("/refresh", refreshRoute);
+app.use("/api", webhookRoute);
 app.use("/users", userRoutes);
 app.use("/projects", taskRoutes);
 app.use("/proposal", ProposalRoutes);
-app.use("/tasks", clentRoutes);
+app.use("/tasks", clientRoutes);
 app.use("/order", orderRoutes);
 app.use("/transactions", transactionRoutes);
 

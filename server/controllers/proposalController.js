@@ -41,8 +41,8 @@ const createProposal = async (req, res) => {
     // Save the task
     await task.save();
     
-    // Save the proposal ID to the setProposal array in the user document
-    freelancer.setProposal.push(task._id);
+    // Save the proposal ID to the sentProposal array in the user document
+    freelancer.sentProposal.push(task._id);
     await freelancer.save();
 
     res.status(201).json({

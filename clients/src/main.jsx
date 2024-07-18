@@ -6,6 +6,8 @@ import App from "./App.jsx";
 import "./index.css";
 import { mode } from "@chakra-ui/theme-tools";
 import { extendTheme } from "@chakra-ui/theme-utils";
+// import "react-circular-progressbar/dist/styles.css";
+import "react-datepicker/dist/react-datepicker.css";
 
 import { RecoilRoot } from "recoil";
 import { ThemeProvider } from "@material-tailwind/react";

@@ -19,11 +19,12 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  MenuGroup,
 } from "@chakra-ui/react";
 import { FiMenu, FiBell, FiChevronDown } from "react-icons/fi";
 import { NavLink, useNavigate } from "react-router-dom";
 import useLogout from "./hooks/useLogout";
-import React from "react";
+import React, { useState } from "react";
 import { GoHome } from "react-icons/go";
 import { PiSuitcase } from "react-icons/pi";
 import { useRecoilValue } from "recoil";
@@ -34,9 +35,16 @@ import useAuth from "./hooks/useAuth";
 import DepositModal from "./pages/Dashboard/components/DepositModal";
 import { FaListUl } from "react-icons/fa";
 import { FiBriefcase } from "react-icons/fi";
+import RequestVerification from "./pages/Dashboard/components/RequestVerification";
+import Withdraw from "./pages/Freelancer/withdraw/Withdraw";
 
 const SidebarContent = ({ onClose, ...rest }) => {
   const logout = useLogout();
+  const userInfo = useRecoilValue(userAtom);
+  const user = userInfo;
+
+  console.log(user)
+
   return (
     <Box
       transition="3s ease"
@@ -70,7 +78,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
         Dashboard
       </NavItem>
 
-      <NavItem
+      {user?.roles?.Freelancer === "Freelancer" && user?.isVerified === true && (<NavItem
         as={NavLink}
         to={"/projects"}
         style={({ isActive }) => ({
@@ -80,7 +88,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
         icon={PiSuitcase}
       >
         Project
-      </NavItem>
+      </NavItem>)}
 
       <NavItem
         as={NavLink}
@@ -105,18 +113,18 @@ const SidebarContent = ({ onClose, ...rest }) => {
       >
         Orders
       </NavItem>
-
-      <NavItem
-        as={NavLink}
-        to={"/clients/my-tasks"}
-        style={({ isActive }) => ({
-          color: isActive ? "#1F2937" : "",
-          background: isActive ? "#FFFFFF" : "",
-        })}
-        icon={FiBriefcase}
-      >
-        My Tasks
-      </NavItem>
+      {user?.roles?.Client === "Client" && (
+        <NavItem
+          as={NavLink}
+          to={"/clients/my-tasks"}
+          style={({ isActive }) => ({
+            color: isActive ? "#1F2937" : "",
+            background: isActive ? "#FFFFFF" : "",
+          })}
+          icon={FiBriefcase}
+        >
+          My Tasks
+        </NavItem>)}
 
       <div className="flex w-[80%] items-center mx-auto">
         <Button
@@ -158,10 +166,13 @@ const NavItem = ({ icon, children, ...rest }) => {
 
 const MobileNav = ({ onOpen, ...rest }) => {
   const logout = useLogout();
-  const user = useRecoilValue(userAtom);
+  const userInfo = useRecoilValue(userAtom);
+  const user = userInfo;
   const navigate = useNavigate();
   const [showDepositModal, setShowDepositModal] = React.useState(false);
-
+  const [showModal, setShowModal] = useState(false);
+  // console.log(user)
+  console.log(userInfo)
   return (
     <Flex
       pos={"sticky"}
@@ -184,7 +195,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
         icon={<FiMenu />}
       />
 
-      <Image display={{ base: "flex", md: "none" }} src="/QBLogo.png" />
+      <Image boxSize='100px' display={{ base: "flex", md: "none" }} src="/assets/images/WorkIqshort.png" />
 
       <HStack spacing={{ base: "0", md: "6" }}>
         <IconButton
@@ -202,7 +213,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
               _focus={{ boxShadow: "none" }}
             >
               <HStack>
-                <Avatar size={"sm"} src={user?.avatar} />
+                <Avatar size={"sm"} src={userInfo?.avatar} />
                 <VStack
                   display={{ base: "none", md: "flex" }}
                   alignItems="flex-start"
@@ -210,7 +221,7 @@ const MobileNav = ({ onOpen, ...rest }) => {
                   ml="2"
                 >
                   <Text fontSize="sm" color="gray.600">
-                    {user?.name}
+                    {userInfo?.name}
                   </Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
@@ -222,12 +233,24 @@ const MobileNav = ({ onOpen, ...rest }) => {
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem onClick={() => navigate(`/profile/${user?.username}`)}>
+              <MenuItem onClick={() => navigate(`/profile/${userInfo?.username}`)}>
                 Profile
               </MenuItem>
-              <MenuItem onClick={() => setShowDepositModal(true)}>
-                Deposit
-              </MenuItem>
+              {user?.isVerified === false && (<MenuItem ><RequestVerification /></MenuItem>)}
+              <MenuDivider />
+              <MenuGroup title='Settings'>
+                <MenuItem onClick={() => setShowDepositModal(true)}>
+                  Deposit
+                </MenuItem>
+
+                <MenuItem>
+                  <Withdraw
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                  // reloadData={getData}
+                  />
+                </MenuItem>
+              </MenuGroup>
               <MenuDivider />
               <MenuItem onClick={logout}>Sign out</MenuItem>
             </MenuList>
@@ -238,9 +261,16 @@ const MobileNav = ({ onOpen, ...rest }) => {
         <DepositModal
           showDepositModal={showDepositModal}
           setShowDepositModal={setShowDepositModal}
-          // reloadData={getData}
+        // reloadData={getData}
         />
       )}
+      {/* {showModal && (
+        <Withdraw
+          showModal={showModal}
+          setShowModal={setShowModal}
+        // reloadData={getData}
+        />
+      )} */}
     </Flex>
   );
 };

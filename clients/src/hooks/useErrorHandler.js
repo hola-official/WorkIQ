@@ -18,7 +18,7 @@ const useErrorHandler = () => {
 			logout();
 		} else if (error?.response?.status === 401) {
 			setPrevPath(window.location.pathname);
-			// logout();
+			logout();
 		}
 	};
 	return errorHandler;

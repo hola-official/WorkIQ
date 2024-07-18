@@ -33,7 +33,7 @@ const formSchema = z.object({
 export const SectionPriceForm = ({
   initialData,
   taskId,
-  setTask,
+  setRefetchSection,
   sectionId,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -65,10 +65,10 @@ export const SectionPriceForm = ({
       );
       showToast("Success", "Task updated successfully", "success");
       toggleEdit();
-      setTask((prev) => ({ ...prev, price: values.price }));
+      setRefetchSection(prev => prev + 1)
       // router.refresh();
     } catch (error) {
-      console.log('price error goes here',error);
+      console.log('price error goes here', error);
       showToast(
         "Error",
         error.response.data.message || error.response.data.error,
@@ -138,9 +138,9 @@ export const SectionPriceForm = ({
                       <Input
                         colorScheme={"blue"}
                         type="number"
-                        // step="0.01"
+                        step="0.01"
                         isDisabled={isSubmitting}
-                        // min={5} // Minimum price of $5
+                        min={5} // Minimum price of $5
                         placeholder="Set a price for your task"
                         // onChange={handlePriceChange}
                         {...field}

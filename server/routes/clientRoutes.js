@@ -38,20 +38,41 @@ router.get(
   getAllClientTasks
 );
 
-router.put("/edit-task/:id", verifyJWT, verifyRoles(Admin, Client), updateTask);
-
 router.put(
   "/edit-task/:id/category",
   verifyJWT,
   verifyRoles(Admin, Client),
   updateTaskCategory
 );
+
+
+
+router.put("/edit-task/:id", verifyJWT, verifyRoles(Admin, Client), updateTask);
+
+// router.put(
+//   "/edit-task/:id/category",
+//   verifyJWT,
+//   verifyRoles(Admin, Client),
+//   updateTaskCategory
+// );
+
+// router.put(
+//   "/edit-task/:id/category",
+//   verifyJWT,
+//   verifyRoles(Admin, Client),
+//   updateTaskCategory
+//   // createSection
+// );
+
+
 router.put(
   "/edit-task/:id/create-section",
   verifyJWT,
   verifyRoles(Admin, Client),
+  // updateTaskCategory
   createSection
 );
+
 router.put(
   "/edit-task/:id/toggle-publish",
   verifyJWT,

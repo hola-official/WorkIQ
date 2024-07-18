@@ -55,7 +55,7 @@ export default function SplitScreen() {
 
       setToken(token);
       setUsers(loggedUser);
-
+      console.log(loggedUser)
       const localStoragePrevPath = localStorage?.getItem("localPrevPath");
       // Redirect to the originally requested route (or a default route)
       if (localStoragePrevPath) {
@@ -82,11 +82,11 @@ export default function SplitScreen() {
   };
 
 
-	const baseUrl= import.meta.env.VITE_SERVER_BASE_URL
+  const baseUrl = import.meta.env.VITE_SERVER_BASE_URL
 
-	const handleGoogleAuth = () => {
-			window.location.href = `${baseUrl}/auth/googleauth`;
-	}
+  const handleGoogleAuth = () => {
+    window.location.href = `${baseUrl}/auth/googleauth`;
+  }
 
   return (
     <Stack

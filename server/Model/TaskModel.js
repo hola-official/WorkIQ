@@ -6,7 +6,7 @@ const proposalSchema = new mongoose.Schema(
     freelancer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      // required: true,
     },
     isAssigned: { type: Boolean, default: false },
     coverLetter: { type: String, required: true },

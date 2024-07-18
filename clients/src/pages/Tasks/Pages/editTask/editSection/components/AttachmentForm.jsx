@@ -23,7 +23,7 @@ import useShowToast from "@/hooks/useShowToast";
 const formSchema = z.object({
   url: z.string().min(1),
 });
-export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
+export const AttachmentForm = ({ initialData, taskId, sectionId, setRefetchSection }) => {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(""); // New state for file name
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -96,6 +96,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       setUploadProgress(0);
     }
   };
+  console.log(initialData)
 
   const onSubmit = async () => {
     try {
@@ -120,7 +121,8 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       // setUploadTask(data)
       showToast("Success", "File uploaded successfully", "success");
       toggleEdit();
-      window.location.reload();
+      setRefetchSection(prev => prev + 1)
+      // window.location.reload();
     } catch (error) {
       console.error("Error uploading file:", error);
       if (error?.code === "storage/canceled") {
@@ -144,11 +146,11 @@ export const AttachmentForm = ({ initialData, taskId, sectionId }) => {
       const fileRef = ref(storage, attachment.url);
       await deleteObject(fileRef);
 
-			console.log(attachment._id)
+      console.log(attachment._id)
       await axiosInstance.delete(
         `tasks/edit-task/${taskId}/section/${sectionId}/attachment/${attachment._id}`,
       );
-			console.log(delAttachId);
+      console.log(delAttachId);
       showToast("Success", "Attachment deleted", "success");
       // router.refresh();
     } catch (error) {
