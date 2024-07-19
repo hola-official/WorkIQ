@@ -164,7 +164,7 @@ const HeaderSection = React.memo(({ userInfo, balance, totalEarnings, isVerified
 			<div>
 				<div className="flex gap-1">
 					<Avatar>
-						<Image className="rounded-full" src={userInfo?.avatar} />
+						<Image className="rounded-full" boxSize={'150px'} src={userInfo?.avatar} />
 					</Avatar>
 					<h1 className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white">
 						Welcome, {userInfo?.username}
@@ -198,11 +198,11 @@ const StatCards = React.memo(({ stats, userInfo }) => {
 			title: userInfo?.isVerified === true ? "Completed Tasks" : "Task Created",
 			value: userInfo?.isVerified === true ? `${stats?.totalTasksCompleted ?? 0} Tasks` : `${userInfo?.tasksCreated.length} Created`
 		},
-		{
-			icon: <LayoutList />,
-			title: "Success Rate",
-			value: `${stats?.successRate?.toFixed(2) ?? 0}%`
-		},
+		// {
+		// 	icon: <LayoutList />,
+		// 	title: "Success Rate",
+		// 	value: `${stats?.successRate?.toFixed(2) ?? 0}%`
+		// },
 		userInfo?.isVerified === true && {
 			icon: <Users />,
 			title: "Total Points",
