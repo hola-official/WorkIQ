@@ -3,7 +3,7 @@ import axios from "axios";
 import { useRecoilValue } from "recoil";
 
 // const BASE_URL = "https://quickbill-2oy7.onrender.com/";
-const BASE_URL = "http://localhost:3000/";
+const BASE_URL = "https://work-iq.vercel.app/";
 
 
  const axiosInstance = axios.create({
