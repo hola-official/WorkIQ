@@ -9,7 +9,8 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { Link } from "react-router-dom";
-import { PlusCircle } from "lucide-react";
+import { Eye } from "lucide-react";
+
 import {
 	Table,
 	TableBody,
@@ -18,10 +19,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Button } from "@chakra-ui/react";
 import { Input } from "@/components/ui/input";
 export function DataTable({ columns, data }) {
-	console.log(data);
+	// console.log(data);
 	const [sorting, setSorting] = React.useState([]);
 	const [columnFilters, setColumnFilters] = React.useState([]);
 	const table = useReactTable({
@@ -38,25 +39,20 @@ export function DataTable({ columns, data }) {
 			columnFilters,
 		},
 	});
-	// if (!data)
-		// return (
-    //         <div>
-    //         {" "}
-    //         <div className="flex items-center justify-end py-4 ">
-    //             <Link className="justify-end" to="/tutors/create-course">
-    //                 <Button>
-    //                     <PlusCircle className="h-4 w-4 mr-2" />
-    //                     New course
-    //                 </Button>
-    //             </Link>
-    //         </div>{" "}
-    //         <p className="text-center mt-20">No data to display</p>
-    //     </div>
-		// );
+	// if (data)
+	// 	return (
+	// 		<div>
+	// 			{" "}
+	// 			<div className="flex items-center justify-end py-4 ">
+	// 				
+	// 			</div>{" "}
+	// 			<p className="text-center mt-20">No data to display</p>
+	// 		</div>
+	// 	);
 
 	return (
 		<div className="w-full">
-			<div className="flex items-center py-4 justify-between">
+			<div className="flex items-center flex-wrap py-4 justify-between">
 				<Input
 					placeholder="Filter order..."
 					value={table?.getColumn("title")?.getFilterValue() ?? ""}
@@ -65,6 +61,12 @@ export function DataTable({ columns, data }) {
 					}
 					className="max-w-sm"
 				/>
+				<Link className="justify-end" to="/manage-orders">
+					<Button colorScheme={'blue'} borderRadius={'md'} size={['sm', 'md']}>
+						<Eye className="h-4 w-4 mr-2" />
+						View orders
+					</Button>
+				</Link>
 			</div>
 			<div className="rounded-md border">
 				<Table>
@@ -77,9 +79,9 @@ export function DataTable({ columns, data }) {
 											{header?.isPlaceholder
 												? null
 												: flexRender(
-														header.column.columnDef.header,
-														header.getContext()
-												  )}
+													header.column.columnDef.header,
+													header.getContext()
+												)}
 										</TableHead>
 									);
 								})}

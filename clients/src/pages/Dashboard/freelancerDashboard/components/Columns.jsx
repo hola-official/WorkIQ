@@ -66,7 +66,7 @@ export const columns = [
 		},
 		cell: ({ row }) => {
 			const days = row.getValue("durationDays");
-			return <p className="ml-4">{days}</p>;
+			return <p className="ml-4">{days} d</p>;
 		},
 	},
 	{

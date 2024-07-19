@@ -73,38 +73,28 @@ const FreelancerEarningsChart = ({ stats }) => {
         {
           name: 'Earnings',
           data: earningsData.some((value) => value !== 0) ? earningsData : [0],
-          color: '#4CAF50', // Green color for earnings
         },
         {
           name: 'Deposits',
           data: depositsData.some((value) => value !== 0) ? depositsData : [0],
-          color: '#2196F3', // Blue color for deposits
         },
         {
           name: 'Withdrawals',
           data: withdrawalsData.some((value) => value !== 0) ? withdrawalsData : [0],
-          color: '#F44336', // Red color for withdrawals
         },
       ],
       options: {
         chart: {
-          type: 'bar',
+          type: 'area',
           height: 350,
+          stacked: false,
         },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '55%',
-            endingShape: 'rounded',
-          },
+        stroke: {
+          curve: 'smooth',
+          width: 3,
         },
         dataLabels: {
           enabled: false,
-        },
-        stroke: {
-          show: true,
-          width: 4,
-          colors: ['transparent'],
         },
         xaxis: {
           categories: shiftedMonthNames,
@@ -120,14 +110,24 @@ const FreelancerEarningsChart = ({ stats }) => {
           },
         },
         fill: {
-          opacity: 1,
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.9,
+            stops: [0, 90, 100]
+          }
         },
+        colors: ['#4CAF50', '#2196F3', '#F44336'],
         tooltip: {
           y: {
             formatter: function (val) {
               return `$${val.toFixed(2)}`;
             },
           },
+        },
+        legend: {
+          position: 'top',
         },
       },
     };
@@ -146,7 +146,7 @@ const FreelancerEarningsChart = ({ stats }) => {
         />
       </div>
       {processedData.length > 0 ? (
-        <ReactApexChart options={chartData.options} series={chartData.series} type="bar" height={350} />
+        <ReactApexChart options={chartData.options} series={chartData.series} type="line" height={350} />
       ) : (
         <p className="text-center mt-20">No data to display for the selected date range</p>
       )}

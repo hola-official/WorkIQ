@@ -47,7 +47,7 @@ const OrderTrack = () => {
     getOrders();
   }, [showToast]);
 
-  if (loading) return <p>Fetching all client tasks</p>;
+  // if (loading) return ;
 
   return (
     <SidebarWithHeader>
@@ -55,7 +55,7 @@ const OrderTrack = () => {
         <h1 className="text-2xl md:text-4xl font-medium">My Orders</h1>
       </div>
       <div className="p-6">
-        <DataTable columns={columns} data={tasks} />
+        <DataTable columns={columns} loading={loading} data={tasks} />
       </div>
     </SidebarWithHeader>
   );

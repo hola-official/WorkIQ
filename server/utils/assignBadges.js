@@ -1,6 +1,6 @@
 const BADGE_CRITERIA = {
   TOTAL_POINTS: {
-    BRONZE: 400,
+    BRONZE: 600,
     SILVER: 1000,
     GOLD: 5000,
   },

@@ -18,9 +18,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button as Chakrabutton, Flex, Select, Text } from "@chakra-ui/react";
+import Spinner from "@/components/Spinner";
 
-export function DataTable({ columns, data }) {
-  console.log(data)
+export function DataTable({ columns, data, loading }) {
+  // console.log(data)
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -44,13 +45,16 @@ export function DataTable({ columns, data }) {
     },
   });
   let currentPage = table.options.state.pagination.pageIndex + 1;
-  if (!data?.length) {
+  if (!data) {
+    return <Spinner />
+  } else if (!data?.length) {
     return (
       <div>
         <h1 className="text-2xl md:text-4xl font-medium">You have no order</h1>
       </div>
     );
   }
+  // if (loading) return <Spinner />
 
   return (
     <div className="w-full">
@@ -74,9 +78,9 @@ export function DataTable({ columns, data }) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

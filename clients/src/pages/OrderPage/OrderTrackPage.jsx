@@ -559,6 +559,7 @@ import useShowToast from "@/hooks/useShowToast";
 import { formatPrice } from "@/lib/format";
 import useAuth from "@/hooks/useAuth";
 import { ConfirmModal } from "@/ui/confirm-modal";
+import Spinner from "@/components/Spinner";
 
 const TABLE_HEAD = ["Section", "Delivery", "Amount"];
 
@@ -715,7 +716,7 @@ const OrderTrackPage = () => {
     setShowModal(true);
   };
 
-  if (loading) return <p>Fetching all client tasks</p>;
+  if (loading) return <Spinner />;
 
   const countdownClass = isCountdownComplete ? "text-red-500" : "text-blue-500";
   const classes = "p-4 border-b border-blue-gray-50";

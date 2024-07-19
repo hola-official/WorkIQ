@@ -1,7 +1,21 @@
 import React from 'react';
 import { Nested } from '@alptugidin/react-circular-progress-bar';
 
-// Function to generate a random hex color
+// Function to get a specific color for each badge type
+const getBadgeColor = (badgeName) => {
+  switch (badgeName.toLowerCase()) {
+    case 'bronze':
+      return '#CD7F32';
+    case 'silver':
+      return '#C0C0C0';
+    case 'gold':
+      return '#FFD700';
+    default:
+      return getRandomColor();
+  }
+};
+
+// Function to generate a random hex color for non-badge data
 const getRandomColor = () => {
   const letters = '0123456789ABCDEF';
   let color = '#';
@@ -16,18 +30,16 @@ const PieChartComponent = ({ data }) => {
   const circles = data.map(item => ({
     text: item.name,
     value: item.value,
-    color: getRandomColor(),  // Generate a random color for each item
+    color: ['Bronze', 'Silver', 'Gold'].includes(item.name) ? getBadgeColor(item.name) : getRandomColor(),
   }));
 
   return (
-    <div className="h-64 w-full max-w-sm mx-auto rounded-lg p-8 border-gray-300/55">
+    <div className="h-64 md:h-52 w-full max-w-sm mx-auto rounded-lg p-8 border-gray-300/55">
       <Nested
         circles={circles}
-      
         sx={{
-          
-          width: '200px',  // Adjust the width
-          height: '5000px', // Adjust the height
+          width: '200px',
+          height: '200px',
           bgColor: '#cbd5e1',
           fontWeight: 'bold',
           fontFamily: 'Trebuchet MS',
