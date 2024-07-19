@@ -95,7 +95,7 @@ const EditTask = () => {
   const isComplete = requiredFields?.every(Boolean);
 
   if (isLoading) {
-    return <p>Loading client Task</p>;
+    return <Spinner />
   } else if (!task) {
     console.log("error error error");
     return <Navigate to={"/dashboard"} />;

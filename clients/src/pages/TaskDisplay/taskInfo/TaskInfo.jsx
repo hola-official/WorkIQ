@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip } from "@chakra-ui/react";
 import { formatPrice } from "@/lib/format";
 import Footer from "@/components/Footer";
+import Spinner from "@/components/Spinner";
 
 const TaskInfo = () => {
   const { taskId } = useParams();
@@ -60,7 +61,7 @@ const TaskInfo = () => {
   };
 
   if (isLoading) {
-    return <p>Loading Client Task</p>;
+    return <Spinner />
   }
 
   if (!task) {

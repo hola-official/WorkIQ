@@ -196,6 +196,7 @@ import { SectionDurationForm } from "./components/SectionDurationForm";
 import { useAxiosInstance } from "../../../../../../api/axios";
 import { Text, Flex } from "@chakra-ui/react";
 import Loading from "@/components/ui/Loading";
+import Spinner from "@/components/Spinner";
 
 const EditSection = () => {
   const { taskId, sectionId } = useParams();
@@ -227,17 +228,7 @@ const EditSection = () => {
   }, [taskId, refetchSection]);
 
   if (!section) {
-    return (
-      <Flex
-        justifyContent={"center"}
-        flexDir={"column"}
-        align={"center"}
-        h={"100vh"}
-      >
-        <Loading />
-        <Text as={"h1"}>Setting up section</Text>
-      </Flex>
-    );
+    return <Spinner />;
   }
 
   const requiredFields = [
