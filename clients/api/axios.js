@@ -3,10 +3,9 @@ import axios from "axios";
 import { useRecoilValue } from "recoil";
 
 // const BASE_URL = "https://quickbill-2oy7.onrender.com/";
-const BASE_URL = "https://work-iq.vercel.app/";
+const BASE_URL = process.env.BASE_URL || "http://localhost:3000/";
 
-
- const axiosInstance = axios.create({
+const axiosInstance = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
@@ -16,7 +15,9 @@ const BASE_URL = "https://work-iq.vercel.app/";
 
 // Function to set the Authorization header in axiosInstance
 export const setAuthorizationHeader = (token) => {
-  axiosInstance.defaults.headers.common["Authorization"] = token ? `Bearer ${token}` : null;
+  axiosInstance.defaults.headers.common["Authorization"] = token
+    ? `Bearer ${token}`
+    : null;
 };
 
 // Example of using the token from Recoil value
