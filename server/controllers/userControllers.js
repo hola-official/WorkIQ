@@ -744,10 +744,10 @@ const getFreelancerStats = async (req, res) => {
     const pieChartData = {
       badges: [
         {
-          name: "Gold",
-          value: freelancer.badges.some((badge) => badge.type === "gold")
-            ? 100
-            : 0,
+          name: "Bronze",
+          value: freelancer.badges.some((badge) => badge.type === "bronze")
+            ? 0
+            : 80,
         },
         {
           name: "Silver",
@@ -756,8 +756,8 @@ const getFreelancerStats = async (req, res) => {
             : 0,
         },
         {
-          name: "Bronze",
-          value: freelancer.badges.some((badge) => badge.type === "bronze")
+          name: "Gold",
+          value: freelancer.badges.some((badge) => badge.type === "gold")
             ? 100
             : 0,
         },
@@ -801,7 +801,7 @@ const getFreelancerStats = async (req, res) => {
       earningRate: [
         {
           name: "Earnings Rate",
-          value: totalEarnings / (totalTasksCompleted || 1),
+          value: totalEarnings / (totalTasksCompleted ? 100 : 0),
         }, // Prevent division by zero
       ],
     };

@@ -175,16 +175,16 @@ const MainContent = React.memo(({ stats, pieChartData, recentWithdrawals, recent
 		</div>}
 		<div className="col-span-1 w-full">
 			<div className="border rounded-lg border-gray-300/55 p-4">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
+				{/* <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
 					Recent Orders
-				</h2>
+				</h2> */}
 				<DataTable
 					data={stats?.allOrders ?? []}
 					columns={columns}
 				/>
 			</div>
 			{/* Add a new section for recent withdrawals and deposits */}
-			<div className="border rounded-lg border-gray-300/55 p-4 mt-4">
+			{/* <div className="border rounded-lg border-gray-300/55 p-4 mt-4">
 				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
 					Recent Withdrawals
 				</h2>
@@ -201,7 +201,7 @@ const MainContent = React.memo(({ stats, pieChartData, recentWithdrawals, recent
 					data={recentDeposits ?? []}
 					columns={columns}  // Make sure you have appropriate columns defined for this data
 				/>
-			</div>
+			</div> */}
 		</div>
 	</div>
 ));

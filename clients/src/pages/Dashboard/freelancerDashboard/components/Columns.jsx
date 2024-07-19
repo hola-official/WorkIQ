@@ -14,7 +14,6 @@ export const columns = [
 	{
 		accessorKey: "title",
 		header: ({ column }) => {
-			console.log(column)
 			return (
 				<Button
 					variant="ghost"
@@ -27,12 +26,11 @@ export const columns = [
 		},
 		cell: ({ row }) => {
 			const title = row.getValue("title");
-			console.log(row)
 			return <p className="ml-4">{title}</p>;
 		},
 	},
 	{
-		accessorKey: "amount",
+		accessorKey: "price",
 		header: ({ column }) => {
 			return (
 				<Button
@@ -85,9 +83,26 @@ export const columns = [
 			);
 		},
 		cell: ({ row }) => {
-			const status = row.getValue("status");
-			console.log(row.getValue("status"))
-			return <p className="ml-4">{status}</p>;
+			// const status = row.getValue("order.status");
+			const status = row.original.order.status;
+			// console.log(row.getValue("status"))
+			// console.log(status)
+			let statusColor = "text-[#E0BF00]";
+			switch (status) {
+				case "delivered":
+					statusColor = "text-[#7d85f5]";
+					break;
+				case "completed":
+					statusColor = "text-green-700";
+					break;
+				case "cancelled":
+					statusColor = "text-red-700";
+					break;
+				case "Overdue":
+					statusColor = "text-[#E40DC4]";
+					break;
+			}
+			return <p className={`${statusColor} font-medium text-left`}>{status}</p>;
 		},
 	},
 	{
