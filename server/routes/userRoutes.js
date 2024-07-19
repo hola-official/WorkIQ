@@ -30,14 +30,14 @@ router.put("/update/:userId", verifyJWT, updateUser);
 router.delete("/:userId", verifyJWT, deleteUser);
 router.get("/:query", verifyJWT, getUserProfile);
 // Multer setup
-const upload = multer({ dest: "uploads/" });
+// const upload = multer({ dest: "uploads/" });
 
-router.post("/verify", upload.single("file"), verifyJWT, requestVerification);
+router.post("/verify", verifyJWT, requestVerification);
 router.post("/verify/:token", approveVerification);
 
 router.post(
   "/:userId/portfolios",
-  upload.single("file"),
+  // upload.single("file"),
   verifyJWT,
   createPortfolio
 );

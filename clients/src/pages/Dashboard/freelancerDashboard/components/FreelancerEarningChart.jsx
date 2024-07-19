@@ -103,7 +103,7 @@ const FreelancerEarningsChart = ({ stats }) => {
         },
         stroke: {
           show: true,
-          width: 2,
+          width: 4,
           colors: ['transparent'],
         },
         xaxis: {

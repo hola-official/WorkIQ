@@ -24,13 +24,14 @@ import useShowToast from "@/hooks/useShowToast";
 import { useRecoilValue } from "recoil";
 import userAtom from "@/atoms/userAtom";
 import { ScrollArea } from "../../../components/ui/scroll-area"
+import usePreviewImg from "@/hooks/usePreviewImg";
 
 const RequestVerification = () => {
   // const { selectedAccount } = useContext(Web3Context);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState("");
   const [message, setMessage] = useState("");
   const [address, setAddress] = useState('')
   const [isLoading, setIsLoading] = useState(false);
@@ -47,20 +48,25 @@ const RequestVerification = () => {
     try {
       setIsLoading(true);
 
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("username", username);
-      formData.append("address", address);
-      // formData.append("role", role);
-      formData.append("email", email);
-      formData.append("message", message);
-      formData.append("file", file);
+      // const formData = new FormData();
+      // formData.append("name", name);
+      // formData.append("username", username);
+      // formData.append("address", address);
+      // // formData.append("role", role);
+      // formData.append("email", email);
+      // formData.append("message", message);
+      // // formData.append("file", file);
+      const formData = {
+        name: name,
+        username: username,
+        address: address,
+        email: email,
+        message: message,
+        file: file,
+      };
+      console.log(formData)
 
-      const response = await axiosInstance.post("users/verify", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post("users/verify", formData);
 
       // const tx = await requestVerificationContract.requestVerification();
       showToast('Success', 'Your request has been submitted successfully', 'success')
@@ -173,7 +179,6 @@ const RequestVerification = () => {
                         onChange={(e) => setFile(e.target.files[0])}
                         required
                       />
-
                       <div className="text-sm ">
                         <p>Provide a self-portrait photo ("selfie") while holding government-approved photo identification. Make sure your selfie is not blurry and text is legible.</p>
                         <br />

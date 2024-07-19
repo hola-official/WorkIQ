@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 export function DataTable({ columns, data }) {
-	console.log(columns);
+	console.log(data);
 	const [sorting, setSorting] = React.useState([]);
 	const [columnFilters, setColumnFilters] = React.useState([]);
 	const table = useReactTable({
@@ -38,7 +38,7 @@ export function DataTable({ columns, data }) {
 			columnFilters,
 		},
 	});
-	if (!data)
+	// if (!data)
 		// return (
     //         <div>
     //         {" "}
@@ -93,7 +93,6 @@ export function DataTable({ columns, data }) {
 									key={row.id}
 									data-state={row?.getIsSelected() && "selected"}
 								>
-									console.log(row)
 									{row?.getVisibleCells()?.map((cell) => (
 										<TableCell key={cell.id}>
 											{flexRender(
