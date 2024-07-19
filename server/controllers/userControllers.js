@@ -653,8 +653,8 @@ const getFreelancerStats = async (req, res) => {
 
     // Calculate success rate
     const successRate =
-      totalProposalsSent > 0
-        ? (totalTasksCompleted / totalProposalsSent) * 100
+      totalTasksCompleted > 0
+        ? (totalTasksCompleted / totalTasksCompleted) * 100
         : 0;
 
     // Get top skills
@@ -801,7 +801,7 @@ const getFreelancerStats = async (req, res) => {
       earningRate: [
         {
           name: "Earnings Rate",
-          value: totalEarnings / (totalProposalsSent || 1),
+          value: totalEarnings / (totalTasksCompleted || 1),
         }, // Prevent division by zero
       ],
     };

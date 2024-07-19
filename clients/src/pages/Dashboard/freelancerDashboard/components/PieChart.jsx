@@ -20,10 +20,12 @@ const PieChartComponent = ({ data }) => {
   }));
 
   return (
-    <div className="h-96 w-full rounded-lg border-gray-300/55">
+    <div className="h-64 w-full max-w-sm mx-auto rounded-lg border-gray-300/55">
       <Nested
         circles={circles}
         sx={{
+          width: '200px',  // Adjust the width
+          height: '5000px', // Adjust the height
           bgColor: '#cbd5e1',
           fontWeight: 'bold',
           fontFamily: 'Trebuchet MS',
