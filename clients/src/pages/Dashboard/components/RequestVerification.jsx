@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@chakra-ui/react";
 import React, { useContext, useState } from "react";
 import { Label } from "../../../components/ui/label";
 import { Input } from "../../../components/ui/input";
@@ -191,7 +191,7 @@ const RequestVerification = () => {
                   <AlertDialogCancel type="button" disabled={isLoading}>
                     Cancel
                   </AlertDialogCancel>
-                  <Button type="submit" disabled={isLoading}>{buttonText}</Button>
+                  <Button colorScheme={'blue'} borderRadius={'md'} type="submit" disabled={isLoading}>{buttonText}</Button>
                 </AlertDialogFooter>
               </form>
             </ScrollArea>

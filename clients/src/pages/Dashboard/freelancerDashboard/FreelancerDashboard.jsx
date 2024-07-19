@@ -19,6 +19,7 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { Avatar, Image } from "@chakra-ui/react";
 import { AvatarFallback } from "@/ui/avatar";
 import { formatPrice } from "@/lib/format";
+import { motion } from 'framer-motion';
 
 const BADGE_CRITERIA = {
 	TOTAL_POINTS: {
@@ -59,6 +60,7 @@ const calculateBadgeProgress = (totalPoints) => {
 		{ name: "Gold", value: parseFloat(goldProgress.toFixed(2)) }
 	];
 };
+
 const FreelancerDashboard = ({ setDashboardMode }) => {
 	const userInfo = useRecoilValue(userAtom);
 	const axiosInstance = useAxiosInstance();
@@ -80,26 +82,23 @@ const FreelancerDashboard = ({ setDashboardMode }) => {
 		};
 
 		fetchStats();
-	}, []);
+		const intervalId = setInterval(fetchStats, 5000); // Poll every 5 seconds
+
+		return () => clearInterval(intervalId); // Cleanup on unmount
+	}, [axiosInstance]);
 
 	if (loading) return <Spinner />;
 	if (error) return <ErrorMessage message="Error fetching freelancer stats" />;
 
-
 	const pieChartData = [
-		// ...stats?.pieChartData?.successRate.map(rate => ({
-		//   name: rate.name,
-		//   value: rate.value,
-		//   color: rate.color || '#000000', // Use a default color if not specified
-		// })),
 		...calculateBadgeProgress(stats?.totalPoints || 0),
 		...stats?.pieChartData?.earningRate.map(earning => ({
 			name: earning.name,
 			value: earning.value,
-			color: earning.color || '#000000', // Use a default color if not specified
+			color: earning.color || '#000000',
 		})),
 		{
-			name: "Avg Completion Time",
+			name: "Avg",
 			value: stats?.avgCompletionTime?.value || 100,
 			color: '#4CAF50',
 		},
@@ -108,33 +107,46 @@ const FreelancerDashboard = ({ setDashboardMode }) => {
 			value: 100 - (stats?.avgCompletionTime?.value || 100),
 			color: '#FF5722',
 		}
-		// ...stats?.pieChartData?.avgCompletionTime.map(time => ({
-		// 	name: time.name,
-		// 	value: time.value,
-		// 	color: time.color || '#000000', // Use a default color if not specified
-		// })),
 	];
-	console.log(stats)
+
 	return (
 		<div className="flex-1 space-y-6">
-			<HeaderSection
-				userInfo={userInfo}
-				stats={stats}
-				balance={stats?.currentBalance}
-				totalEarnings={stats?.totalEarnings}
-				isVerified={userInfo?.isVerified}
-			/>
-			<StatCards
-				stats={stats}
-				userInfo={userInfo}
-			/>
-			<MainContent
-				stats={stats}
-				pieChartData={pieChartData}
-				recentWithdrawals={stats?.pieChartData?.recentWithdrawals}
-				recentDeposits={stats?.pieChartData?.totalDeposits}
-				userInfo={userInfo}
-			/>
+			<motion.div
+				initial={{ x: -100, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ duration: 0.5, type: "spring", stiffness: 70 }}
+			>
+				<HeaderSection
+					userInfo={userInfo}
+					stats={stats}
+					balance={stats?.currentBalance}
+					totalEarnings={stats?.totalEarnings}
+					isVerified={userInfo?.isVerified}
+				/>
+			</motion.div>
+			<motion.div
+				initial={{ x: 100, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ duration: 0.5 }}
+			>
+				<StatCards
+					stats={stats}
+					userInfo={userInfo}
+				/>
+			</motion.div>
+			<motion.div
+				initial={{ x: -100, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ duration: 0.5 }}
+			>
+				<MainContent
+					stats={stats}
+					pieChartData={pieChartData}
+					recentWithdrawals={stats?.pieChartData?.recentWithdrawals}
+					recentDeposits={stats?.pieChartData?.totalDeposits}
+					userInfo={userInfo}
+				/>
+			</motion.div>
 		</div>
 	);
 };
@@ -209,51 +221,38 @@ const StatCards = React.memo(({ stats, userInfo }) => {
 	];
 
 	return (
-		<div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+		<motion.div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-5">
 			{statCardItems.map((item, index) => (
-				item && <StatCard key={index} icon={item.icon} title={item.title} value={item.value} />
+				item && (
+					<motion.div
+						key={index}
+						initial={{ opacity: 0, y: 20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.5, delay: index * 0.1 }}
+					>
+						<StatCard icon={item.icon} title={item.title} value={item.value} />
+					</motion.div>
+				)
 			))}
-		</div>
+		</motion.div>
 	);
 });
 
 const MainContent = React.memo(({ stats, pieChartData, recentWithdrawals, recentDeposits, userInfo }) => (
 	<div className="flex flex-wrap w-full gap-6">
-		{userInfo?.isVerified === false && <div className="rounded-lg w-full border-gray-300/55"><FreelancerEarningsChart stats={stats} /></div>}
+		{userInfo?.isVerified === false && <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }} className="rounded-lg w-full border-gray-300/55"><FreelancerEarningsChart stats={stats} /></motion.div>}
 		{userInfo?.isVerified === true && <div className="grid grid-cols-1 lg:grid-cols-2 xl:col-span-2 items-center border w-full">
-			<div className="rounded-lg border-gray-300/55"><FreelancerEarningsChart stats={stats} /></div>
-			<div className="rounded-lg border-gray-300/55 bg-white">{pieChartData.length > 0 && <PieChart data={pieChartData} />}</div>
+			<motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }} className="rounded-lg border-gray-300/55"><FreelancerEarningsChart stats={stats} /></motion.div>
+			<motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }} className="rounded-lg border-gray-300/55 bg-white">{pieChartData.length > 0 && <PieChart data={pieChartData} />}</motion.div>
 		</div>}
-		<div className="col-span-1 w-full">
+		<motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }} className="col-span-1 w-full">
 			<div className="border rounded-lg border-gray-300/55 p-4">
-				{/* <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
-          Recent Orders
-        </h2> */}
 				<DataTable
 					data={stats?.allOrders ?? []}
 					columns={columns}
 				/>
 			</div>
-			{/* Add a new section for recent withdrawals and deposits */}
-			{/* <div className="border rounded-lg border-gray-300/55 p-4 mt-4">
-        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
-          Recent Withdrawals
-        </h2>
-        <DataTable
-          data={recentWithdrawals ?? []}
-          columns={columns}  // Make sure you have appropriate columns defined for this data
-        />
-      </div>
-      <div className="border rounded-lg border-gray-300/55 p-4 mt-4">
-        <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">
-          Total Deposits
-        </h2>
-        <DataTable
-          data={recentDeposits ?? []}
-          columns={columns}  // Make sure you have appropriate columns defined for this data
-        />
-      </div> */}
-		</div>
+		</motion.div>
 	</div>
 ));
 
@@ -266,7 +265,7 @@ const StatCard = React.memo(({ icon, title, value }) => (
 			<h3 className="text-lg md:text-2xl xl:text-3xl">{value}</h3>
 		</div>
 		<div>
-			<p className="text-sm md:text-base lg:text-lg text-gray-300">{title}</p>
+			<p className="text-sm md:text-base lg:text-lg text-gray-400">{title}</p>
 		</div>
 	</div>
 ));
