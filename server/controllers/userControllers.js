@@ -247,9 +247,9 @@ const getUserProfile = async (req, res) => {
 
 const requestVerification = async (req, res) => {
   const userId = req.userId;
-  const { name, username, email, address, message } = req.body;
-  const file = req.file;
-
+  const { name, username, email, address, message, file } = req.body;
+  // const  = req.body;
+  console.log(file);
   try {
     const user = await userModel.findById(userId);
     if (!user) {
@@ -280,7 +280,15 @@ const requestVerification = async (req, res) => {
     console.log(pendingVerification);
 
     // Generate file URL
-    // const fileUrl = `https://localhost:3000/uploads/${file.filename}`;
+    // let uploadedImageUrl;
+    // if (file) {
+    //   const uploadedImage = await cloudinary.uploader.upload(file.path, {
+    //     folder: "verification",
+    //   });
+    //   uploadedImageUrl = uploadedImage.secure_url;
+    // }
+
+    // console.log(uploadedImageUrl);
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
