@@ -674,23 +674,59 @@ const getFreelancerStats = async (req, res) => {
       { $limit: 5 },
     ]);
 
-    // Calculate average task completion time
-    const completionTimes = await TaskModel.aggregate([
+    // Calculate average task completion time and cancellation rate
+    const completionAndCancellationData = await TaskModel.aggregate([
+      {
+        $unwind: "$sections",
+      },
+      {
+        $unwind: "$sections.order",
+      },
       {
         $match: {
-          _id: { $in: freelancer.tasksCompleted },
-          completedAt: { $exists: true },
-          startDate: { $exists: true },
+          "sections.order.freelancer": new mongoose.Types.ObjectId(
+            freelancer._id
+          ),
+          "sections.order.status": { $in: ["completed", "cancelled"] },
         },
       },
       {
         $group: {
           _id: null,
-          avgTime: { $avg: { $subtract: ["$completedAt", "$startDate"] } },
+          totalOrders: { $sum: 1 },
+          cancelledOrders: {
+            $sum: {
+              $cond: [{ $eq: ["$sections.order.status", "cancelled"] }, 1, 0],
+            },
+          },
+          completedOrders: {
+            $sum: {
+              $cond: [{ $eq: ["$sections.order.status", "completed"] }, 1, 0],
+            },
+          },
         },
       },
     ]);
-    const avgCompletionTime = completionTimes[0]?.avgTime || 0;
+
+    let avgCompletionTimeValue = 100; // Start at 100%
+    let completedOrdersCount = 0;
+    let cancelledOrdersCount = 0;
+
+    if (completionAndCancellationData.length > 0) {
+      const data = completionAndCancellationData[0];
+      cancelledOrdersCount = data.cancelledOrders;
+      completedOrdersCount = data.completedOrders;
+
+      // Deduct 5% for each cancelled order
+      avgCompletionTimeValue = Math.max(0, 100 - cancelledOrdersCount * 5);
+    }
+
+    const avgCompletionTimeFormatted = {
+      value: avgCompletionTimeValue,
+      unit: "%",
+      completedOrders: completedOrdersCount,
+      cancelledOrders: cancelledOrdersCount,
+    };
 
     // Fetch all orders (completed, pending, ongoing) by the freelancer
     const allOrders = await TaskModel.aggregate([
@@ -700,11 +736,14 @@ const getFreelancerStats = async (req, res) => {
       {
         $unwind: "$sections.order",
       },
-      {
-        $match: {
-          "sections.assignTo": userId,
-        },
-      },
+      // {
+      //   $match: {
+      //     "sections.assignTo": userId,
+      //   },
+      //   $match: {
+      //     "sections.assignTo": userId,
+      //   },
+      // },
       {
         $sort: { "sections.order.deliveryEndDate": -1 },
       },
@@ -736,40 +775,78 @@ const getFreelancerStats = async (req, res) => {
         .length,
     };
 
-    // Calculate total deposits
-    const totalDeposits = await TransactionModel.aggregate([
-      { $match: { user: userId, type: "deposit", status: "success" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]).then((results) => results[0]?.total || 0);
+    const transactions = await TransactionModel.find({
+      user: userId,
+      type: { $in: ["earning", "order_completed", "deposit", "withdrawal"] },
+      ...(startDate &&
+        endDate && {
+          createdAt: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate),
+          },
+        }),
+    });
 
-    // Calculate total withdrawals
-    const totalWithdrawals = await TransactionModel.aggregate([
-      { $match: { user: userId, type: "withdrawal", status: "success" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]).then((results) => results[0]?.total || 0);
+    let totalDeposits = 0;
+    let totalWithdrawals = 0;
+
+    transactions.forEach((transaction) => {
+      if (transaction.type === "deposit") {
+        totalDeposits += transaction.amount;
+      } else if (transaction.type === "withdrawal") {
+        totalWithdrawals += transaction.amount;
+      }
+    });
+
+    const BADGE_CRITERIA = {
+      TOTAL_POINTS: {
+        BRONZE: 600,
+        SILVER: 1000,
+        GOLD: 5000,
+      },
+    };
+
+    const calculateBadgeProgress = (totalPoints) => {
+      const bronzeThreshold = BADGE_CRITERIA.TOTAL_POINTS.BRONZE;
+      const silverThreshold = BADGE_CRITERIA.TOTAL_POINTS.SILVER;
+      const goldThreshold = BADGE_CRITERIA.TOTAL_POINTS.GOLD;
+
+      let bronzeProgress, silverProgress, goldProgress;
+
+      if (totalPoints >= goldThreshold) {
+        bronzeProgress = 100;
+        silverProgress = 100;
+        goldProgress = 100;
+      } else if (totalPoints >= silverThreshold) {
+        bronzeProgress = 100;
+        silverProgress = 100;
+        goldProgress =
+          ((totalPoints - silverThreshold) /
+            (goldThreshold - silverThreshold)) *
+          100;
+      } else if (totalPoints >= bronzeThreshold) {
+        bronzeProgress = 100;
+        silverProgress =
+          ((totalPoints - bronzeThreshold) /
+            (silverThreshold - bronzeThreshold)) *
+          100;
+        goldProgress = 0;
+      } else {
+        bronzeProgress = (totalPoints / bronzeThreshold) * 100;
+        silverProgress = 0;
+        goldProgress = 0;
+      }
+
+      return [
+        { name: "Bronze", value: parseFloat(bronzeProgress.toFixed(2)) },
+        { name: "Silver", value: parseFloat(silverProgress.toFixed(2)) },
+        { name: "Gold", value: parseFloat(goldProgress.toFixed(2)) },
+      ];
+    };
 
     // Prepare data for PieChart
     const pieChartData = {
-      badges: [
-        {
-          name: "Bronze",
-          value: freelancer.badges.some((badge) => badge.type === "bronze")
-            ? 0
-            : 80,
-        },
-        {
-          name: "Silver",
-          value: freelancer.badges.some((badge) => badge.type === "silver")
-            ? 100
-            : 0,
-        },
-        {
-          name: "Gold",
-          value: freelancer.badges.some((badge) => badge.type === "gold")
-            ? 100
-            : 0,
-        },
-      ],
+      badges: calculateBadgeProgress(freelancer.totalPoints),
       successRate: [
         {
           name: "Successful Projects",
@@ -780,32 +857,7 @@ const getFreelancerStats = async (req, res) => {
           value: parseFloat((100 - successRate).toFixed(2)),
         },
       ],
-      avgCompletionTime: [
-        {
-          name: "0-1 Week",
-          value: avgCompletionTime <= 7 * 24 * 60 * 60 * 1000 ? 100 : 0, // Convert to milliseconds
-        },
-        {
-          name: "1-2 Weeks",
-          value:
-            avgCompletionTime > 7 * 24 * 60 * 60 * 1000 &&
-            avgCompletionTime <= 14 * 24 * 60 * 60 * 1000
-              ? 100
-              : 0,
-        },
-        {
-          name: "2-4 Weeks",
-          value:
-            avgCompletionTime > 14 * 24 * 60 * 60 * 1000 &&
-            avgCompletionTime <= 28 * 24 * 60 * 60 * 1000
-              ? 100
-              : 0,
-        },
-        {
-          name: "More than 4 Weeks",
-          value: avgCompletionTime > 28 * 24 * 60 * 60 * 1000 ? 100 : 0,
-        },
-      ],
+      avgCompletionTime: avgCompletionTimeFormatted,
       earningRate: [
         {
           name: "Earnings Rate",
@@ -824,7 +876,7 @@ const getFreelancerStats = async (req, res) => {
       recentTransactions,
       successRate,
       topSkills,
-      avgCompletionTime,
+      avgCompletionTime: avgCompletionTimeFormatted,
       allOrders: extractedAllOrders,
       pieChartData,
       totalDeposits,

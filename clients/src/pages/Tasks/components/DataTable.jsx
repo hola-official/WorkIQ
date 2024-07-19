@@ -32,8 +32,9 @@ import {
 import { Button as Chakrabutton, Flex, Select, Text } from "@chakra-ui/react";
 import { useNavigate, Link } from "react-router-dom";
 import { PlusCircle } from "lucide-react";
+import Spinner from "@/components/Spinner";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, loading }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
@@ -57,7 +58,9 @@ export function DataTable({ columns, data }) {
     },
   });
   let currentPage = table.options.state.pagination.pageIndex + 1;
-  if (!data?.length) {
+  if (!data?.length && loading) {
+    return <Spinner />
+  } else if (!data?.length) {
     return (
       <Link to="/clients/create-tasks">
         <Chakrabutton colorScheme={"blue"}>
@@ -96,9 +99,9 @@ export function DataTable({ columns, data }) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
