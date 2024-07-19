@@ -168,10 +168,11 @@ const StatCards = React.memo(({ stats, userInfo }) => (
 
 const MainContent = React.memo(({ stats, pieChartData, recentWithdrawals, recentDeposits, userInfo }) => (
 	<div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-		<div className="grid grid-cols-1 lg:grid-cols-2 xl:col-span-2 border">
+		{userInfo?.isVerified === false && <div className="rounded-lg border-gray-300/55"><FreelancerEarningsChart stats={stats} /></div>}
+		{userInfo?.isVerified === true && <div className="grid grid-cols-1 lg:grid-cols-2 xl:col-span-2 border">
 			<div className="rounded-lg border-gray-300/55"><FreelancerEarningsChart stats={stats} /></div>
-			{userInfo?.isVerified === true && <div className="rounded-lg border-gray-300/55">{pieChartData.length > 0 && <PieChart data={pieChartData} />}</div>}
-		</div>
+			<div className="rounded-lg border-gray-300/55">{pieChartData.length > 0 && <PieChart data={pieChartData} />}</div>
+		</div>}
 		<div className="col-span-1 w-full">
 			<div className="border rounded-lg border-gray-300/55 p-4">
 				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-4">

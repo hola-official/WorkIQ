@@ -5,6 +5,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Tooltip } from "@material-tailwind/react";
+import Spinner from "@/components/Spinner";
 
 const TaskList = ({ tasks, filter }) => {
   // Apply filters to tasks based on filter criteria
@@ -21,6 +22,10 @@ const TaskList = ({ tasks, filter }) => {
 
     return true;
   });
+
+  if(!filteredTasks.length){
+    return <Spinner/>
+  }
 
   return (
     <>
