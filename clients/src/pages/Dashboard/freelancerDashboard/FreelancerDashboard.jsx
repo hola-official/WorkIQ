@@ -116,13 +116,13 @@ const FreelancerDashboard = ({ setDashboardMode }) => {
 				animate={{ x: 0, opacity: 1 }}
 				transition={{ duration: 0.5, type: "spring", stiffness: 70 }}
 			>
-				<HeaderSection
+				{/* <HeaderSection
 					userInfo={userInfo}
 					stats={stats}
 					balance={stats?.currentBalance}
 					totalEarnings={stats?.totalEarnings}
 					isVerified={userInfo?.isVerified}
-				/>
+				/> */}
 			</motion.div>
 			<motion.div
 				initial={{ x: 100, opacity: 0 }}
@@ -151,40 +151,40 @@ const FreelancerDashboard = ({ setDashboardMode }) => {
 	);
 };
 
-const HeaderSection = React.memo(({ userInfo, balance, totalEarnings, isVerified }) => (
-	<div
-		style={{
-			backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.05)), url(/freelancer-bg.webp)`,
-			backgroundSize: "cover",
-			backgroundPosition: "center",
-		}}
-		className="bg-slate-300 p-8 lg:p-14 rounded-3xl space-y-2 lg:space-y-5 flex justify-between items-center xl:flex-col-reverse xl:items-stretch"
-	>
-		<div className="xl:w-full xl:flex xl:justify-start">
-			<div>
-				<div className="flex gap-1">
-					<Avatar>
-						<Image className="rounded-full" boxSize={'150px'} src={userInfo?.avatar} />
-					</Avatar>
-					<h1 className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white">
-						Welcome, {userInfo?.username}
-					</h1>
-				</div>
-				<h1 className="text-xs md:text-lg text-white/60 xl:text-xl">
-					See what happened with your tasks and earnings
-				</h1>
-			</div>
-		</div>
-		<div className="flex flex-col gap-2 xl:w-full xl:flex xl:justify-end xl:mb-4">
-			<h1 className="text-base md:text-2xl xl:text-3xl font-semibold text-white text-right max-md:hidden">
-				{isVerified === true ? "Total Earnings" : "Balance"}
-			</h1>
-			<h1 className="text-base md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white text-right">
-				$ {isVerified === true ? totalEarnings?.toFixed(2) ?? 0 : balance?.toFixed(2)}
-			</h1>
-		</div>
-	</div>
-));
+// const HeaderSection = React.memo(({ userInfo, balance, totalEarnings, isVerified }) => (
+// 	<div
+// 		style={{
+// 			backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.05)), url(/freelancer-bg.webp)`,
+// 			backgroundSize: "cover",
+// 			backgroundPosition: "center",
+// 		}}
+// 		className="bg-slate-300 p-8 lg:p-14 rounded-3xl space-y-2 lg:space-y-5 flex justify-between items-center xl:flex-col-reverse xl:items-stretch"
+// 	>
+// 		<div className="xl:w-full xl:flex xl:justify-start">
+// 			<div>
+// 				<div className="flex gap-1">
+// 					<Avatar>
+// 						<Image className="rounded-full" boxSize={'150px'} src={userInfo?.avatar} />
+// 					</Avatar>
+// 					<h1 className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white">
+// 						Welcome, {userInfo?.username}
+// 					</h1>
+// 				</div>
+// 				<h1 className="text-xs md:text-lg text-white/60 xl:text-xl">
+// 					See what happened with your tasks and earnings
+// 				</h1>
+// 			</div>
+// 		</div>
+// 		<div className="flex flex-col gap-2 xl:w-full xl:flex xl:justify-end xl:mb-4">
+// 			<h1 className="text-base md:text-2xl xl:text-3xl font-semibold text-white text-right max-md:hidden">
+// 				{isVerified === true ? "Total Earnings" : "Balance"}
+// 			</h1>
+// 			<h1 className="text-base md:text-3xl lg:text-4xl xl:text-5xl font-semibold text-white text-right">
+// 				$ {isVerified === true ? totalEarnings?.toFixed(2) ?? 0 : balance?.toFixed(2)}
+// 			</h1>
+// 		</div>
+// 	</div>
+// ));
 
 const StatCards = React.memo(({ stats, userInfo }) => {
 	const statCardItems = [
