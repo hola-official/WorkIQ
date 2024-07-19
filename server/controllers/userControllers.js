@@ -766,15 +766,6 @@ const getFreelancerStats = async (req, res) => {
     const extractedAllOrders =
       allOrders.length > 0 ? allOrders[0].allOrders : [];
 
-    // Count badges
-    const badges = {
-      gold: freelancer.badges.filter((badge) => badge.type === "gold").length,
-      silver: freelancer.badges.filter((badge) => badge.type === "silver")
-        .length,
-      bronze: freelancer.badges.filter((badge) => badge.type === "bronze")
-        .length,
-    };
-
     const transactions = await TransactionModel.find({
       user: userId,
       type: { $in: ["earning", "order_completed", "deposit", "withdrawal"] },
@@ -862,7 +853,7 @@ const getFreelancerStats = async (req, res) => {
         {
           name: "Earnings Rate",
           value: totalEarnings / (totalTasksCompleted ? 100 : 0),
-        }, // Prevent division by zero
+        }, 
       ],
     };
     res.json({

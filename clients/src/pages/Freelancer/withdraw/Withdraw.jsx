@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Button } from "@chakra-ui/react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DollarSign, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useAxiosInstance } from "../../../../api/axios";
@@ -234,6 +234,8 @@ const Withdraw = ({ showModal, setShowModal }) => {
                   <Button
                     type="submit"
                     className="w-full"
+                    colorScheme={'blue'}
+                    borderRadius={'md'}
                     disabled={
                       !payoutDetails?.bankAccount ||
                       isLoading ||
