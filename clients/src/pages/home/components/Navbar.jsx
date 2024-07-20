@@ -26,10 +26,15 @@ export default function Navbar() {
     <header className="flex h-20 sticky top-0 shadow-md z-999 bg-white w-full shrink-0 items-center px-4 md:px-6">
       <Sheet>
         <SheetTrigger asChild>
-          <Button className="lg:hidden" size="icon" variant="outline">
-            <MenuIcon className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
+          <div className="flex justify-between items-center">
+            <div>
+              <Button className="lg:hidden" size="icon" variant="outline">
+                <MenuIcon className="h-6 w-6" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </div>
+           {/* <div> <img src="/WorkIQ-full.svg" className="h-15 " alt="logo" /></div> */}
+          </div>
         </SheetTrigger>
         <SheetContent side="left">
           <Link className="mr-6 flex lg:hidden" href="#">
@@ -37,14 +42,14 @@ export default function Navbar() {
           </Link>
           <div className="grid gap-2 py-6">
             {/* <Link href="#"> */}
-            <Button onClick={handleLogin} variant={"ghost"}>
+            <ChakraBtn onClick={handleLogin} variant={"ghost"}>
               Login
-            </Button>
+            </ChakraBtn>
             {/* </Link> */}
             {/* <Link href="#"> */}
-            <Button onClick={handleRegister} variant={"default"}>
+            <ChakraBtn onClick={handleRegister} >
               Register
-            </Button>
+            </ChakraBtn>
             {/* </Link> */}
           </div>
         </SheetContent>

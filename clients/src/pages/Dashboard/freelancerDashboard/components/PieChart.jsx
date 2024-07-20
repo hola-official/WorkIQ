@@ -33,13 +33,14 @@ const PieChartComponent = ({ data }) => {
     color: ['Bronze', 'Silver', 'Gold'].includes(item.name) ? getBadgeColor(item.name) : getRandomColor(),
   }));
 
+  console.log(circles)
   return (
     <div className="h-64 md:h-52 w-full max-w-sm mx-auto rounded-lg p-8 border-gray-300/55">
       <Nested
         circles={circles}
         sx={{
-          width: '200px',
-          height: '200px',
+          // width: '200px',
+          // height: '200px',
           bgColor: '#cbd5e1',
           fontWeight: 'bold',
           fontFamily: 'Trebuchet MS',
