@@ -220,7 +220,7 @@ const getUserProfile = async (req, res) => {
     }, 0);
 
     // console.log(`Total points: ${totalPoints}`);
-
+    console.log(totalPoints);
     // Define the criteria to be passed to assignBadges
     const criteria = [{ type: "TOTAL_POINTS", count: totalPoints }];
 
@@ -853,7 +853,7 @@ const getFreelancerStats = async (req, res) => {
         {
           name: "Earnings Rate",
           value: totalEarnings / (totalTasksCompleted ? 100 : 0),
-        }, 
+        },
       ],
     };
     res.json({

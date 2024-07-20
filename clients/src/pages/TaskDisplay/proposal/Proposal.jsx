@@ -1,13 +1,11 @@
-import { useForm } from "react-hook-form";
 import Footer from "@/components/Footer";
-import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@chakra-ui/react";
 import { useAxiosInstance } from "../../../../api/axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getTimestamp } from "@/lib/utils";
 import useShowToast from "@/hooks/useShowToast";
+import Spinner from "@/components/Spinner";
 
 function Proposal() {
   const { taskId, sectionId } = useParams();
@@ -16,11 +14,6 @@ function Proposal() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const showToast = useShowToast();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
   const axiosInstance = useAxiosInstance();
 
   useEffect(() => {
@@ -69,7 +62,7 @@ function Proposal() {
   console.log(taskId, sectionId);
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading state until user data is fetched
+    return <Spinner/>; // Show loading state until user data is fetched
   }
 
   return (

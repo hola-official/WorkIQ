@@ -55,6 +55,7 @@ import { Tooltip } from "@material-tailwind/react";
 import { Badge } from "@/components/ui/badge";
 import Portfolio from "./Portfolio";
 import AddPortfolio from "./AddPortfolio";
+import Spinner from "@/components/Spinner";
 
 const Profile = () => {
   const { _id, username } = useAuth();
@@ -197,12 +198,7 @@ const Profile = () => {
   };
 
   if (!userInfo?.user && loading) {
-    return (
-      <Flex justifyContent={"center"} flexDir={"column"} align={"center"}>
-        <Loading />
-        <Text as={"h1"}>Setting up profile</Text>
-      </Flex>
-    );
+    return <Spinner />
   }
 
   console.log(userInfo)
@@ -266,7 +262,7 @@ const Profile = () => {
                     as={"h1"}
                     color={"#4B5563"}
                     fontWeight={400}
-                    fontSize={['sm',"md"]}
+                    fontSize={['sm', "md"]}
                   >
                     {userInfo?.totalPoints}+ point earned
                   </Text>}
@@ -436,6 +432,7 @@ const Profile = () => {
                                 placeholder="your-email@example.com"
                                 _placeholder={{ color: "gray.500" }}
                                 type="email"
+                                disabled
                                 onChange={(e) =>
                                   setInputs({
                                     ...inputs,
@@ -624,54 +621,10 @@ const Profile = () => {
                   </Text>
                 </Flex>
 
-                <Text textAlign={"start"} as="h2" color="#6B7280" fontSize={['sm',"md"]}>
+                <Text textAlign={"start"} as="h2" color="#6B7280" fontSize={['sm', "md"]}>
                   {userInfo?.bio || "No bio provided."}
                 </Text>
               </Flex>
-
-              {/* <Box gap={10}>
-              <Text
-                as={"h2"}
-                fontSize={{ base: "md", md: "1xl" }}
-                fontWeight={600}
-              >
-                Languages you know
-              </Text>
-
-              <Flex flexDir="column" gap={2} mt={2}>
-                <Input
-                  value={languageInputValue}
-                  onChange={handleLanguageInputChange}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleLanguageAdd();
-                    }
-                  }}
-                />
-                {languageError && (
-                  <Alert status="error">
-                    <AlertIcon />
-                    {languageError}
-                  </Alert>
-                )}
-                <HStack spacing={2}>
-                  {languages.map((language, index) => (
-                    <Tag
-                      key={index}
-                      borderRadius="full"
-                      color="white"
-                      bg="blue.500"
-                    >
-                      <TagLabel>{language}</TagLabel>
-                      <TagCloseButton
-                        onClick={() => handleLanguageRemove(language)}
-                      />
-                    </Tag>
-                  ))}
-                </HStack>
-              </Flex>
-            </Box> */}
-
               <Box gap={10} mt={4}>
                 <Text
                   as={"h2"}

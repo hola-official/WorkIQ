@@ -1,14 +1,5 @@
-import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 export const columns = [
 	{
@@ -120,7 +111,7 @@ export const columns = [
 		},
 		cell: ({ row }) => {
 			const date = row.original.order.updatedAt;
-			console.log(row.original)
+			// console.log(row.original)
 
 			return <p className="ml-4">{format(new Date(date), "MMMM d, yyyy")}</p>;
 		},

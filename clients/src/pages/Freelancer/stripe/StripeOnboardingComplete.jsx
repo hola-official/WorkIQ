@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAxiosInstance } from "../../../../api/axios";
 import useShowToast from "@/hooks/useShowToast";
+import Spinner from "@/components/Spinner";
 
 const StripeOnboardingComplete = () => {
 	const [status, setStatus] = useState("loading");
@@ -37,11 +38,7 @@ const StripeOnboardingComplete = () => {
 	}, [navigate]);
 
 	if (status === "loading") {
-		return (
-			<div className="h-screen flex justify-center items-center">
-				Completing your Stripe account setup...
-			</div>
-		);
+		return <Spinner />
 	} else if (status === "success") {
 		return (
 			<div className="h-screen flex justify-center items-center">

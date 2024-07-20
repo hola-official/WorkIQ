@@ -194,8 +194,6 @@ import { SectionPriceForm } from "./components/SectionPriceForm";
 import { AttachmentForm } from "./components/AttachmentForm";
 import { SectionDurationForm } from "./components/SectionDurationForm";
 import { useAxiosInstance } from "../../../../../../api/axios";
-import { Text, Flex } from "@chakra-ui/react";
-import Loading from "@/components/ui/Loading";
 import Spinner from "@/components/Spinner";
 
 const EditSection = () => {

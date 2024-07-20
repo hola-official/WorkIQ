@@ -7,7 +7,6 @@ import {
   Button,
   IconButton,
   useColorModeValue,
-  Spinner,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
@@ -16,6 +15,7 @@ import { useEffect, useState } from "react";
 import { useAxiosInstance } from "../../../../api/axios";
 import axios from "axios";
 import Footer from "@/components/Footer";
+import Spinner from "@/components/Spinner";
 
 const ApproveVerification = () => {
   const [confirmed, setConfirmed] = useState(false);
@@ -55,18 +55,7 @@ const ApproveVerification = () => {
   }, [loading]);
 
   if (!confirmed && loading) {
-    return (
-      <Flex
-        justifyContent={"center"}
-        flexDir={"column"}
-        gap={2}
-        alignItems={"center"}
-        minH={"100vh"}
-      >
-        <Spinner size={"xl"} />
-        <Text>Approving verification</Text>
-      </Flex>
-    );
+    return <Spinner />
   }
 
   return (

@@ -85,13 +85,18 @@ const FreelancerEarningsChart = ({ stats }) => {
       ],
       options: {
         chart: {
-          type: 'area',
+          type: 'bar',
           height: 350,
-          stacked: false,
+          // stacked: false,
         },
         stroke: {
           curve: 'smooth',
           width: 3,
+        },
+        plotOptions: {
+          bar: {
+            distributed: true
+          }
         },
         dataLabels: {
           enabled: false,
@@ -146,7 +151,7 @@ const FreelancerEarningsChart = ({ stats }) => {
         />
       </div>
       {processedData.length > 0 ? (
-        <ReactApexChart options={chartData.options} series={chartData.series} type="line" height={350} />
+        <ReactApexChart options={chartData.options} series={chartData.series} type="bar" height={350} />
       ) : (
         <p className="text-center mt-20">No data to display for the selected date range</p>
       )}

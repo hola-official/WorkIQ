@@ -7,14 +7,14 @@ import {
 	Button,
 	IconButton,
 	useColorModeValue,
-	Spinner,
 } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {  useAxiosInstance } from "../../../api/axios";
+import { useAxiosInstance } from "../../../api/axios";
 import axios from "axios";
+import Spinner from "../Spinner";
 
 const ActivatePage = () => {
 	const [confirmed, setConfirmed] = useState(false);
@@ -53,18 +53,7 @@ const ActivatePage = () => {
 	}, [loading]);
 
 	if (!confirmed && loading) {
-		return (
-			<Flex
-				justifyContent={"center"}
-				flexDir={"column"}
-				gap={2}
-				alignItems={"center"}
-				minH={"100vh"}
-			>
-				<Spinner size={"xl"} />
-				<Text>Verifying Your Account</Text>
-			</Flex>
-		);
+		return <Spinner />
 	}
 
 	return (

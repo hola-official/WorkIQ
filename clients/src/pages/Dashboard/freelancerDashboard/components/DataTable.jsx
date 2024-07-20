@@ -39,20 +39,11 @@ export function DataTable({ columns, data }) {
 			columnFilters,
 		},
 	});
-	// if (data)
-	// 	return (
-	// 		<div>
-	// 			{" "}
-	// 			<div className="flex items-center justify-end py-4 ">
-	// 				
-	// 			</div>{" "}
-	// 			<p className="text-center mt-20">No data to display</p>
-	// 		</div>
-	// 	);
+
 
 	return (
 		<div className="w-full">
-			<div className="flex items-center flex-wrap py-4 justify-between">
+			<div className="flex items-center flex-wrap gap-4 py-4 justify-between">
 				<Input
 					placeholder="Filter order..."
 					value={table?.getColumn("title")?.getFilterValue() ?? ""}

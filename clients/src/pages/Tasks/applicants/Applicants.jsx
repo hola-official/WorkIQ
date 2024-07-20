@@ -55,6 +55,7 @@ import { IoTimeOutline, IoDocumentAttachOutline } from "react-icons/io5";
 import { formatPrice } from "@/lib/format";
 import Footer from "@/components/Footer";
 import Proposal from "./components/Proposal";
+import Spinner from "@/components/Spinner";
 
 const Applicants = () => {
   const { taskId } = useParams();
@@ -123,7 +124,7 @@ const Applicants = () => {
   };
 
   if (isLoading) {
-    return <p>Loading Task Info</p>;
+    return <Spinner />
   }
 
   if (!task) {
