@@ -14,6 +14,24 @@ const app_id = process.env.STREAM_APP_ID;
 
 const clientUrl = process.env.CLIENT_URL;
 
+const createUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const userId = req.userId;
+    const foundUser = await User.findById(userId);
+    const existingUsername = await User.findOne({ username }).select(
+      "-password"
+    );
+    if (existingUsername)
+      return res.status(400).json({ error: "Username already taken" });
+    foundUser.username = username;
+    await foundUser.save();
+    res.status(200).json({ message: "Username updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getCurrentUserInfo = async (req, res) => {
   try {
     // Check if user information exists in the session
@@ -200,7 +218,8 @@ const activateUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid activation code" });
     }
 
-    const { name, email, username, password, location, ethAddress } = newUser.user;
+    const { name, email, username, password, location, ethAddress } =
+      newUser.user;
 
     const existUser = await User.findOne({
       $or: [{ email }, { username }],
@@ -660,6 +679,7 @@ const logout = async (req, res) => {
 
 module.exports = {
   signUp,
+  createUsername,
   submitAdditionalInfo,
   activateUser,
   login,
