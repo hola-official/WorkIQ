@@ -50,6 +50,9 @@ const userSchema = new Schema(
       Freelancer: String,
       Admin: String,
     },
+    connectedWallets: { type: [String], default: [] },
+    paymentWallet: { type: String, unique: true },
+    paymentWalletRegisterComplete: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false }, // New field for verification status
     googleId: String,
     location: { type: String },
@@ -59,6 +62,9 @@ const userSchema = new Schema(
       type: Number,
     },
     escrowBalance: { type: Number, default: 0 }, // New field for escrow balance
+    usdcBalance: {
+      type: Number,
+    },
     stripeAccountId: String,
     stripeOnboardingComplete: { type: Boolean, default: false },
     portfolios: [portfolioSchema],
@@ -66,6 +72,24 @@ const userSchema = new Schema(
     tasksCompleted: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     tasksCreated: [{ type: Schema.Types.ObjectId, ref: "Task" }],
     refreshToken: [String],
+    devices: [
+      {
+        fingerprint: String,
+        userAgent: String,
+        browser: String,
+        os: String,
+        lastIP: String,
+        location: String,
+        lastUsed: Date,
+        isVerified: Boolean,
+        createdAt: { type: Date, default: Date.now },
+        // expiresAt: { type: Date, default: () => new Date(+new Date() + 2*60*1000) } // 30 days from now
+        expiresAt: {
+          type: Date,
+          default: () => new Date(+new Date() + 30 * 24 * 60 * 60 * 1000),
+        }, // 30 days from now
+      },
+    ],
     points: [
       {
         orderId: { type: Schema.Types.ObjectId, ref: "task.section.order" },

@@ -38,11 +38,9 @@ const RequestVerification = () => {
   const [showModal, setShowModal] = useState(false);
   const userInfo = useRecoilValue(userAtom)
   const user = userInfo;
-  const showToast = useShowToast()
+  const {showToast} = useShowToast()
   const axiosInstance = useAxiosInstance()
 
-
-  console.log(user)
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

@@ -8,11 +8,16 @@ const transactionSchema = new mongoose.Schema({
     enum: ["deposit", "order_completed", "withdrawal", "earning"],
     required: true,
   },
+  paymentMethod: {
+    type: String,
+    enum: ["card", "crypto"],
+  },
   status: {
     type: String,
     enum: ["pending", "success", "failed"],
     default: "pending",
   },
+  txHash: String,
   reference: { type: String },
   stripeTransferId: { type: String },
   createdAt: { type: Date, default: Date.now },

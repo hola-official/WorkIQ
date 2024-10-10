@@ -12,12 +12,13 @@ import {
 	InputGroup,
 	InputRightElement,
 	HStack,
+	Select,
 } from "@chakra-ui/react";
 import { ViewIcon, ViewOffIcon, CheckIcon } from "@chakra-ui/icons";
 import { FcGoogle } from "react-icons/fc";
 import { useSetRecoilState } from "recoil";
 import authScreenAtom from "../../atoms/authAtom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAxiosInstance } from "../../../api/axios";
 import userAtom from "../../atoms/userAtom";
@@ -30,15 +31,36 @@ export default function SplitScreen() {
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [email, setEmail] = useState("");
 	const [name, setName] = useState("");
+	const [location, setLocation] = useState("");
+	const [countries, setCountries] = useState([]);
 	const [username, setUsername] = useState("");
 	const setActivationToken = useSetRecoilState(activationToken)
 	const setUser = useSetRecoilState(userAtom);
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const navigate = useNavigate();
-	const showToast = useShowToast();
+	const {showToast} = useShowToast();
 	const [loading, setLoading] = useState(false);
 	const axiosInstance = useAxiosInstance();
+
+	useEffect(() => {
+		const fetchCountries = async () => {
+			try {
+				const response = await fetch('https://restcountries.com/v3.1/all');
+				const data = await response.json();
+				const sortedCountries = data
+					.map(country => country.name.common)
+					.sort((a, b) => a.localeCompare(b));
+				setCountries(sortedCountries);
+				// console.log(sortedCountries)
+			} catch (error) {
+				console.error("Error fetching countries:", error);
+				showToast("Error", "Failed to load countries list", "error");
+			}
+		};
+
+		fetchCountries();
+	}, []);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -50,7 +72,7 @@ export default function SplitScreen() {
 		try {
 			const response = await axiosInstance.post(
 				"/auth/signup",
-				JSON.stringify({ name, username, email, password, confirmPassword })
+				JSON.stringify({ name, username, email, password, confirmPassword, location })
 			);
 			// const loggedUser = response.data.loggedInUser;
 			const data = response.data;
@@ -65,7 +87,7 @@ export default function SplitScreen() {
 			navigate("/activate-verify");
 		} catch (error) {
 			console.log(error);
-			
+
 			if (!error.status) {
 				console.log("No Server Response");
 			} else if (error.status === 400) {
@@ -80,10 +102,10 @@ export default function SplitScreen() {
 		}
 	};
 
-	const baseUrl= import.meta.env.VITE_SERVER_BASE_URL
+	const baseUrl = import.meta.env.VITE_SERVER_BASE_URL
 
 	const handleGoogleAuth = () => {
-			window.location.href = `${baseUrl}/auth/googleauth`;
+		window.location.href = `${baseUrl}/auth/googleauth`;
 	}
 
 	return (
@@ -137,6 +159,22 @@ export default function SplitScreen() {
 										border={"1px solid black"}
 										required
 									/>
+								</FormControl>
+
+								<FormControl isRequired my={5}>
+									<Select
+										placeholder="Select your country"
+										value={location}
+										onChange={(e) => setLocation(e.target.value)}
+										border={"1px solid black"}
+										required
+									>
+										{countries.map((country) => (
+											<option key={country} value={country}>
+												{country}
+											</option>
+										))}
+									</Select>
 								</FormControl>
 
 								<FormControl isRequired my={5}>

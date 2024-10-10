@@ -173,7 +173,7 @@ const getOrderById = async (req, res) => {
     }
 
     // Respond with the order and its associated section details
-    res.status(200).json({ order, section });
+    res.status(200).json({ order, section, task });
   } catch (error) {
     console.error("Error fetching order by ID:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -358,13 +358,14 @@ const approveOrderDelivery = async (req, res) => {
     await task.save();
 
     // Respond with the updated order details
-    res.status(200).json({ message: "Order delivery approved successfully", order });
+    res
+      .status(200)
+      .json({ message: "Order delivery approved successfully", order });
   } catch (error) {
     console.error("Error approving order delivery:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const cancelOrder = async (req, res) => {
   try {

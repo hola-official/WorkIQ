@@ -28,6 +28,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { GoChevronRight } from "react-icons/go";
 import useShowToast from "@/hooks/useShowToast";
 import { ConfirmModal } from "@/ui/confirm-modal";
+import { useTaskManagement } from "@/hooks/useTaskManagement";
+import useAuth from "@/hooks/useAuth";
+import { useWaitForTransactionReceipt } from "wagmi";
 // import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const Proposal = ({ task, proposal, section }) => {
@@ -36,7 +39,50 @@ const Proposal = ({ task, proposal, section }) => {
   const [input, setInput] = useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const navigate = useNavigate();
-  const showToast = useShowToast();
+  const { _id: userId } = useAuth();
+  const { showToast, dismissToast, loadingToast, successToast, errorToast } = useShowToast();
+  const [toastId, setToastId] = useState(null);
+  const {
+    assignSectionToFreelancer,
+    assignSectionToFreelancerHash,
+    isAssignSectionToFreelancerPending,
+    assignSectionToFreelancerError
+  } = useTaskManagement();
+
+  console.log(section)
+  const { isLoading: isTransactionConfirming, isSuccess: isTransactionConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: assignSectionToFreelancerHash,
+    });
+
+  useEffect(() => {
+    if (isAssignSectionToFreelancerPending) {
+      const newToastId = loadingToast("Waiting for approval from wallet...");
+      setToastId(newToastId);
+    }
+    if (isTransactionConfirming) {
+      if (toastId) dismissToast(toastId);
+      const newToastId = loadingToast(
+        "Waiting for confirmation on the blockchain..."
+      );
+      setToastId(newToastId);
+    }
+    if (isTransactionConfirmed) {
+      successToast(`Order created successfully successfully!`, { id: toastId });
+      // Trigger a refresh of the task data
+      // onSectionUpdate();
+    }
+    if (assignSectionToFreelancerError) {
+
+
+      errorToast(assignSectionToFreelancerError, { id: toastId });
+    }
+  }, [
+    isAssignSectionToFreelancerPending,
+    isTransactionConfirming,
+    isTransactionConfirmed,
+    assignSectionToFreelancerError,
+  ]);
 
   useEffect(() => {
     handleFreelancerInfo();
@@ -54,16 +100,21 @@ const Proposal = ({ task, proposal, section }) => {
 
   const handleCreateOrder = async () => {
     try {
-      const res = await axiosInstance.post(
-        `order/create-order/${section._id}`,
-        {
-          freelancerId: freelancer._id,
-        }
-      );
+      if (section.isCryptoPost === true) {
+        const result = await assignSectionToFreelancer(task?._id, section?._id, freelancer?._id, userId);
+        console.log('Toggle section publication status result:', result);
+      } else {
+        const res = await axiosInstance.post(
+          `order/create-order/${section._id}`,
+          {
+            freelancerId: freelancer._id,
+          }
+        );
+      }
 
       const data = await res.data;
       console.log(data);
-      navigate(`/track/order/${data?.order?._id}`)
+      // navigate(`/track/order/${data?.order?._id}`)
 
       showToast("Success", data.message, "success");
     } catch (error) {
@@ -93,7 +144,7 @@ const Proposal = ({ task, proposal, section }) => {
         <Box textAlign="left">
           <Link
             fontSize="xl"
-            lineheight={1.2}
+            lineHeight={1.2}
             fontWeight="bold"
             w="100%"
             _hover={{
@@ -128,14 +179,17 @@ const Proposal = ({ task, proposal, section }) => {
               justifyContent="space-between"
               direction={{ base: "column", sm: "row" }}
             >
-              <Box>
-                <Text fontSize="sm" fontWeight="bold">
-                  {freelancer ? freelancer?.username : "N/A"}
-                </Text>
-                <Text fontSize="sm" color="gray.500">
-                  {getTimestamp(proposal.createdAt)}
-                </Text>
-              </Box>
+              <Link
+            to={`/profile/${freelancer?.username}`}>
+                <Box>
+                  <Text fontSize="sm" fontWeight="bold">
+                    {freelancer ? freelancer?.username : "N/A"}
+                  </Text>
+                  <Text fontSize="sm" color="gray.500">
+                    {getTimestamp(proposal.createdAt)}
+                  </Text>
+                </Box>
+              </Link>
               <HStack
                 as={Link}
                 spacing={1}
@@ -162,9 +216,10 @@ const Proposal = ({ task, proposal, section }) => {
                   // onClick={onOpen}
                   colorScheme={"blue"}
                   size={"md"}
+                  // isDisabled={section?.isAssigned === true}
                   float={"right"}
                 >
-                  Assign
+                  {section?.isAssigned === true ? "Assigned" : "Assign"}
                 </Button>
               </ConfirmModal>
               {/* <Modal isOpen={isOpen} onClose={onClose}>

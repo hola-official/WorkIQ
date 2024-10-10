@@ -11,7 +11,7 @@ const CategoryForm = ({ initialData, taskId, options, setTask }) => {
   const [selectedCategory, setSelectedCategory] = useState(initialData.categoryId);
   const [isLoading, setIsLoading] = useState(false);
   const axiosInstance = useAxiosInstance()
-  const showToast = useShowToast()
+  const {showToast} = useShowToast()
 
   console.log(initialData)
 

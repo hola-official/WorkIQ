@@ -1,20 +1,26 @@
 import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
-import Content from "./components/Content";
-import Testimonials from "./components/Testimonials";
 import Footer from "@/components/Footer";
+import About from "./components/About";
+import Features from "./components/Features";
+import Contact from "./components/Contact";
+import HowItWorks from "./components/HowItWorks";
+import Pricing from "./components/Pricing";
 
 const Home = () => {
   return (
-    <div>
+    <section className="min-h-screen bg-gray-200">
       <Navbar />
-      <main className="bg-[#F6F6F6] overflow-hidden">
+      <div className="px-4">
         <HeroSection />
-        <Content />
-        <Testimonials />
+        <About />
+        <Features />
+        <HowItWorks />
+        <Pricing />
+        <Contact />
         <Footer />
-      </main>
-    </div>
+      </div>
+    </section>
   );
 };
 

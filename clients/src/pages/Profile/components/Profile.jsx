@@ -74,7 +74,7 @@ const Profile = () => {
   const [skillError, setSkillError] = useState("");
   // const [bioError, setBioError] = useState("");
   const errorHandler = useErrorHandler();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   console.log(_id, username)
   // const [user, setUser] = useRecoilState(null);
   const [inputs, setInputs] = useState({

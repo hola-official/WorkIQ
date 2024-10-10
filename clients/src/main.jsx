@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import App from "./App.jsx";
 import "./index.css";
 import { mode } from "@chakra-ui/theme-tools";
@@ -12,6 +12,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { RecoilRoot } from "recoil";
 import { ThemeProvider } from "@material-tailwind/react";
 import { StreamChatProvider } from "./context/StreamChatContext.jsx";
+import "@rainbow-me/rainbowkit/styles.css";
+import { WagmiConfigProvider } from "./wagmi";
 
 const styles = {
   global: (props) => ({
@@ -44,7 +46,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <BrowserRouter>
           <ChakraProvider theme={theme}>
             <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-            <App />
+            <WagmiConfigProvider>
+              <Routes>
+                <Route path="/*" element={<App />} />
+              </Routes>
+            </WagmiConfigProvider>
           </ChakraProvider>
         </BrowserRouter>
         {/* </React.StrictMode> */}

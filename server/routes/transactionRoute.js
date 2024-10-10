@@ -5,14 +5,15 @@ const {
   createOrRefreshStripeConnectAccount,
   completeStripeConnectOnboarding,
   getPayoutDetails,
-  initiatePayout,
   initiateWithdrawal,
   getWithdrawalHistory,
+  depositUSDC,
 } = require("../controllers/TransactionController");
 const verifyJWT = require("../middleware/verifyJWT");
 
 // Deposit funds
 router.post("/deposit-funds", verifyJWT, depositFunds);
+router.post("/deposit-usdc", verifyJWT, depositUSDC);
 
 // Stripe Connect account creation and management
 router.post(
@@ -28,7 +29,6 @@ router.post(
 
 // Payout related routes
 router.get("/payout-details", verifyJWT, getPayoutDetails);
-router.post("/initiate-payout", verifyJWT, initiatePayout);
 
 // Withdrawal related routes
 router.post("/withdraw", verifyJWT, initiateWithdrawal);

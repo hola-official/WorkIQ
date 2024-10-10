@@ -28,7 +28,7 @@ export const SectionTitleForm = ({
   setRefetchSection,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const axiosInstance = useAxiosInstance();
   const toggleEdit = () => setIsEditing((current) => !current);
   const form = useForm({

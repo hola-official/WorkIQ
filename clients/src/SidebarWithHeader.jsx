@@ -37,6 +37,8 @@ import { FaListUl } from "react-icons/fa";
 import { FiBriefcase } from "react-icons/fi";
 import RequestVerification from "./pages/Dashboard/components/RequestVerification";
 import Withdraw from "./pages/Freelancer/withdraw/Withdraw";
+import CustomConnectButton from "./components/CustomConnectButton";
+import { WalletCards, WalletMinimal } from "lucide-react";
 
 const SidebarContent = ({ onClose, ...rest }) => {
   const logout = useLogout();
@@ -239,16 +241,21 @@ const MobileNav = ({ onOpen, ...rest }) => {
               {user?.isVerified === false && (<MenuItem ><RequestVerification /></MenuItem>)}
               <MenuDivider />
               <MenuGroup title='Settings'>
-                <MenuItem onClick={() => setShowDepositModal(true)}>
+                <MenuDivider />
+                <Text px="3" py="1" fontWeight="bold" fontSize="sm">Wallet</Text>
+                <MenuItem onClick={() => setShowDepositModal(true)} icon={<WalletCards />}>
                   Deposit
                 </MenuItem>
-
-                <MenuItem>
+                <MenuItem onClick={() => setShowModal(true)} icon={<WalletMinimal />}>
                   <Withdraw
                     showModal={showModal}
                     setShowModal={setShowModal}
                   // reloadData={getData}
                   />
+                </MenuItem>
+                <MenuDivider />
+                <MenuItem>
+                  <CustomConnectButton className="rounded-md" />
                 </MenuItem>
               </MenuGroup>
               <MenuDivider />

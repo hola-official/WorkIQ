@@ -20,7 +20,7 @@ export const SkillForm = ({ initialData, taskId }) => {
   const [skillInputValue, setSkillInputValue] = useState("");
   const [skillError, setSkillError] = useState("");
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
 
   const toggleEdit = () => setIsEditing((current) => !current);
 

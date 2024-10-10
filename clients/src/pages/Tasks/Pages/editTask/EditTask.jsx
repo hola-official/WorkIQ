@@ -29,7 +29,7 @@ const EditTask = () => {
   const [categories, setCategories] = useState([]);
   const [taskCategoriesData, setTaskCategoriesData] = useState(null);
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
 
   useEffect(() => {
     const fetchTaskData = async () => {

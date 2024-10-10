@@ -3,7 +3,7 @@ const { uuid } = require("uuidv4");
 const { sendMail } = require("../utils/sendMail.js");
 const TransactionModel = require("../Model/TransactionModel");
 const userModel = require("../Model/userModel");
-// const crypto = require("crypto");
+// const { parseUnits } = require("ethers/lib/utils");
 
 // let uuid = crypto.randomUUID();
 
@@ -72,6 +72,7 @@ const depositFunds = async (req, res) => {
         user: userId,
         amount: parsedAmount,
         type: "deposit",
+        paymentMethod: "card",
         reference: "stripe deposit",
         status: "success",
       });
@@ -122,6 +123,80 @@ const depositFunds = async (req, res) => {
     console.log(error);
     res.send({
       message: "Transaction failed",
+      data: error.message,
+      success: false,
+    });
+  }
+};
+
+const depositUSDC = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { amount, txHash } = req.body;
+
+    // Validate the amount
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return res.status(400).json({
+        message: "Invalid deposit amount",
+        success: false,
+      });
+    }
+
+    // Find the user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        success: false,
+      });
+    }
+
+    // Update user's balance
+    const currentUsdcBalance = user.usdcBalance || 0;
+    const newUsdcBalance = currentUsdcBalance + parsedAmount;
+
+    await userModel.findByIdAndUpdate(userId, {
+      usdcBalance: newUsdcBalance,
+    });
+
+    // Create a new transaction record
+    const newTransaction = new TransactionModel({
+      user: userId,
+      amount: parsedAmount,
+      type: "deposit",
+      reference: "USDC deposit",
+      status: "success",
+      txHash: txHash,
+    });
+
+    await newTransaction.save();
+
+    // Send email notification
+    try {
+      await sendMail({
+        email: user.email,
+        subject: "USDC Deposit Successful",
+        template: "deposit-mail.ejs",
+        data: {
+          user: { username: user.username },
+          amount: parsedAmount,
+          time: { timestamp: new Date().toLocaleString() },
+        },
+      });
+    } catch (error) {
+      console.log("Error sending USDC deposit email:", error);
+    }
+
+    res.status(200).json({
+      message: "USDC deposit successful",
+      data: newTransaction,
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error in depositUSDC:", error);
+    res.status(500).json({
+      message: "USDC deposit failed",
       data: error.message,
       success: false,
     });
@@ -238,36 +313,6 @@ const getPayoutDetails = async (req, res) => {
   }
 };
 
-const initiatePayout = async (req, res) => {
-  try {
-    const userId = req.userId;
-    const { amount } = req.body;
-    const user = await userModel.findById(userId);
-
-    if (!user.stripeAccountId) {
-      return res
-        .status(400)
-        .json({ message: "No Stripe account found for this user" });
-    }
-
-    // Create a payout
-    const payout = await stripe.payouts.create(
-      {
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-      },
-      {
-        stripeAccount: user.stripeAccountId,
-      }
-    );
-
-    res.json({ message: "Payout initiated successfully", payoutId: payout.id });
-  } catch (error) {
-    console.error("[INITIATE_PAYOUT]", error);
-    res.status(500).json({ message: "Failed to initiate payout" });
-  }
-};
-
 const initiateWithdrawal = async (req, res) => {
   try {
     const userId = req.userId;
@@ -326,6 +371,7 @@ const initiateWithdrawal = async (req, res) => {
         user: userId,
         amount: amount,
         type: "withdrawal",
+        paymentMethod: "card",
         status: payout.status === "paid" ? "success" : payout.status,
         reference: "stripe withdraw",
         stripeChargeId: payout.id,
@@ -411,10 +457,10 @@ const stripeWebhook = async (req, res) => {
 
 module.exports = {
   depositFunds,
+  depositUSDC,
   createOrRefreshStripeConnectAccount,
   completeStripeConnectOnboarding,
   getPayoutDetails,
-  initiatePayout,
   initiateWithdrawal,
   getWithdrawalHistory,
   stripeWebhook,

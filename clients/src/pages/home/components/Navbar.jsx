@@ -1,138 +1,245 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/lJwnQlHSEBA
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-import authScreenAtom from "@/atoms/authAtom";
-import { Button } from "@/components/ui/button";
-import { Button as ChakraBtn } from "@chakra-ui/react";
-import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { LayoutGrid, X, User } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
 
 export default function Navbar() {
-  const setAuthScreen = useSetRecoilState(authScreenAtom);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+  const [hasScrolled, setHasScrolled] = useState(false);
   const navigate = useNavigate();
+  const navRef = useRef(null);
 
-  const handleRegister = () => {
-    setAuthScreen("signup");
-    navigate("/auth");
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset;
+      if (scrollTop > 50) {
+        setHasScrolled(true);
+      } else {
+        setHasScrolled(false);
+      }
+
+      if (hasScrolled) {
+        const sections = [
+          "home",
+          "how-it-works",
+          "about",
+          "features",
+          "pricing",
+        ];
+        const currentSection = sections.find((section) => {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            return rect.top <= 100 && rect.bottom >= 100;
+          }
+          return false;
+        });
+        setActiveSection(currentSection || "");
+      }
+    };
+
+    const handleOutsideClick = (event) => {
+      if (navRef.current && !navRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [hasScrolled]);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
   };
-  const handleLogin = () => {
-    setAuthScreen("login");
-    navigate("/auth");
+
+  const handleSmoothScroll = (event, targetId) => {
+    event.preventDefault();
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: "smooth" });
+    }
+    setIsOpen(false);
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.6 },
+  };
+
   return (
-    <header className="flex h-20 sticky top-0 shadow-md z-999 bg-white w-full shrink-0 items-center px-4 md:px-6">
-      <Sheet>
-        <SheetTrigger asChild>
-          <div className="flex justify-between items-center">
-            <div>
-              <Button className="lg:hidden" size="icon" variant="outline">
-                <MenuIcon className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </div>
-           {/* <div> <img src="/WorkIQ-full.svg" className="h-15 " alt="logo" /></div> */}
-          </div>
-        </SheetTrigger>
-        <SheetContent side="left">
-          <Link className="mr-6 flex lg:hidden" href="#">
-            <img src="/WorkIQ-full.svg" className="h-15 " alt="logo" />
-          </Link>
-          <div className="grid gap-2 py-6">
-            {/* <Link href="#"> */}
-            <ChakraBtn onClick={handleLogin} variant={"ghost"}>
-              Login
-            </ChakraBtn>
-            {/* </Link> */}
-            {/* <Link href="#"> */}
-            <ChakraBtn onClick={handleRegister} >
-              Register
-            </ChakraBtn>
-            {/* </Link> */}
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <Link className="mr-6 hidden lg:flex" href="#">
-        <img src="/WorkIQ-full.svg" className="h-15 " alt="logo" />
-      </Link>
-
-      <nav className="ml-auto hidden lg:flex gap-6">
-        {/* <Link href="#"> */}
-        <ChakraBtn onClick={handleLogin} variant={"ghost"}>
-          Login
-        </ChakraBtn>
-        {/* </Link> */}
-        {/* <Link href="#"> */}
-        <ChakraBtn
-          onClick={handleRegister}
-          colorScheme={"blue"}
-          size={["md", "lg"]}
+    <motion.nav
+      ref={navRef}
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed w-full p-4 md:py-4 z-50 transition-all duration-300 ${
+        hasScrolled ? "bg-transparent" : "bg-transparent"
+      }`}
+    >
+      <div className="mx-auto px-4">
+        <div
+          className={`flex items-center justify-between h-16 px-4 ${
+            hasScrolled
+              ? "bg-white rounded-3xl shadow-lg bg-opacity-60 backdrop-blur"
+              : ""
+          }`}
         >
-          Get Started today
-        </ChakraBtn>
-        {/* </Link> */}
-        {/* <Link
-					className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
-					href="#"
-				>
-					About
-				</Link>
-				<Link
-					className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
-					href="#"
-				>
-					Services
-				</Link>
-				<Link
-					className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-gray-100/50 data-[state=open]:bg-gray-100/50 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus:bg-gray-800 dark:focus:text-gray-50 dark:data-[active]:bg-gray-800/50 dark:data-[state=open]:bg-gray-800/50"
-					href="#"
-				>
-					Contact
-				</Link> */}
-      </nav>
-    </header>
+          <div className="flex items-center space-x-4">
+            <motion.div
+              className={`text-2xl font-bold text-blue-600  flex items-center cursor-pointer`}
+              whileHover={{ scale: 1.05 }}
+              onClick={scrollToTop}
+            >
+              <img
+                src="/assets/images/WorkIqshort.png"
+                alt="WorkIQ"
+                className={!isMobile ? "hidden" : " h-16"}
+              />
+              <span className={isMobile ? "hidden" : ""} {...fadeIn}>
+                WorkIQ
+              </span>
+            </motion.div>
+          </div>
+          {!isMobile && (
+            <div className="flex items-center space-x-4">
+              <NavItem
+                href="#about"
+                isActive={hasScrolled && activeSection === "about"}
+                onClick={(e) => handleSmoothScroll(e, "about")}
+                hasScrolled={hasScrolled}
+              >
+                About
+              </NavItem>
+              <NavItem
+                href="#features"
+                isActive={hasScrolled && activeSection === "features"}
+                onClick={(e) => handleSmoothScroll(e, "features")}
+                hasScrolled={hasScrolled}
+              >
+                Features
+              </NavItem>
+              <NavItem
+                href="#how-it-works"
+                isActive={hasScrolled && activeSection === "how-it-works"}
+                onClick={(e) => handleSmoothScroll(e, "how-it-works")}
+                hasScrolled={hasScrolled}
+              >
+                How It Works
+              </NavItem>
+              <NavItem
+                href="#pricing"
+                isActive={hasScrolled && activeSection === "pricing"}
+                onClick={(e) => handleSmoothScroll(e, "pricing")}
+                hasScrolled={hasScrolled}
+              >
+                Pricing
+              </NavItem>
+              <div onClick={() => navigate("/auth")} className="cursor-pointer">
+                <NavItem
+                  // href={"/auth"}
+                  className={
+                    "bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-8 rounded-2xl inline-flex items-center transition-colors duration-300"
+                  }
+                  isActive={hasScrolled && activeSection === "login"}
+                  onClick={(e) => handleSmoothScroll(e, "login")}
+                  // hasScrolled={hasScrolled}
+                >
+                  Login
+                </NavItem>
+              </div>
+            </div>
+          )}
+          {isMobile && (
+            <button
+              onClick={toggleMenu}
+              className={`${
+                hasScrolled ? "text-blue-600 hover:text-blue-800" : ""
+              } focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md`}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isOpen}
+            >
+              {isOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <LayoutGrid className="w-6 h-6" />
+              )}
+            </button>
+          )}
+        </div>
+        <AnimatePresence>
+          {isMobile && isOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`pb-4 items-center ${
+                hasScrolled ? "bg-white" : "bg-gray-800"
+              } rounded-3xl shadow-lg px-4 mt-2`}
+            >
+              <div onClick={() => navigate("/auth")} className="cursor-pointer">
+                <NavItem
+                  isActive={hasScrolled && activeSection === "login"}
+                  onClick={(e) => handleSmoothScroll(e, "login")}
+                  hasScrolled={hasScrolled}
+                >
+                  <User size={20} className="mr-2" />
+                  Login
+                </NavItem>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.nav>
   );
 }
 
-function MenuIcon(props) {
+function NavItem({
+  href,
+  children,
+  isActive,
+  onClick,
+  hasScrolled,
+  className,
+}) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <motion.a
+      href={href}
+      className={`flex items-center py-2 px-4 rounded-3xl transition-colors ${className} ${
+        hasScrolled
+          ? isActive
+            ? "bg-blue-100 text-slate-700"
+            : "text-slate-700 hover:bg-blue-50"
+          : ""
+      }`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
     >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  );
-}
-
-function MountainIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
-    </svg>
+      {children}
+    </motion.a>
   );
 }

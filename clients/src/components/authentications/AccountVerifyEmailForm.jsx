@@ -9,19 +9,51 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { PinInput, PinInputField } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useShowToast from "../../hooks/useShowToast";
 import { useAxiosInstance } from "../../../api/axios";
 import { useRecoilValue } from "recoil";
 import actToken from "../../atoms/activationTokenAtom";
+import { useAccount, useDisconnect } from "wagmi";
 
 const AccountVerifyEmailForm = () => {
   const [code, setCode] = useState();
+  const [seconds, setSeconds] = useState(60); // Initial countdown duration in seconds
   const activationToken = useRecoilValue(actToken)
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const navigate = useNavigate();
+  const { isConnected } = useAccount();
+  const { disconnectAsync } = useDisconnect();
+
+  useEffect(() => {
+    const disconectWallet = async () => {
+      try {
+        await disconnectAsync();
+      } catch (error) {
+        toast.error("Error disconnecting wallet");
+      }
+    };
+    if (isConnected) disconectWallet();
+  }, [isConnected]);
+
+  useEffect(() => {
+    let countdown = setInterval(() => {
+      setSeconds((prevSeconds) => {
+        if (prevSeconds === 0) {
+          clearInterval(countdown); // Stop the countdown when it reaches 0
+        }
+        return prevSeconds === 0 ? 0 : prevSeconds - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdown); // Cleanup function to clear interval
+  }, [seconds]); // Run effect only once when the component mounts
+
+  const resetCountdown = () => {
+    setSeconds(60); // Reset countdown duration to 60 seconds
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,6 +126,26 @@ const AccountVerifyEmailForm = () => {
           </Center>
         </FormControl>
         <Stack spacing={6}>
+          <div className="flex mt-2 justify-between">
+            <p>Didn&apos;t receive OTP? </p>
+
+            {seconds > 0 ? (
+              <div className="text-slate-600">
+                Resend OTP in:{" "}
+                {Math.floor(seconds / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(seconds % 60).toString().padStart(2, "0")}
+              </div>
+            ) : (
+              <button
+                className="text-blue-700 font-medium cursor-pointer hover:underline hover:text-blue-500"
+                onClick={resetCountdown}
+              >
+                Resend OTP
+              </button>
+            )}
+          </div>
           <Button
             bg={"blue.400"}
             size={{ base: 'md', md: 'lg' }}

@@ -6,20 +6,36 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useShowToast from "@/hooks/useShowToast";
 import Spinner from "@/components/Spinner";
+import useAuth from "@/hooks/useAuth";
+import RegisterUserBtn from "@/components/web3/RegisterUserBtn";
 
 function Proposal() {
   const { taskId, sectionId } = useParams();
   const [task, setTask] = useState(null);
   const [coverLetter, setCoverLetter] = useState("");
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState()
   const navigate = useNavigate();
-  const showToast = useShowToast();
+  const { showToast } = useShowToast();
   const axiosInstance = useAxiosInstance();
+  const { _id: userId } = useAuth()
 
   useEffect(() => {
     handleGetTaskInfo();
+    handleGetUserInfo()
   }, []);
 
+  const handleGetUserInfo = async () => {
+    try {
+      const res = await axiosInstance.get(`/users/${userId}`)
+      const data = res.data;
+      console.log(data)
+      setUser(data)
+    } catch (error) {
+      console.error(error);
+
+    }
+  }
   const handleGetTaskInfo = async () => {
     setLoading(true);
     try {
@@ -60,9 +76,10 @@ function Proposal() {
   };
 
   console.log(taskId, sectionId);
+  console.log(user)
 
   if (loading) {
-    return <Spinner/>; // Show loading state until user data is fetched
+    return <Spinner />; // Show loading state until user data is fetched
   }
 
   return (
@@ -156,19 +173,26 @@ function Proposal() {
               rows="4"
               className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             ></textarea>
-            {errors.coverLetter && (
+            {/* {errors.coverLetter && (
               <span className="text-red-500">{errors.coverLetter.message}</span>
-            )}
+            )} */}
 
             <div className="flex gap-2">
-              <Button
-                colorScheme="blue"
-                size={["sm", "md"]}
-                type="submit"
-                borderRadius="lg"
-              >
-                {loading ? "Submitting proposal..." : "Submit a proposal"}
-              </Button>
+              {!user?.paymentWallet || !user?.paymentWalletRegisterComplete === true && <p className="text-red-500">The section you want to apply for is posted with crypto click on register to be able to apply</p>}
+
+              {!user?.paymentWallet || !user?.paymentWalletRegisterComplete === true ?
+                <RegisterUserBtn className={'float-right mb-4'} label={"Register"} />
+                :
+                (<Button
+                  colorScheme="blue"
+                  size={["sm", "md"]}
+                  isDisabled={!coverLetter}
+                  type="submit"
+                  borderRadius="lg"
+                >
+                  {loading ? "Submitting proposal..." : "Submit a proposal"}
+                </Button>)
+              }
               <Button
                 variant="ghost"
                 size={["sm", "md"]}

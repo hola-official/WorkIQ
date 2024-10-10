@@ -8,7 +8,7 @@ const StripeOnboardingComplete = () => {
 	const [status, setStatus] = useState("loading");
 	const navigate = useNavigate();
 	const axiosInstance = useAxiosInstance();
-	const showToast = useShowToast();
+	const {showToast} = useShowToast();
 
 	useEffect(() => {
 		let timeoutId;

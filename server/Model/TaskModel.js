@@ -74,6 +74,8 @@ const orderSchema = new Schema(
         },
       ],
     },
+    completionTimestamp: Date,
+    txHash: String,
     status: {
       type: String,
       default: "in_progress",
@@ -94,7 +96,12 @@ const sectionSchema = new Schema({
     default: 3,
   },
   isPublished: Boolean,
+  isCryptoPost: {
+    type: Boolean,
+    default: false,
+  },
   assignTo: String,
+  txHash: String,
   isAssigned: {
     type: Boolean,
     default: false,
@@ -117,7 +124,7 @@ const taskSchema = new Schema(
   {
     title: {
       type: String,
-      required: true,
+      // required: true,
     },
     description: {
       type: String,
@@ -135,6 +142,7 @@ const taskSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Category",
     },
+    txHash: String,
     skills: [{ type: String }],
     sections: [sectionSchema],
     isPublished: {
@@ -142,6 +150,7 @@ const taskSchema = new Schema(
       default: false,
     },
     client: { type: Schema.Types.ObjectId, ref: "User" },
+    clientAddress: String,
     // status: {
     //   type: String,
     //   enum: ["pending", "approved", "completed", "rejected"],

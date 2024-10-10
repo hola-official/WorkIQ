@@ -10,7 +10,7 @@ import tokenAtom from "@/atoms/tokenAtom";
 
 const GoogleAuth = () => {
 	const navigate = useNavigate();
-	const showToast = useShowToast();
+	const {showToast} = useShowToast();
 	const location = useLocation();
 	const queryParams = new URLSearchParams(location.search);
 	const receivedToken = queryParams.get("token");

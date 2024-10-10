@@ -32,7 +32,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId, setRefetchSecti
   const [isEditing, setIsEditing] = useState(false);
   const [delAttachId, setDelAttachId] = useState(null);
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const { showToast } = useShowToast();
   // const [updateSectionAttachment] = useUpdateSectionAttachmentMutation(); // Ensure you have the appropriate mutation hook
   // const [deleteSectionAttachment] = useDeleteSectionAttachmentMutation(); // Ensure you have the appropriate mutation hook
 
@@ -40,7 +40,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId, setRefetchSecti
     setIsEditing((prevIsEditing) => !prevIsEditing);
   };
 
-  console.log(uploadProgress);
+  // console.log(uploadProgress);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -96,7 +96,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId, setRefetchSecti
       setUploadProgress(0);
     }
   };
-  console.log(initialData)
+  // console.log(initialData)
 
   const onSubmit = async () => {
     try {
@@ -227,7 +227,7 @@ export const AttachmentForm = ({ initialData, taskId, sectionId, setRefetchSecti
             className="file-input file-input-bordered w-full cursor-pointer"
           />
           <div className="text-xs text-muted-foreground mt-4">
-            Add anything your students might need to complete this section.
+            Add anything that might need to complete this section.
           </div>
 
           {!isUploading && file && (
