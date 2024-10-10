@@ -47,7 +47,6 @@ export default function SplitScreen() {
   const axiosInstance = useAxiosInstance();
   const {showToast} = useShowToast();
 
-  console.log("Running...")
   useEffect(() => {
     getFingerprint().then(setFingerprint);
   }, []);
