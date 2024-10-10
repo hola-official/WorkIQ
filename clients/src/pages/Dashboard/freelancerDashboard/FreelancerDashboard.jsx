@@ -16,6 +16,12 @@ import ErrorMessage from "@/components/ErrorMessage";
 import { Avatar } from "@chakra-ui/react";
 import { formatPrice } from "@/lib/format";
 import { motion } from 'framer-motion';
+import { CheckboxReactHookFormMultiple } from "@/components/FormCustom";
+import RegisterUserBtn from "@/components/web3/RegisterUserBtn";
+import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
+import { useTaskManagement } from "@/hooks/useTaskManagement";
+import useAuth from "@/hooks/useAuth";
 
 const BADGE_CRITERIA = {
 	TOTAL_POINTS: {
@@ -58,11 +64,19 @@ const calculateBadgeProgress = (totalPoints) => {
 };
 
 const FreelancerDashboard = () => {
+	const { _id: userId } = useAuth();
+	const { getUserBalance } = useTaskManagement();
+	const { data: userUSDCBalance, refetch } = getUserBalance(userId);
 	const userInfo = useRecoilValue(userAtom);
 	const axiosInstance = useAxiosInstance();
 	const [stats, setStats] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const { status, address } = useAccount();
+	const USDCBalance = Number(formatUnits(userUSDCBalance || 0, 6)) || 0;
+	refetch()
+	// console.log(address)
+
 
 	useEffect(() => {
 		const fetchStats = async () => {
@@ -107,6 +121,8 @@ const FreelancerDashboard = () => {
 
 	return (
 		<div className="flex-1 space-y-6">
+			{/* <CheckboxReactHookFormMultiple /> */}
+			{/* <RegisterUserBtn className={'float-right mb-4'} label={"Just register"} /> */}
 			<motion.div
 				initial={{ x: -100, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}
@@ -128,6 +144,7 @@ const FreelancerDashboard = () => {
 				<StatCards
 					stats={stats}
 					userInfo={userInfo}
+					USDCBalance={USDCBalance}
 				/>
 			</motion.div>
 			<motion.div
@@ -180,12 +197,17 @@ const HeaderSection = React.memo(({ userInfo, balance, totalEarnings, isVerified
 	</div>
 ));
 
-const StatCards = React.memo(({ stats, userInfo }) => {
+const StatCards = React.memo(({ stats, userInfo, USDCBalance }) => {
 	const statCardItems = [
 		{
 			icon: <DollarSign />,
 			title: userInfo?.isVerified === true ? "Balance" : "Freezed",
 			value: userInfo?.isVerified === true ? `$${stats?.currentBalance?.toFixed(2) ?? 0}` : `${formatPrice(userInfo?.escrowBalance)}`
+		},
+		{
+			icon: <DollarSign />,
+			title: "USDC",
+			value:`$${USDCBalance?.toFixed(2) || "0.00"}`
 		},
 		{
 			icon: <LayoutList />,

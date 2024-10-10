@@ -39,7 +39,7 @@ export const SectionPriceForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const [priceError, setPriceError] = useState("");
   const [price, setPrice] = useState("");
-  const showToast = useShowToast();
+  const { showToast } = useShowToast();
   const axiosInstance = useAxiosInstance();
   const toggleEdit = () => setIsEditing((current) => !current);
   const form = useForm({

@@ -17,6 +17,9 @@ const transactionRoutes = require("./routes/transactionRoute");
 const ProposalRoutes = require("./routes/proposalRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const webhookRoute = require("./routes/webhookRoute");
+const nonceRoutes = require("./routes/nonceRoutes");
+const homeHTMLContent = require("./utils/homeHTMLContent");
+const TaskManagementController = require("./controllers/contractEventsController");
 const cloudinary = require("cloudinary").v2;
 require("./config/passport-setup");
 
@@ -65,6 +68,10 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 
 // Routes
+app.get("/", (req, res) => {
+  res.send(homeHTMLContent);
+});
+app.use("/nonce", nonceRoutes);
 app.use("/auth", authRoutes);
 app.use("/refresh", refreshRoute);
 app.use("/api", webhookRoute);
@@ -74,6 +81,8 @@ app.use("/proposal", ProposalRoutes);
 app.use("/tasks", clientRoutes);
 app.use("/order", orderRoutes);
 app.use("/transactions", transactionRoutes);
+
+TaskManagementController.initializeWebSocket();
 
 // Connect to MongoDB and start server
 mongoose

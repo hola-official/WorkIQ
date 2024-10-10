@@ -1,11 +1,9 @@
 "use client";
 import * as z from "zod";
-// import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader2, PlusCircle } from "lucide-react";
 import { useState } from "react";
-// import { useRouter } from "next/navigation";
 import {
 	Form,
 	FormControl,
@@ -17,7 +15,6 @@ import { Button } from "@chakra-ui/react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { SectionList } from "./SectionList";
-// import { useCreateSectionMutation, useReorderSectionMutation } from "@/features/tasks/tasksApiSlice";
 import { useNavigate } from "react-router-dom";
 import useShowToast from "../../../../../hooks/useShowToast";
 import { useAxiosInstance } from "../../../../../../api/axios";
@@ -29,12 +26,8 @@ export const SectionForm = ({ setTask, initialData, taskId }) => {
 	const [isCreating, setIsCreating] = useState(false);
 	const [isUpdating, setIsUpdating] = useState(false);
 	const navigate = useNavigate()
-	const showToast = useShowToast()
+	const {showToast} = useShowToast()
 	const axiosInstance = useAxiosInstance()
-	// const [createSection] =
-	// useCreateSectionMutation();
-	// const [reorderSection] =
-	// useReorderSectionMutation();
 	const toggleCreating = () => {
 		setIsCreating((current) => !current);
 	};

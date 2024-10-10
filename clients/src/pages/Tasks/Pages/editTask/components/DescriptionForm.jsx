@@ -30,7 +30,7 @@ export const DescriptionForm = ({ initialData, taskId, setTask }) => {
 	const [value, setValue] = useState(initialData.description);
 	// const [isSubmitting, setIsSubmitting] = useState(false);
 	const axiosInstance = useAxiosInstance()
-	const showToast = useShowToast()
+	const {showToast} = useShowToast()
 
 	// useEffect(() => {
 	// 	// Validation logic

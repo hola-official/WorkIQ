@@ -44,7 +44,7 @@ const Portfolio = ({ userId }) => {
   const [editedPortfolio, setEditedPortfolio] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const { _id } = useAuth();
 
   useEffect(() => {

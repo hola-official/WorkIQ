@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 const ForgetingPwd = () => {
   const [email, setEmail] = useState("");
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {

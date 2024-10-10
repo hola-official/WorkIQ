@@ -26,7 +26,7 @@ export const Actions = ({ disabled, isPublished }) => {
   const [task, setTask] = useState();
   const axiosInstance = useAxiosInstance();
   const { taskId } = useParams();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   useEffect(() => {
     const fetchTaskData = async () => {
       try {

@@ -24,8 +24,8 @@ import {
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { Link } from "react-router-dom";
 
-const SectionCard = ({taskId, section}) => {
-  const { username } = useAuth();
+const SectionCard = ({ taskId, section }) => {
+  const { username, _id: userId } = useAuth();
   // const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleDownload = (url, filename) => {
@@ -90,6 +90,7 @@ const SectionCard = ({taskId, section}) => {
     setIsOpen(!isOpen);
   };
 
+  console.log(section)
   const renderAttachments = () => {
     return (
       <ul className="list-none list-inside mb-2">
@@ -186,7 +187,7 @@ const SectionCard = ({taskId, section}) => {
           <p className="text-lg md:text-md font-medium text-slate-700">
             {section.price ? formatPrice(section.price) : "Free"}
           </p>
-          <Link to={`/projects/apply/${taskId}/section/${section._id}`}><Button colorScheme={"blue"}>Apply</Button></Link>
+          <Link to={`/projects/apply/${taskId}/section/${section._id}`}><Button colorScheme={"blue"} isDisabled={section?.proposal?.[0]?.freelancer === userId}>{section?.proposal?.[0]?.freelancer === userId ? "Applied" : "Apply"}</Button></Link>
         </div>
       </CardFooter>
     </Card>

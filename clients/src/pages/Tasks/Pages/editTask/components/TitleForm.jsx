@@ -26,7 +26,7 @@ const formSchema = z.object({
 });
 export const TitleForm = ({ setTask, initialData, taskId }) => {
 	const [isEditing, setIsEditing] = useState(false);
-	const showToast = useShowToast();
+	const {showToast} = useShowToast();
 	const axiosInstance = useAxiosInstance();
 	const [updating, setUpdating] = useState(false);
 	const toggleEdit = () => setIsEditing((current) => !current);

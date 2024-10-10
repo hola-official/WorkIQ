@@ -35,12 +35,23 @@ const useAuth = () => {
   const token = useRecoilValue(tokenAtom);
   let isClient = false;
   let isAdmin = false;
-  let status = "Student";
+  let status = "Freelancer";
 
   if (token) {
     const decoded = jwtDecode(token);
-    const { _id, username, roles, fullName, image, streamToken } =  decoded.UserInfo;
+    const {
+      _id,
+      username,
+      roles,
+      fullName,
+      image,
+      streamToken,
+      stripeOnboardingComplete,
+      connectedWallets,
+      paymentWallet,
+    } = decoded.UserInfo;
 
+    // console.log(decoded.UserInfo);
     isClient = roles.includes("Client");
     isAdmin = roles.includes("Admin");
 
@@ -57,6 +68,9 @@ const useAuth = () => {
       fullName,
       image,
       streamToken,
+      stripeOnboardingComplete,
+      connectedWallets,
+      paymentWallet,
     };
   }
 
@@ -70,6 +84,9 @@ const useAuth = () => {
     fullName: "",
     image: "",
     streamToken: "",
+    connectedWallets: [],
+    paymentWallet: "",
+    stripeOnboardingComplete: "",
   };
 };
 export default useAuth;

@@ -23,7 +23,7 @@ export const Actions = ({ disabled, taskId, isPublished }) => {
   // const [deleteTask] = useDeleteTaskMutation(); // Ensure you have the appropriate mutation hook
   const navigate = useNavigate();
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
 
   // const deleteFolderAndContents = async (folderPath) => {
   // 	const storage = getStorage();

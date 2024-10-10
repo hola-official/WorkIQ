@@ -94,7 +94,7 @@ export const columns = [
       const { _id, sections } = row.original;
 
       const axiosInstance = useAxiosInstance();
-      const showToast = useShowToast();
+      const {showToast} = useShowToast();
       const navigate = useNavigate();
       const onDelete = async (attachment) => {
         try {

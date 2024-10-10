@@ -20,7 +20,7 @@ const VerifyEmailForm = () => {
   const [code, setCode] = useState();
   const axiosInstance = useAxiosInstance();
   const activationToken = useRecoilValue(actToken)
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {

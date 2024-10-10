@@ -69,7 +69,7 @@ const TaskInfo = () => {
   }
 
   // const user = userInfo?.user;
-  console.log(taskId);
+  // console.log(taskId);
   console.log(user);
   if (user) {
     return (

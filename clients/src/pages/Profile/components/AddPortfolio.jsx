@@ -37,7 +37,7 @@ const AddPortfolio = ({ userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const { _id } = useAuth()
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const axiosInstance = useAxiosInstance();
 
   const handleFileChange = (e) => {

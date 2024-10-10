@@ -21,7 +21,7 @@ export const SectionDurationForm = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
   const [value, setValue] = useState(initialData.durationDays);
   // const [durationDays, setDurationDays] = useState(initialData.durationDays || 2);
 

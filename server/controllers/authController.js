@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const { sendMail } = require("../utils/sendMail.js");
 const createActivationToken = require("../utils/createActivationToken.js");
 const { StreamClient } = require("@stream-io/node-sdk");
+const UAParser = require("ua-parser-js");
+const formatDate = require("../utils/formateDate.js");
+const getGeolocation = require("../utils/geolocation.js");
 
 const api_key = process.env.STREAM_API_KEY;
 const api_secret = process.env.STREAM_API_SECRET;
@@ -68,8 +71,6 @@ const generateGoogleAuthCookie = async (req, res) => {
 
       //Detected refresh token reuse!
       if (!foundToken) {
-        // console.log("Used cookie already");
-        // clear out ALL previous refresh tokens
         newRefreshTokenArray = [];
       }
 
@@ -83,17 +84,8 @@ const generateGoogleAuthCookie = async (req, res) => {
     // Saving refreshToken with current user
     foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
 
-    // const serverClient = connect(api_key, api_secret, app_id);
-    // const expirationTime = Math.floor(Date.now() / 1000) + 3600;
-    // const issuedAt = Math.floor(Date.now() / 1000) - 60;
-    // const streamToken = serverClient.createUserToken(foundUser._id.toString(), expirationTime, issuedAt);
-
     const result = await foundUser.save();
-    // console.log(result)
 
-    // const userInfo = {...result, password: ''}
-
-    // Creates Secure Cookie with refresh token
     res.cookie("jwt", newRefreshToken, {
       httpOnly: true,
       secure: true,
@@ -101,10 +93,6 @@ const generateGoogleAuthCookie = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    // console.log(accessToken)
-    // console.log(accessToken)
-
-    // Send authorization roles and access token to user
     res.redirect(`${clientUrl}/dashboard`);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -160,6 +148,47 @@ const signUp = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
+const submitAdditionalInfo = async (req, res) => {
+  const { email, username, name, location, ethAddress } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ error: "Email or username already exists" });
+    }
+
+    const user = { name, username, email, location, ethAddress };
+
+    const activationToken = createActivationToken(user);
+    const activationCode = activationToken.activationCode;
+
+    const data = { user: { name: user.name }, activationCode };
+
+    try {
+      console.log("Sending activation email...");
+      await sendMail({
+        email: user.email,
+        subject: "Activate your Account",
+        template: "activation-mail.ejs",
+        data,
+      });
+      console.log("Activation email sent successfully.");
+      res.status(201).json({
+        success: true,
+        message: `Please check your email ${user.email} to activate your account`,
+        activationToken: activationToken.token,
+      });
+    } catch (error) {
+      console.error("Error sending email:", error);
+      return res.status(400).json({ error: error.message });
+    }
+  } catch (error) {
+    console.error("Error in processing request:", error);
+    res.status(400).json({ error: error.message });
+  }
+};
 
 const activateUser = async (req, res) => {
   try {
@@ -171,21 +200,59 @@ const activateUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid activation code" });
     }
 
-    const { name, email, username, password } = newUser.user;
+    const { name, email, username, password, location, ethAddress } = newUser.user;
 
-    const existUser = await User.findOne({ email });
+    const existUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
     if (existUser) {
       return res.status(400).json({ error: "User already exists" });
     }
-    const user = await User.create({
-      name,
-      username,
-      email,
-      password,
+
+    let user;
+    if (password) {
+      user = await User.create({
+        name,
+        username,
+        email,
+        password,
+        location,
+      });
+    } else if (ethAddress) {
+      user = await User.create({
+        name,
+        username,
+        email,
+        location,
+        connectedWallets: [ethAddress],
+      });
+    }
+
+    if (!user) {
+      return res.status(400).json({ error: "User creation failed" });
+    }
+
+    const newRefreshToken = jwt.sign(
+      { _id: user._id.toString() },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+    let newRefreshTokenArray = user.refreshToken;
+
+    user.refreshToken = [...newRefreshTokenArray, newRefreshToken];
+
+    const result = await user.save();
+
+    res.cookie("jwt", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
-    res.status(201).json({
+    res.status(200).json({
+      message: "Account has been activated",
       success: true,
       user,
     });
@@ -199,19 +266,6 @@ const activateUser = async (req, res) => {
     res.status(500).json({ error: "Something went wrong" });
   }
 };
-
-//To request for password reset, we need to send the user's email to the server.
-// We will then send a password reset email to the user that will allow them to reset their password.
-// The mail will contain a token that will be used to verify the user's identity and to reset their password.
-// The token will be signed using the secret key and will expire after a certain period of time.
-// The user will be able to reset their password by providing the new password along with the token.
-// The server will then verify the token and the user's email and update the user's password in the database.
-// The user will then be able to login with their new password.
-// The password reset link will be sent to the user's email address.
-// The user will then be able to click on the link to reset their password.
-// The user will then be able to enter their new password and click on the "Reset Password" button.
-// The server will then verify the token and the user's email and update the user's password in the database.
-// The user will then be able to login with their new password.
 
 const passwordReset = async (req, res) => {
   const { email } = req.body;
@@ -292,130 +346,33 @@ const passwordResetConfirmed = async (req, res) => {
   }
 };
 
-// const login = async (req, res) => {
-// 	const cookies = req.cookies;
-// 	const { user, password } = req.body;
-
-// 	try {
-// 		if (!user || !password)
-// 			return res
-// 				.status(400)
-// 				.json({ message: "Username and password are required." });
-
-// 		const foundUser = await User.findOne({
-// 			$or: [{ username: user }, { email: user }],
-// 		})
-// 			.select("+password")
-// 			.exec();
-
-// 		if (!foundUser)
-// 			return res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
-
-// 		// evaluate password
-// 		const match = await bcrypt.compare(password, foundUser.password);
-// 		if (match) {
-// 			const roles = Object.values(foundUser.roles).filter(Boolean);
-
-// 			// Generate access token
-// 			// const accessToken = jwt.sign(
-// 			// 	{
-// 			// 		UserInfo: {
-// 			// 			_id: foundUser._id,
-// 			// 			username: foundUser.username,
-// 			// 			roles: roles,
-// 			// 		},
-// 			// 	},
-// 			// 	process.env.ACCESS_TOKEN_SECRET,
-// 			// 	{ expiresIn: "1d" }
-// 			// );
-// 			const accessToken = jwt.sign(
-// 				{
-// 					UserInfo: {
-// 						_id: foundUser._id,
-// 						username: foundUser.username,
-// 						fullName: foundUser.name,
-// 						image: foundUser.avatar,
-// 						roles: roles,
-// 						streamToken: streamToken,
-// 					},
-// 				},
-// 				process.env.ACCESS_TOKEN_SECRET,
-// 				{ expiresIn: "15m" }
-// 			);
-
-// 			// Set refresh token
-// 			const newRefreshToken = jwt.sign(
-// 				{ username: foundUser.username },
-// 				process.env.REFRESH_TOKEN_SECRET,
-// 				{ expiresIn: "1d" }
-// 			);
-
-// 			let newRefreshTokenArray = !cookies?.jwt
-// 				? foundUser.refreshToken
-// 				: foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
-
-// 			if (cookies?.jwt) {
-// 				const refreshToken = cookies.jwt;
-// 				const foundToken = await User.findOne({ refreshToken }).exec();
-
-// 				//Detected refresh token reuse!
-// 				if (!foundToken) {
-// 					newRefreshTokenArray = [];
-// 				}
-
-// 				res.clearCookie("jwt", {
-// 					httpOnly: true,
-// 					sameSite: "None",
-// 					secure: true,
-// 				});
-// 			}
-
-// 			const streamClient = new StreamClient(api_key, api_secret);
-// 			const expirationTime = Math.floor(Date.now() / 1000) + 3600;
-// 			const issuedAt = Math.floor(Date.now() / 1000) - 60;
-// 			// const streamToken = streamClient.createToken(foundUser._id.toString(), expirationTime, issuedAt);
-// 			const streamToken = streamClient.createToken(foundUser._id.toString());
-
-// 			// Save new refresh token
-// 			foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
-// 			const result = await foundUser.save();
-// 			result.password = '';
-// 			result.refreshToken = '';
-
-// 			// Create and send email
-// 			try {
-// 				await sendMail({
-// 					email: foundUser.email,
-// 					subject: "Welcome Back! Your Login Was Successful 🚀",
-// 					template: "login-successful-mail.ejs",
-// 					data: { user: { username: foundUser.username } },
-// 				});
-// 			} catch (error) {
-// 				console.error("Error sending email:", error.message);
-// 			}
-
-// 			// Set access token cookie
-// 			res.cookie("jwt", newRefreshToken, {
-// 				httpOnly: true,
-// 				secure: true,
-// 				sameSite: "None",
-// 				maxAge: 24 * 60 * 60 * 1000,
-// 			});
-
-// 			// Send authorization roles and access token to user
-// 			res.json({ accessToken, loggedUser: result });
-// 		} else {
-// 			res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
-// 		}
-// 	} catch (error) {
-// 		res.status(500).json({ message: error.message });
-// 	}
-// };
-
 const login = async (req, res) => {
   const cookies = req.cookies;
-  const { user, password } = req.body;
-  // console.log(req.body);
+  const { user, password, fingerprint } = req.body;
+
+  const uaParser = new UAParser(req.headers["user-agent"]);
+  const browserName = `${uaParser.getBrowser().name} ${
+    uaParser.getBrowser().version || ""
+  }`;
+  const osName = `${uaParser.getOS().name} ${uaParser.getOS().version || ""}`;
+
+  const geoLocationData = await getGeolocation(req.ip);
+  const location = `${geoLocationData.state_prov}, ${geoLocationData.country_name}`;
+
+  // console.log(location);
+
+  const deviceInfo = {
+    fingerprint,
+    userAgent: req.headers["user-agent"],
+    browser: browserName,
+    os: osName,
+    lastIP: req.ip,
+    location,
+    lastUsed: new Date(),
+    isVerified: false,
+  };
+
+  // console.log(deviceInfo);
 
   try {
     if (!user || !password)
@@ -432,13 +389,70 @@ const login = async (req, res) => {
     if (!foundUser)
       return res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
 
+    if (!foundUser.password) {
+      return res.status(404).json({
+        error:
+          "This user was registered using Google. Login with Google and create password.",
+      });
+    }
     // evaluate password
     const match = await bcrypt.compare(password, foundUser.password);
     if (match) {
+      foundUser.devices = foundUser.devices.filter(
+        (device) => device.expiresAt > new Date()
+      );
+
+      const knownDevice = foundUser.devices.find(
+        (d) => d.fingerprint === fingerprint
+      );
+
+      if (!knownDevice) {
+        const user = {
+          name: foundUser.name,
+          deviceInfo: deviceInfo,
+          email: foundUser.email,
+        };
+
+        const activationToken = createActivationToken(user);
+        const activationCode = activationToken.activationCode;
+
+        const data = {
+          user: { name: user.name },
+          deviceInfo: {
+            ...deviceInfo,
+            lastUsed: formatDate(deviceInfo.lastUsed),
+          },
+          activationCode,
+        };
+
+        try {
+          console.log("Sending activation email...");
+          await sendMail({
+            email: user.email,
+            subject: "Signing in from a new device",
+            template: "new-device-mail.ejs",
+            data,
+          });
+          console.log("New device mail sent successfully.");
+          return res.status(201).json({
+            success: true,
+            message: `Please check your email ${user.email} to authorize this device`,
+            activationToken: activationToken.token,
+            email: user.email,
+          });
+        } catch (error) {
+          console.error("Error sending email:", error);
+          return res.status(400).json({ error: error.message });
+        }
+      }
+
+      knownDevice.lastUsed = new Date();
+      knownDevice.lastIP = req.ip;
+
       const roles = Object.values(foundUser.roles).filter(Boolean);
 
       const newRefreshToken = jwt.sign(
-        { username: foundUser.username },
+        { _id: foundUser._id.toString() },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: "1d" }
       );
@@ -449,11 +463,11 @@ const login = async (req, res) => {
 
       if (cookies?.jwt) {
         /*
-					Scenario added here: 
-					1) User logs in but never uses RT and does not logout 
-					2) RT is stolen
-					3) If 1 & 2 occurs, reuse detection is needed to clear all RTs when user logs in
-				*/
+            Scenario added here: 
+            1) User logs in but never uses RT and does not logout 
+            2) RT is stolen
+            3) If 1 & 2 occurs, reuse detection is needed to clear all RTs when user logs in
+          */
         const refreshToken = cookies.jwt;
         const foundToken = await User.findOne({ refreshToken }).exec();
 
@@ -475,20 +489,11 @@ const login = async (req, res) => {
       foundUser.refreshToken = [...newRefreshTokenArray, newRefreshToken];
 
       const streamClient = new StreamClient(api_key, api_secret);
-      const expirationTime = Math.floor(Date.now() / 1000) + 3600;
-      const issuedAt = Math.floor(Date.now() / 1000) - 60;
-      // const streamToken = streamClient.createToken(foundUser._id.toString(), expirationTime, issuedAt);
       const streamToken = streamClient.createToken(foundUser._id.toString());
 
-      // const serverClient = connect(api_key, api_secret, app_id);
-      // const expirationTime = Math.floor(Date.now() / 1000) + 3600;
-      // const issuedAt = Math.floor(Date.now() / 1000) - 60;
-      // const streamToken = serverClient.createUserToken(foundUser._id.toString(), expirationTime, issuedAt);
-
       const result = await foundUser.save();
-      // console.log(result)
-      result.password = "";
-      result.refreshToken = "";
+      console.log(result);
+
       // console.log(result)
       const accessToken = jwt.sign(
         {
@@ -497,12 +502,15 @@ const login = async (req, res) => {
             username: foundUser.username,
             fullName: foundUser.name,
             image: foundUser.avatar,
+            connectedWallets: foundUser.connectedWallets,
+            paymentWallet: foundUser.paymentWallet,
             roles: roles,
             streamToken: streamToken,
+            stripeOnboardingComplete: foundUser.stripeOnboardingComplete,
           },
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "3hr" }
+        { expiresIn: "15m" }
       );
 
       // const userInfo = {...result, password: ''}
@@ -518,46 +526,71 @@ const login = async (req, res) => {
       // console.log(accessToken)
       // console.log(accessToken)
 
-      // Send logout confirmation email
-      const userData = {
-        name: foundUser.name,
-        email: foundUser.email,
-        // location: foundUser.location, // You can customize this based on your user model
-        timestamp: new Date().toLocaleString("default", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        }),
-        // Add more relevant data if needed
-      };
-
-      // console.log(userData)
-
-      // Send email
-      try {
-        await sendMail({
-          email: userData.email,
-          subject: "Welcome Back Onboard",
-          template: "login-successful-mail.ejs",
-          data: {
-            user: { username: foundUser.username },
-            time: { timestamp: userData.timestamp },
-          },
-        });
-      } catch (error) {
-        console.log("Error sending logout email:", error);
-        // Handle error if needed
-      }
-
       // Send authorization roles and access token to user
       res.json({ accessToken, loggedUser: result });
     } else {
       res.status(401).json({ message: "Invalid username or password" }); //Unauthorized
     }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+const verifyDeviceOTP = async (req, res) => {
+  const { activation_token, activation_code, fingerprint } = req.body;
+
+  try {
+    const decoded = jwt.verify(activation_token, process.env.ACTIVATION_SECRET);
+
+    if (decoded.activationCode !== activation_code) {
+      return res.status(400).json({ error: "Invalid activation code" });
+    }
+
+    const { email } = decoded.user;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    user.devices.push({
+      ...decoded.user.deviceInfo,
+      isVerified: true,
+    });
+    const newRefreshToken = jwt.sign(
+      { _id: user._id.toString() },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+    let newRefreshTokenArray = user.refreshToken;
+
+    // Saving refreshToken with current user
+    user.refreshToken = [...newRefreshTokenArray, newRefreshToken];
+
+    // const result = await user.save();
+    // console.log(result)
+    await user.save();
+
+    // const userInfo = {...result, password: ''}
+
+    // Creates Secure Cookie with refresh token
+    res.cookie("jwt", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Device verified successfully",
+      loggedUser: user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -627,8 +660,10 @@ const logout = async (req, res) => {
 
 module.exports = {
   signUp,
+  submitAdditionalInfo,
   activateUser,
   login,
+  verifyDeviceOTP,
   logout,
   getCurrentUserInfo,
   passwordReset,

@@ -782,9 +782,17 @@ const getFreelancerStats = async (req, res) => {
     let totalWithdrawals = 0;
 
     transactions.forEach((transaction) => {
-      if (transaction.type === "deposit") {
+      if (
+        transaction.type === "deposit" ||
+        transaction.paymentMethod === "card" ||
+        transaction.paymentMethod === "crypto"
+      ) {
         totalDeposits += transaction.amount;
-      } else if (transaction.type === "withdrawal") {
+      } else if (
+        transaction.type === "withdrawal" ||
+        transaction.paymentMethod === "card" ||
+        transaction.paymentMethod === "crypto"
+      ) {
         totalWithdrawals += transaction.amount;
       }
     });

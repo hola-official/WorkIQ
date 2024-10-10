@@ -36,7 +36,7 @@ export const SectionDescriptionForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const toggleEdit = () => setIsEditing((current) => !current);
   const axiosInstance = useAxiosInstance();
-  const showToast = useShowToast();
+  const {showToast} = useShowToast();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
