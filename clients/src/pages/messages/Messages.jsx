@@ -16,12 +16,10 @@ import {
 import "stream-chat-react/dist/css/index.css";
 // import "@/styles/messagesStyles.css";
 import useAuth from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { useStreamChat } from "@/context/StreamChatContext";
 import "@/styles/streamChatStyles.css";
 import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import SidebarWithHeader from "@/SidebarWithHeader";
 import Spinner from "@/components/Spinner";
 // import { EmojiPicker } from 'stream-chat-react/emojis';
 

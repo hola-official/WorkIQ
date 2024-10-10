@@ -1,5 +1,4 @@
 const express = require("express");
-const passport = require("passport");
 const {
   signUp,
   login,
@@ -12,11 +11,13 @@ const {
   generateGoogleAuthCookie,
   verifyDeviceOTP,
   submitAdditionalInfo,
+  createUsername,
 } = require("../controllers/authController");
 const {
   googleAuthCallback,
   authenticateGoogle,
 } = require("../middleware/passportMiddleware");
+const verifyJWT = require("../middleware/verifyJWT");
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ const router = express.Router();
 router.get("/googleauth", authenticateGoogle);
 
 router.get("/google/callback", googleAuthCallback, generateGoogleAuthCookie);
-// router.get("/google/success", getCurrentUserInfo);
+router.post("/username", verifyJWT, createUsername);
 router.post("/signup", signUp);
 router.post("/login", login);
 router.post("/additional-info", submitAdditionalInfo);

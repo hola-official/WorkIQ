@@ -35,14 +35,14 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="*" element={<PageNotFound />} />
-      <Route path="/admin/approve/verify/:token" element={<ApproveVerification />} />
-      <Route path="/auth/google-verify" element={<GoogleAuth />} />
       <Route path="/confirm-email" element={<AccountConfirmation />} />
-      <Route path="/auth" element={<AuthPage />} />
       <Route path="/activate-verify" element={<AccountVerifyEmailForm />} />
       <Route path="/forget-password" element={<ForgetingPwd />} />
       <Route path="/activate-form" element={<VerifyEmailForm />} />
       <Route element={<RequireAuth allowedRoles={[...Object.values(ROLES)]} />}>
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/auth/google-verify" element={<GoogleAuth />} />
+      <Route path="/admin/approve/verify/:token" element={<ApproveVerification />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="messages" element={<MessagePage />} />
         <Route path="profile/:query" element={<ProfilePage />} />
