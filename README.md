@@ -172,4 +172,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 Project Link: [https://github.com/hola-official/workiq](https://github.com/hola-official/workiq)  
-Email: mailto:infoworkiq@gmail.com
+Email: [infoworkiq@gmail.com](mailto:infoworkiq@gmail.com)
